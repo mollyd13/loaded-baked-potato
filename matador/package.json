@@ -45,5 +45,8 @@
   },
   "allowScripts": {
     "@ngneat/until-destroy@10.0.0": true
+  },
+  "overrides": {
+    "tar": "^7.4.0"
   }
 }
