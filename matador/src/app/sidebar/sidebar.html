@@ -1,0 +1,57 @@
+<mat-toolbar class="mat-elevation-z8">
+  <div class="display-left">
+      <button
+        mat-icon-button
+        (click)="sidenav.toggle()" class="nav-button"
+        >
+        <mat-icon *ngIf="!sidenav.opened"> menu </mat-icon>
+        <mat-icon *ngIf="sidenav.opened"> close </mat-icon>
+      </button>
+
+  </div>
+  
+  <div class="display-right">
+    <button mat-icon-button class="example-icon favorite-icon" aria-label="Example icon-button with heart icon">
+      <mat-icon style="color: white;">favorite</mat-icon>
+    </button>
+    <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon">
+      <mat-icon style="color: rgb(157, 209, 232);">share</mat-icon>
+    </button>
+  </div>
+</mat-toolbar>
+<mat-sidenav-container>
+  <mat-sidenav class="mat-elevation-z8" #sidenav="matSidenav" class="mat-elevation-z8">
+
+    <h4 class="name">Jayant Tripathy</h4>
+    <p class="designation">Software Engineer</p>
+
+    <mat-divider></mat-divider>
+    <!-- <mat-nav-list> -->
+    <mat-list-item>
+      <a class="menu-icons" routerLink="/dashboard">
+        <mat-icon>house</mat-icon>
+        <span>Home</span>
+      </a>
+    </mat-list-item>
+    <mat-list-item>
+      <a class="menu-icons" routerLink="/history">
+        <mat-icon>history</mat-icon>
+        <span>History</span>
+      </a>
+    </mat-list-item>
+
+
+    <div class="bottom-nav">
+      <mat-divider></mat-divider>
+      
+
+    </div>
+    <!-- </mat-nav-list> -->
+  </mat-sidenav>
+  <mat-sidenav-content>
+      <div class="content mat-elevation-z8">
+      <router-outlet></router-outlet>
+    </div>
+    
+  </mat-sidenav-content>
+</mat-sidenav-container>
