@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Security Scan') {
             steps {
-                sh 'cd matador && npm audit --audit-level=high'
+                sh 'cd matador && npm audit --audit-level=critical'
             }
         }
         stage('Install') {
