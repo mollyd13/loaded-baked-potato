@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
 
-kill $(cat .pidfile)
+kill $(cat matador/.pidfile)
