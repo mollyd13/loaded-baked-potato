@@ -2,6 +2,11 @@ pipeline {
     agent any
     tools {nodejs "NODEJS"}
     stages {
+        stage('Security Scan') {
+            steps {
+                sh 'cd matador && npm audit --audit-level=high'
+            }
+        }
         stage('Install') {
             steps {
                 sh 'cd matador && npm install'
@@ -10,6 +15,11 @@ pipeline {
         stage('Build') {
             steps {
                 sh 'cd matador && npm run ng build'
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'cd matador && npm test'
             }
         }
     }
