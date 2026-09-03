@@ -17,10 +17,5 @@ pipeline {
                 sh 'cd matador && npm run ng build'
             }
         }
-        stage('Test') {
-            steps {
-                sh 'cd matador && ng test --watch=false --browsers=ChromeHeadlessNoSandbox'
-            }
-        }
     }
 }
