@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 
+cd matador
 npm run ng build
 npm run ng serve &
 sleep 1
