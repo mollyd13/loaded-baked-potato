@@ -19,7 +19,7 @@ pipeline {
         }
         stage('Test') {
             steps {
-                sh 'cd matador && npm test'
+                sh 'cd matador && ng test --watch=false --browsers=ChromeHeadlessNoSandbox'
             }
         }
     }
