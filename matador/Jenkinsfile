@@ -4,8 +4,6 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh 'cd matador && npm cache clean --force'
-                sh 'cd matador && npm rebuild'
                 sh 'cd matador && npm install'
             }
         }
