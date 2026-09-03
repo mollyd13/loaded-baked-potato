@@ -1,0 +1,129 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 20px;
+}
+
+.summary-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.summary-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.summary-change {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.summary-change mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.summary-change.positive {
+  color: #16a34a;
+}
+
+.summary-change.negative {
+  color: #dc2626;
+}
+
+.holdings-card {
+  padding: 20px 24px;
+}
+
+.holdings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.holdings-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.holdings-total {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.holdings-table {
+  width: 100%;
+}
+
+.holdings-table th.mat-header-cell {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #6b7280;
+}
+
+.instrument-name {
+  display: block;
+  font-weight: 600;
+  color: #111827;
+}
+
+.instrument-symbol {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.holdings-table td.positive {
+  color: #16a34a;
+  font-weight: 500;
+}
+
+.holdings-table td.negative {
+  color: #dc2626;
+  font-weight: 500;
+}
+
+@media (max-width: 900px) {
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
