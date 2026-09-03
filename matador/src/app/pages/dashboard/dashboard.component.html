@@ -27,6 +27,7 @@
       </span>
     </div>
 
+    <div class="table-scroll">
     <table mat-table [dataSource]="holdings" class="holdings-table">
 
       <ng-container matColumnDef="instrument">
@@ -74,6 +75,7 @@
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
     </table>
+    </div>
   </mat-card>
 
 </div>
