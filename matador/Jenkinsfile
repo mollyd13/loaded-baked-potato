@@ -10,6 +10,7 @@ pipeline {
         stage('Install') {
             steps {
                 sh 'cd matador && npm install'
+                sh 'npm install -g @puppeteer/browsers && npx @puppeteer/browsers install chrome'
             }
         }
         stage('Build') {
