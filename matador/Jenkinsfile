@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    environment {
+        CHROME_BIN = credentials('chrome-binary-path')
+    }
     tools {nodejs "NODEJS"}
     stages {
         stage('Security Scan') {
@@ -19,7 +22,7 @@ pipeline {
         }
         stage('Test') {
             steps {
-                sh 'cd matador && npm run test -- --watch=false --browsers=ChromeHeadless'
+                sh 'cd matador && npm run test -- --watch=false --browsers=ChromeHeadless --CHROME_BIN=$CHROME_BIN'
             }
         }
     }
