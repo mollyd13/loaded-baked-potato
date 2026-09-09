@@ -22,7 +22,7 @@ pipeline {
         }
         stage('Test') {
             steps {
-                sh 'cd matador && npm run test -- --watch=false --browsers=ChromeHeadless --CHROME_BIN="$CHROME_BIN"'
+                sh 'cd matador && ng test --browsers ChromeHeadless'
             }
         }
     }
