@@ -11,11 +11,8 @@
   </div>
   
   <div class="display-right">
-    <button mat-icon-button class="example-icon favorite-icon" aria-label="Example icon-button with heart icon">
-      <mat-icon style="color: white;">favorite</mat-icon>
-    </button>
-    <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon">
-      <mat-icon style="color: rgb(157, 209, 232);">share</mat-icon>
+    <button mat-icon-button  routerLink="/profile">
+      <mat-icon style="color: white; cursor: pointer;">account_circle</mat-icon>
     </button>
   </div>
 </mat-toolbar>
@@ -27,11 +24,6 @@
     [opened]="sidenavMode === 'side'"
     [disableClose]="sidenavMode === 'side'"
   >
-
-    <h4 class="name">Jayant Tripathy</h4>
-    <p class="designation">Software Engineer</p>
-
-    <mat-divider></mat-divider>
     <!-- <mat-nav-list> -->
     <mat-list-item>
       <a class="menu-icons" routerLink="/dashboard">

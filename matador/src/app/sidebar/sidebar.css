@@ -27,6 +27,7 @@ mat-toolbar {
   mat-sidenav-container {
     height: calc(100vh - 65px);
   }
+
   .menu-icons {
     display: flex;
     align-items: center;
@@ -39,11 +40,7 @@ mat-toolbar {
     }
   }
 
-  mat-divider {
-    margin-top: 16px;
-    margin-bottom: 16px;
-    background-color: rgba(255, 255, 255, 0.5);
-  }
+
   .bottom-nav{
     position: absolute;
     bottom: 20px;
@@ -57,23 +54,18 @@ mat-toolbar {
   }
   
   .name {
-    margin-top: 8px;
     font-weight: normal;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 0;
   }
   
-  .designation {
-    margin-top: 2px;
-    font-size: 0.7rem;
-    color: lightgrey;
-  }
   .nav-button{
     color: white;
   }
-  .nav-img{
-    width: 150px;
-    margin-right: 14px;
-  }
   .display-right{
+    display: flex;
+    align-items: center;
     position: absolute;
     right: 38px;
   }
