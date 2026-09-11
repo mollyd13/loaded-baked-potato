@@ -1,0 +1,147 @@
+:host {
+  display: block;
+}
+
+.auth-page {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 24px;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0f2027 0%, #2c5364 50%, #00b09b 100%);
+}
+
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(2px);
+  background: rgba(255, 255, 255, 0.18);
+  pointer-events: none;
+}
+
+.bubble-1 {
+  width: 340px;
+  height: 340px;
+  top: -120px;
+  right: -100px;
+}
+
+.bubble-2 {
+  width: 240px;
+  height: 240px;
+  bottom: -80px;
+  left: -60px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.bubble-3 {
+  width: 160px;
+  height: 160px;
+  top: 12%;
+  right: 10%;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.auth-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 16px;
+  padding: 40px 36px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  box-sizing: border-box;
+}
+
+.auth-card h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f2027;
+  text-align: center;
+}
+
+.auth-subtitle {
+  margin: 8px 0 28px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #374151;
+}
+
+.field input {
+  padding: 12px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 1rem;
+  background: #f9fafb;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.field input:focus {
+  outline: none;
+  border-color: #00b09b;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(0, 176, 155, 0.15);
+}
+
+.error {
+  color: #dc2626;
+  font-size: 0.8rem;
+}
+
+.auth-form button {
+  margin-top: 8px;
+  padding: 13px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #0f2027, #00b09b);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.auth-form button:hover {
+  box-shadow: 0 8px 20px rgba(0, 176, 155, 0.35);
+  transform: translateY(-1px);
+}
+
+.switch-link {
+  margin-top: 4px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.switch-link a {
+  color: #00897b;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.switch-link a:hover {
+  text-decoration: underline;
+}

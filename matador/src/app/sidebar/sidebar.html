@@ -20,7 +20,13 @@
   </div>
 </mat-toolbar>
 <mat-sidenav-container>
-  <mat-sidenav class="mat-elevation-z8" #sidenav="matSidenav" class="mat-elevation-z8">
+  <mat-sidenav
+    class="mat-elevation-z8"
+    #sidenav="matSidenav"
+    [mode]="sidenavMode"
+    [opened]="sidenavMode === 'side'"
+    [disableClose]="sidenavMode === 'side'"
+  >
 
     <h4 class="name">Jayant Tripathy</h4>
     <p class="designation">Software Engineer</p>
