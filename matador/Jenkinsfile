@@ -1,0 +1,26 @@
+pipeline {
+    agent any
+    tools {nodejs "NODEJS"}
+    stages {
+        stage('Security Scan') {
+            steps {
+                sh 'cd matador && npm audit --audit-level=critical'
+            }
+        }
+        stage('Install') {
+            steps {
+                sh 'cd matador && npm install'
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'cd matador && npm run ng build'
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'cd matador && ng test --watch=false --browsers=ChromeHeadless'
+            }
+        }
+    }
+}
