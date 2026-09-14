@@ -2,6 +2,11 @@ pipeline {
     agent any
     tools {nodejs "NODEJS"}
     stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
         stage('Security Scan') {
             steps {
                 sh 'cd matador && npm audit --audit-level=critical'
