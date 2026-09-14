@@ -1,0 +1,72 @@
+.profile-container {
+    display: flex;
+    /* align-items: center; */
+    /* justify-content: center; */
+    flex-direction: column;
+    height: 100%;
+    /* background-color: #c2c4c9; */
+    color: white;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 25%;
+    /* background-color: #b7c0d8; */
+    padding: 10px;
+}
+
+.profile-name {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0px;
+    height: 100%;
+}
+
+.profile-name h3 {
+    margin: 0;
+    font-size: 25px;
+    font-weight: bold;
+    color: black;
+}
+
+.profile-name h4 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: lighter;
+    color: black;
+}
+
+.profile-header mat-icon {
+    font-size: 70px;
+    width: 70px;
+    height: 70px;
+    color: black;
+}
+
+.edit-button {
+    margin-left: auto;
+}
+
+.fields {
+    display: flex;
+    flex-direction: row;
+    /* gap: 80px; */
+    padding: 10px;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    gap: 10px;
+    padding: 10px;
+}
+
+.error {
+  color: #dc2626;
+  font-size: 0.8rem;
+}

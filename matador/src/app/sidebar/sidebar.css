@@ -66,8 +66,15 @@ mat-toolbar {
   .display-right{
     display: flex;
     align-items: center;
+    gap: 5px;
     position: absolute;
     right: 38px;
+  }
+  
+  .username {
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
   }
   @media screen and (max-width: 600px) {
     div.display-right {
