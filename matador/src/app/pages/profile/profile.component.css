@@ -1,10 +1,7 @@
 .profile-container {
     display: flex;
-    /* align-items: center; */
-    /* justify-content: center; */
     flex-direction: column;
     height: 100%;
-    /* background-color: #c2c4c9; */
     color: white;
 }
 
@@ -13,7 +10,6 @@
     align-items: center;
     gap: 10px;
     height: 25%;
-    /* background-color: #b7c0d8; */
     padding: 10px;
 }
 
@@ -54,7 +50,6 @@
 .fields {
     display: flex;
     flex-direction: row;
-    /* gap: 80px; */
     padding: 10px;
 }
 
