@@ -222,61 +222,45 @@
 
 /* Order Type Styling */
 .order-type-cell {
-  font-weight: 600;
-  font-size: 11px;
-  padding: 6px 8px;
-  border-radius: 3px;
-  display: inline-block;
-  white-space: nowrap;
-  text-align: center;
+  font-weight: 500;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 .order-type-cell.buy {
-  background-color: #dcfce7;
-  color: #166534;
+  color: #16a34a;
 }
 
 .order-type-cell.sell {
-  background-color: #fee2e2;
-  color: #991b1b;
+  color: #dc2626;
 }
 
 /* Status Styling */
 .status-cell {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-weight: 600;
-  font-size: 11px;
-  padding: 6px 8px;
-  border-radius: 3px;
-  width: fit-content;
+  font-weight: 500;
+  font-size: 13px;
+  text-transform: capitalize;
 }
 
 .status-cell.filled {
-  background-color: #dcfce7;
-  color: #166534;
+  color: #16a34a;
 }
 
 .status-cell.partially-filled {
-  background-color: #fef3c7;
-  color: #92400e;
+  color: #ea580c;
 }
 
 .status-cell.pending {
-  background-color: #e0e7ff;
-  color: #3730a3;
+  color: #1e40af;
 }
 
 .status-cell.cancelled {
-  background-color: #f3f4f6;
   color: #6b7280;
 }
 
 .status-icon {
-  font-size: 14px;
-  width: 14px;
-  height: 14px;
+  display: none;
 }
 
 /* Table Footer */
