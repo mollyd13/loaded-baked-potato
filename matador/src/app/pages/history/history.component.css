@@ -88,6 +88,22 @@
   width: 100%;
 }
 
+.filter-end-and-reset {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  width: 100%;
+}
+
+.filter-end-and-reset .filter-field {
+  flex: 1;
+  min-width: 140px;
+}
+
+.filter-end-and-reset .reset-button {
+  flex-shrink: 0;
+}
+
 .reset-button {
   background-color: var(--secondary-color);
   color: white;

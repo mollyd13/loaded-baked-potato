@@ -42,17 +42,19 @@
           <mat-datepicker #startPicker></mat-datepicker>
         </mat-form-field>
 
-        <mat-form-field class="filter-field">
-          <mat-label>End Date</mat-label>
-          <input matInput [matDatepicker]="endPicker" [(ngModel)]="endDate" (dateChange)="applyFilters()">
-          <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
-          <mat-datepicker #endPicker></mat-datepicker>
-        </mat-form-field>
+        <div class="filter-end-and-reset">
+          <mat-form-field class="filter-field">
+            <mat-label>End Date</mat-label>
+            <input matInput [matDatepicker]="endPicker" [(ngModel)]="endDate" (dateChange)="applyFilters()">
+            <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+          </mat-form-field>
 
-        <button mat-raised-button (click)="resetFilters()" class="reset-button">
-          <mat-icon>clear</mat-icon>
-          Reset
-        </button>
+          <button mat-raised-button (click)="resetFilters()" class="reset-button">
+            <mat-icon>clear</mat-icon>
+            Reset
+          </button>
+        </div>
       </div>
     </div>
   </mat-card>
