@@ -4,7 +4,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDivider } from '@angular/material/divider';
-import { MatList, MatListItem, MatNavList } from '@angular/material/list';
+import { MatList, MatListItem } from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { CommonModule } from '@angular/common';
@@ -16,7 +16,7 @@ import { filter } from 'rxjs';
   selector: 'app-sidebar',
   standalone: true,
   imports: [RouterOutlet,CommonModule,MatToolbarModule,MatSidenavModule, 
-    MatIconModule, MatDivider, MatNavList, MatListItem, MatExpansionModule, RouterModule
+    MatIconModule, MatDivider, MatListItem, MatExpansionModule, RouterModule
   ],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css'

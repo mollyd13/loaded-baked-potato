@@ -1,0 +1,83 @@
+.profile-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    color: white;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 20%;
+}
+
+.profile-name {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0px;
+    height: 100%;
+}
+
+.profile-name h3 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: bold;
+    color: black;
+}
+
+.profile-name h4 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: lighter;
+    color: black;
+}
+
+.profile-header mat-icon {
+    font-size: 100px;
+    width: 100px;
+    height: 100px;
+    color: black;
+}
+
+.edit-button {
+    margin-left: auto;
+}
+
+.fields {
+    display: flex;
+    flex-direction: row;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    gap: 10px;
+    padding: 10px;
+}
+
+.error {
+  color: #dc2626;
+  font-size: 0.8rem;
+}
+
+.profile-title {
+    margin-top: 20px;
+    padding-left: 10px;
+}
+
+.profile-title h1{
+    margin: 0;
+    font-size: 32px;
+    font-weight: bold;
+    color: black;
+}
+.profile-title h2{
+    margin: 0;
+    font-size: 16px;
+    font-weight: lighter;
+    color: black;
+}

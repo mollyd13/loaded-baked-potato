@@ -1,0 +1,71 @@
+<div class="profile-container">
+    <div class="profile-title">
+        <h1>Profile Settings</h1>
+        <h2>Manage your profile information</h2>
+    </div>
+    <div class="profile-header">
+        <mat-icon>account_circle</mat-icon>
+        <div class="profile-name">
+            <h3>{{mockUser.fullName}}</h3>
+            <h4>{{mockUser.email}}</h4>
+        </div>
+        <div class="edit-button">
+             <button mat-flat-button (click)="toggleEditModeOn()">Edit</button>
+        </div>
+        <div class="save-changes">
+             <button mat-flat-button (click)="onSubmit()">Save Changes</button>
+        </div>
+    </div>
+    <form class="fields" [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="column">
+            <mat-form-field appearance="outline">
+                <mat-label>Full Name</mat-label>
+                <input formControlName="fullName" matInput>
+                <mat-icon matSuffix class="edit-icon">edit</mat-icon>
+                <mat-hint>Enter your full name</mat-hint>
+                <mat-error *ngIf="getFieldError('fullName', 'required')">Full name is required</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label>Phone Number</mat-label>
+                <input formControlName="phoneNumber" matInput>
+                <mat-icon matSuffix class="edit-icon">phone</mat-icon>
+                <mat-hint>Enter your phone number</mat-hint>
+                <mat-error *ngIf="getFieldError('phoneNumber', 'required')">Phone number is required</mat-error>
+                <mat-error *ngIf="getFieldError('phoneNumber', 'pattern')">Please enter a valid phone number</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label>Address</mat-label>
+                <input formControlName="address" matInput>
+                <mat-icon matSuffix class="edit-icon">location_on</mat-icon>
+                <mat-hint>Enter your address</mat-hint>
+                <mat-error *ngIf="getFieldError('address', 'required')">Address is required</mat-error>
+            </mat-form-field>
+        </div>
+        <div class="column">
+            <mat-form-field appearance="outline">
+                <mat-label>Email</mat-label>
+                <input formControlName="email" matInput>
+                <mat-icon matSuffix class="edit-icon">email</mat-icon>
+                <mat-hint>Enter your email address</mat-hint>
+                <mat-error *ngIf="getFieldError('email', 'required')">Email is required</mat-error>
+                <mat-error *ngIf="getFieldError('email', 'email')">Please enter a valid email</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label>Date of Birth</mat-label>
+                <input formControlName="dateOfBirth" matInput placeholder="MM/DD/YYYY">
+                <mat-icon matSuffix class="edit-icon">calendar_today</mat-icon>
+                <mat-hint>Date of Birth (MM/DD/YYYY)</mat-hint>
+                <mat-error *ngIf="getFieldError('dateOfBirth', 'required')">Date of birth is required</mat-error>
+                <mat-error *ngIf="getFieldError('dateOfBirth', 'pattern')">Please enter a valid date (MM/DD/YYYY)</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label>Password</mat-label>
+                <input formControlName="password" matInput type="password" placeholder="Enter new password">
+                <mat-icon matSuffix class="edit-icon">password</mat-icon>
+                <mat-hint>Minimum 8 characters</mat-hint>
+                <mat-error *ngIf="getFieldError('password', 'required')">Password is required</mat-error>
+                <mat-error *ngIf="getFieldError('password', 'minlength')">Password must be at least 8 characters</mat-error>
+            </mat-form-field>
+        </div>
+    </form>
+</div>

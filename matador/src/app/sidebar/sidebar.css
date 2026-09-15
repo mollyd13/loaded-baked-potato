@@ -27,6 +27,7 @@ mat-toolbar {
   mat-sidenav-container {
     height: calc(100vh - 65px);
   }
+
   .menu-icons {
     display: flex;
     align-items: center;
@@ -39,44 +40,57 @@ mat-toolbar {
     }
   }
 
-  mat-divider {
-    margin-top: 16px;
-    margin-bottom: 16px;
-    background-color: rgba(255, 255, 255, 0.5);
-  }
+
   .bottom-nav{
     position: absolute;
     bottom: 20px;
     width: 170px;
   }
-  .avatar {
-    margin-top: 16px;
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-  }
   
   .name {
-    margin-top: 8px;
     font-weight: normal;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 0;
   }
   
-  .designation {
-    margin-top: 2px;
-    font-size: 0.7rem;
-    color: lightgrey;
-  }
   .nav-button{
     color: white;
   }
-  .nav-img{
-    width: 150px;
-    margin-right: 14px;
-  }
   .display-right{
+    display: flex;
+    align-items: center;
+    gap: 5px;
     position: absolute;
     right: 38px;
+    cursor: pointer;
   }
+
+  .display-right mat-icon {
+    font-size: 50px;
+    height: 50px;
+    width: 50px;
+  }
+
+  .username-container {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .username {
+    color: white;
+    font-size: 20px;
+    margin: 0;
+  }
+
+  .user-role {
+    color: white;
+    font-size: 12px;
+    margin: 0;
+    margin-top: -8px;
+  }
+
+
   @media screen and (max-width: 600px) {
     div.display-right {
       display: none;
