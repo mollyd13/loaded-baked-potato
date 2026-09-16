@@ -1,17 +1,62 @@
-mat-toolbar {
+  mat-toolbar {
     background: #b80a0a;
     color: white;
   }
   
   mat-sidenav {
-    margin: 16px;
     width: 200px;
     border-right: none;
-    background: #ee0000;
+    background: #b80a0a;
     color: white;
-    border-radius: 10px;
-    padding: 16px;
+    border-radius: 0;
     text-align: center;
+  }
+  
+  mat-sidenav-container {
+    height: calc(100vh - 65px);
+  }
+
+  .app-title-container {
+    display: flex;
+  }
+
+  .text-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .display-left{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .app-title {
+    font-weight: bold;
+    font-size: 20px;
+  }
+  .app-subtitle {
+    font-weight: normal;
+    font-size: 14px;
+    margin-top: -5px;
+    color: rgb(197, 197, 197);
+  }
+
+  .app-title-container mat-icon { 
+    margin-right: 10px;
+    width: 50px;
+    height: 50px;
+    font-size: 50px;
+    border-radius: 10px;
+    background: #ffffff33;
+  }
+
+
+  .nav-button{
+    color: white;
+    cursor: pointer;
   }
   
   .content {
@@ -24,9 +69,6 @@ mat-toolbar {
     box-sizing: border-box;
   }
   
-  mat-sidenav-container {
-    height: calc(100vh - 65px);
-  }
 
   .menu-icons {
     display: flex;
@@ -53,10 +95,7 @@ mat-toolbar {
     cursor: pointer;
     margin: 0;
   }
-  
-  .nav-button{
-    color: white;
-  }
+
   .display-right{
     display: flex;
     align-items: center;

@@ -1,12 +1,18 @@
-<mat-toolbar class="mat-elevation-z8">
+<mat-toolbar>
   <div class="display-left">
       <button
         mat-icon-button
         (click)="sidenav.toggle()" class="nav-button"
         >
-        <mat-icon *ngIf="!sidenav.opened"> menu </mat-icon>
-        <mat-icon *ngIf="sidenav.opened"> close </mat-icon>
+        <mat-icon> menu </mat-icon>
       </button>
+        <div class="app-title-container">
+          <mat-icon>trending_up</mat-icon>
+          <div class = "text-container">
+            <span class="app-title">Matador</span>
+            <span class="app-subtitle">Catchy Slogan</span>
+          </div>
+        </div>
 
   </div>
   
@@ -22,8 +28,6 @@
 </mat-toolbar>
 <mat-sidenav-container>
   <mat-sidenav
-    class="mat-elevation-z8"
-    #sidenav="matSidenav"
     [mode]="sidenavMode"
     [opened]="sidenavMode === 'side'"
     [disableClose]="sidenavMode === 'side'"
@@ -41,13 +45,6 @@
         <span>History</span>
       </a>
     </mat-list-item>
-
-
-    <div class="bottom-nav">
-      <mat-divider></mat-divider>
-      
-
-    </div>
     <!-- </mat-nav-list> -->
   </mat-sidenav>
   <mat-sidenav-content>

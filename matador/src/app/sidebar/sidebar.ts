@@ -3,7 +3,6 @@ import { NavigationEnd, Router, RouterModule, RouterOutlet } from '@angular/rout
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDivider } from '@angular/material/divider';
 import { MatList, MatListItem } from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { BreakpointObserver } from '@angular/cdk/layout';
@@ -16,7 +15,7 @@ import { filter } from 'rxjs';
   selector: 'app-sidebar',
   standalone: true,
   imports: [RouterOutlet,CommonModule,MatToolbarModule,MatSidenavModule, 
-    MatIconModule, MatDivider, MatListItem, MatExpansionModule, RouterModule
+    MatIconModule, MatListItem, MatExpansionModule, RouterModule
   ],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css'
