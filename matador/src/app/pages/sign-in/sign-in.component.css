@@ -11,7 +11,7 @@
   padding: 24px;
   box-sizing: border-box;
   overflow: hidden;
-  background: linear-gradient(135deg, #1a2a6c 0%, #b21f66 50%, #fdbb2d 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--contrast-color) 50%, var(--secondary-color) 100%);
 }
 
 .bubble {
@@ -101,9 +101,8 @@
 
 .field input:focus {
   outline: none;
-  border-color: #b21f66;
+  border-color: black;
   background: #fff;
-  box-shadow: 0 0 0 3px rgba(178, 31, 102, 0.15);
 }
 
 .error {
@@ -116,7 +115,7 @@
   padding: 13px;
   border: none;
   border-radius: 10px;
-  background: linear-gradient(135deg, #1a2a6c, #b21f66);
+  background: linear-gradient(135deg, var(--primary-color), var(--contrast-color));
   color: #fff;
   font-size: 1rem;
   font-weight: 600;
@@ -125,7 +124,7 @@
 }
 
 .auth-form button:hover {
-  box-shadow: 0 8px 20px rgba(178, 31, 102, 0.35);
+  box-shadow: 0 8px 20px rgba(192, 30, 98, 0.35);
   transform: translateY(-1px);
 }
 
@@ -137,7 +136,7 @@
 }
 
 .switch-link a {
-  color: #b21f66;
+  color: var(--contrast-color);
   font-weight: 600;
   text-decoration: none;
 }
