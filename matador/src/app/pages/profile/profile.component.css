@@ -40,7 +40,7 @@
     width: 100px;
     height: 100px;
     color: white;
-    background: var(--contrast-color);
+    background: var(--primary-color);
     border-radius: 50%;
 }
 
@@ -67,12 +67,12 @@
 }
 
 .edit-button button {
-    background-color: var(--contrast-color);
+    background-color: var(--primary-color);
     color: white;
 }
 
 .save-changes button {
-    background-color: var(--contrast-color);
+    background-color: var(--primary-color);
     color: white;
 }
 

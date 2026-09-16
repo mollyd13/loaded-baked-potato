@@ -69,7 +69,7 @@ mat-toolbar {
     font-size: 50px;
     height: 50px;
     width: 50px;
-    background: var(--contrast-color);
+    background: var(--primary-color);
     border-radius: 50%;
     color:black
   }
@@ -84,20 +84,17 @@ mat-toolbar {
     color: white;
     font-size: 18px;
     font-weight: 700;
-    margin: 0;
+    margin-top: 10px;
     height: fit-content;
   }
 
   .user-role {
-    background-color:var(--contrast-color);
     color: white;
     font-size: 14px;
     font-weight: 500;
-    padding-inline: 10px;
-    border-radius: 15px;
-    width: 100%;
     height: fit-content;
     text-align: center;
+    margin-top: -10px;
   }
 
 
