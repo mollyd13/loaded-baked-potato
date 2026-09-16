@@ -32,14 +32,16 @@
     margin: 0;
     font-size: 18px;
     font-weight: lighter;
-    color: black;
+    color: var(--contrast-color);
 }
 
 .profile-header mat-icon {
     font-size: 100px;
     width: 100px;
     height: 100px;
-    color: black;
+    color: white;
+    background: var(--primary-color);
+    border-radius: 50%;
 }
 
 .edit-button {
@@ -64,6 +66,20 @@
   font-size: 0.8rem;
 }
 
+.edit-button button {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.save-changes button {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.edit-icon {
+    color: var(--contrast-color);
+}
+
 .profile-title {
     margin-top: 20px;
     padding-left: 10px;
@@ -79,5 +95,5 @@
     margin: 0;
     font-size: 16px;
     font-weight: lighter;
-    color: black;
+    color: var(--contrast-color);
 }

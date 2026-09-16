@@ -32,13 +32,13 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #6b7280;
+  color: var(--text-color);
 }
 
 .summary-value {
   font-size: 26px;
   font-weight: 700;
-  color: #111827;
+  color: var(--text-color);
 }
 
 .summary-change {
@@ -47,7 +47,7 @@
   gap: 4px;
   font-size: 13px;
   font-weight: 500;
-  color: #6b7280;
+  color: var(--text-color);
 }
 
 .summary-change mat-icon {
@@ -57,11 +57,11 @@
 }
 
 .summary-change.positive {
-  color: #16a34a;
+  color: var(--success-color);
 }
 
 .summary-change.negative {
-  color: #dc2626;
+  color: var(--error-color);
 }
 
 .holdings-card {
@@ -81,7 +81,7 @@
   margin: 0;
   font-size: 18px;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-color);
 }
 
 .holdings-total {
@@ -89,7 +89,7 @@
   align-items: center;
   gap: 4px;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--text-color);
 }
 
 .table-scroll {
@@ -107,28 +107,28 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  color: #6b7280;
+  color: var(--text-color);
 }
 
 .instrument-name {
   display: block;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-color);
 }
 
 .instrument-symbol {
   display: block;
   font-size: 12px;
-  color: #6b7280;
+  color: var(--text-color);
 }
 
 .holdings-table td.positive {
-  color: #16a34a;
+  color: var(--success-color);
   font-weight: 500;
 }
 
 .holdings-table td.negative {
-  color: #dc2626;
+  color: var(--error-color);
   font-weight: 500;
 }
 
