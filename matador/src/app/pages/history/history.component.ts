@@ -16,13 +16,15 @@ interface Order {
   timestamp: Date;
   instrument: string;
   symbol: string;
-  orderType: 'BUY' | 'SELL';
+  assetType: string;
+  actionType: 'BUY' | 'SELL';
+  orderType: string;
   quantity: number;
   price: number;
-  totalValue: number;
+
+  timing: string;
   status: 'FILLED' | 'PARTIALLY_FILLED' | 'PENDING' | 'CANCELLED';
-  commission: number;
-  netProceeds: number;
+  currency: string;
 }
 
 interface OrderSummary {
@@ -54,19 +56,19 @@ interface OrderSummary {
 })
 export class HistoryComponent implements OnInit {
   orderSummaries: OrderSummary[] = [];
-  displayedColumns: string[] = ['timestamp', 'instrument', 'orderType', 'quantity', 'price', 'totalValue', 'status', 'commission', 'netProceeds'];
+  displayedColumns: string[] = ['timestamp', 'instrument', 'assetType', 'actionType', 'orderType', 'quantity', 'price', 'totalValue', 'timing', 'status', 'currency'];
   
   allOrders: Order[] = [
-    { id: 'ORD-001', timestamp: new Date('2024-01-15T10:30:00'), instrument: 'Apple Inc.', symbol: 'AAPL', orderType: 'BUY', quantity: 50, price: 180.25, totalValue: 9012.50, status: 'FILLED', commission: 9.00, netProceeds: 9021.50 },
-    { id: 'ORD-002', timestamp: new Date('2024-01-14T14:15:00'), instrument: 'Microsoft Corp.', symbol: 'MSFT', orderType: 'SELL', quantity: 30, price: 412.50, totalValue: 12375.00, status: 'FILLED', commission: 12.00, netProceeds: 12363.00 },
-    { id: 'ORD-003', timestamp: new Date('2024-01-12T09:45:00'), instrument: 'Alphabet Inc.', symbol: 'GOOGL', orderType: 'BUY', quantity: 100, price: 140.80, totalValue: 14080.00, status: 'FILLED', commission: 14.00, netProceeds: 14094.00 },
-    { id: 'ORD-004', timestamp: new Date('2024-01-10T16:20:00'), instrument: 'Amazon.com Inc.', symbol: 'AMZN', orderType: 'BUY', quantity: 75, price: 172.30, totalValue: 12922.50, status: 'PARTIALLY_FILLED', commission: 13.00, netProceeds: 12935.50 },
-    { id: 'ORD-005', timestamp: new Date('2024-01-08T11:00:00'), instrument: 'Tesla Inc.', symbol: 'TSLA', orderType: 'SELL', quantity: 40, price: 178.90, totalValue: 7156.00, status: 'FILLED', commission: 7.00, netProceeds: 7149.00 },
-    { id: 'ORD-006', timestamp: new Date('2024-01-05T13:30:00'), instrument: 'JPMorgan Chase & Co.', symbol: 'JPM', orderType: 'BUY', quantity: 60, price: 188.00, totalValue: 11280.00, status: 'PENDING', commission: 11.00, netProceeds: 11291.00 },
-    { id: 'ORD-007', timestamp: new Date('2024-01-02T10:15:00'), instrument: 'Visa Inc.', symbol: 'V', orderType: 'BUY', quantity: 25, price: 278.50, totalValue: 6962.50, status: 'FILLED', commission: 7.00, netProceeds: 6969.50 },
-    { id: 'ORD-008', timestamp: new Date('2023-12-28T15:45:00'), instrument: 'NVIDIA Corporation', symbol: 'NVDA', orderType: 'SELL', quantity: 200, price: 850.00, totalValue: 170000.00, status: 'FILLED', commission: 150.00, netProceeds: 169850.00 },
-    { id: 'ORD-009', timestamp: new Date('2023-12-25T12:00:00'), instrument: 'Apple Inc.', symbol: 'AAPL', orderType: 'SELL', quantity: 100, price: 189.50, totalValue: 18950.00, status: 'CANCELLED', commission: 0.00, netProceeds: 18950.00 },
-    { id: 'ORD-010', timestamp: new Date('2023-12-20T09:30:00'), instrument: 'Microsoft Corp.', symbol: 'MSFT', orderType: 'BUY', quantity: 45, price: 378.20, totalValue: 17019.00, status: 'FILLED', commission: 17.00, netProceeds: 17036.00 },
+    { id: 'ORD-001', timestamp: new Date('2024-01-15T10:30:00'), instrument: 'Apple Inc.', symbol: 'AAPL', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 50, price: 180.25, timing: 'day', status: 'FILLED', currency: 'USD' },
+    { id: 'ORD-002', timestamp: new Date('2024-01-14T14:15:00'), instrument: 'Microsoft Corp.', symbol: 'MSFT', assetType: 'Equity', actionType: 'SELL', orderType: 'Market', quantity: 30, price: 412.50, timing: 'day', status: 'FILLED', currency: 'USD' },
+    { id: 'ORD-003', timestamp: new Date('2024-01-12T09:45:00'), instrument: 'Alphabet Inc.', symbol: 'GOOGL', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 100, price: 140.80, timing: 'day', status: 'FILLED', currency: 'USD' },
+    { id: 'ORD-004', timestamp: new Date('2024-01-10T16:20:00'), instrument: 'Amazon.com Inc.', symbol: 'AMZN', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 75, price: 172.30, timing: 'day', status: 'PARTIALLY_FILLED', currency: 'USD' },
+    { id: 'ORD-005', timestamp: new Date('2024-01-08T11:00:00'), instrument: 'Tesla Inc.', symbol: 'TSLA', assetType: 'Equity', actionType: 'SELL', orderType: 'Market', quantity: 40, price: 178.90, timing: 'day', status: 'FILLED', currency: 'USD' },
+    { id: 'ORD-006', timestamp: new Date('2024-01-05T13:30:00'), instrument: 'JPMorgan Chase & Co.', symbol: 'JPM', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 60, price: 188.00, timing: 'day', status: 'PENDING', currency: 'USD' },
+    { id: 'ORD-007', timestamp: new Date('2024-01-02T10:15:00'), instrument: 'Visa Inc.', symbol: 'V', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 25, price: 278.50, timing: 'day', status: 'FILLED', currency: 'USD' },
+    { id: 'ORD-008', timestamp: new Date('2023-12-28T15:45:00'), instrument: 'NVIDIA Corporation', symbol: 'NVDA', assetType: 'Equity', actionType: 'SELL', orderType: 'Market', quantity: 200, price: 850.00, timing: 'day', status: 'FILLED', currency: 'USD' },
+    { id: 'ORD-009', timestamp: new Date('2023-12-25T12:00:00'), instrument: 'Apple Inc.', symbol: 'AAPL', assetType: 'Equity', actionType: 'SELL', orderType: 'Market', quantity: 100, price: 189.50, timing: 'day', status: 'CANCELLED', currency: 'USD' },
+    { id: 'ORD-010', timestamp: new Date('2023-12-20T09:30:00'), instrument: 'Microsoft Corp.', symbol: 'MSFT', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 45, price: 378.20, timing: 'day', status: 'FILLED', currency: 'USD' },
   ];
   
   filteredOrders: Order[] = [];
@@ -83,14 +85,12 @@ export class HistoryComponent implements OnInit {
   updateSummaries(): void {
     const totalOrders = this.filteredOrders.length;
     const filledOrders = this.filteredOrders.filter(o => o.status === 'FILLED').length;
-    const totalVolume = this.filteredOrders.reduce((sum, o) => sum + o.totalValue, 0);
-    const totalCommissions = this.filteredOrders.reduce((sum, o) => sum + o.commission, 0);
+    const totalVolume = this.filteredOrders.reduce((sum, o) => sum + (o.price * o.quantity), 0);
     const buyOrders = this.filteredOrders.filter(o => o.orderType === 'BUY').length;
 
     this.orderSummaries = [
       { label: 'Total Orders', value: totalOrders.toString(), changeText: `${filledOrders} Filled`, changePositive: true },
       { label: 'Total Volume', value: `$${(totalVolume / 1000).toFixed(1)}K`, changeText: `${buyOrders} Buys`, changePositive: true },
-      { label: 'Total Commissions', value: `$${totalCommissions.toFixed(2)}`, changeText: this.filteredOrders.filter(o => o.orderType === 'SELL').length + ' Sells' },
       { label: 'Avg Order Value', value: `$${(totalOrders > 0 ? totalVolume / totalOrders : 0).toFixed(2)}` }
     ];
   }

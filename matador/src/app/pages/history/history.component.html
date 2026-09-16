@@ -79,9 +79,25 @@
           </td>
         </ng-container>
 
+        <!-- Asset Type Column -->
+        <ng-container matColumnDef="assetType">
+          <th mat-header-cell *matHeaderCellDef>Asset Type</th>
+          <td mat-cell *matCellDef="let order" [class.buy]="order.assetType === 'BUY'" [class.sell]="order.assetType === 'SELL'" class="asset-type-cell">
+            {{ order.assetType }}
+          </td>
+        </ng-container>
+
+        <!-- Action Type Column -->
+        <ng-container matColumnDef="actionType">
+          <th mat-header-cell *matHeaderCellDef>Action Type</th>
+          <td mat-cell *matCellDef="let order" [class.buy]="order.actionType === 'BUY'" [class.sell]="order.actionType === 'SELL'" class="action-type-cell">
+            {{ order.actionType }}
+          </td>
+        </ng-container>
+
         <!-- Order Type Column -->
         <ng-container matColumnDef="orderType">
-          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <th mat-header-cell *matHeaderCellDef>Order Type</th>
           <td mat-cell *matCellDef="let order" [class.buy]="order.orderType === 'BUY'" [class.sell]="order.orderType === 'SELL'" class="order-type-cell">
             {{ order.orderType }}
           </td>
@@ -102,7 +118,13 @@
         <!-- Total Value Column -->
         <ng-container matColumnDef="totalValue">
           <th mat-header-cell *matHeaderCellDef>Total Value</th>
-          <td mat-cell *matCellDef="let order">${{ order.totalValue.toFixed(2) }}</td>
+          <td mat-cell *matCellDef="let order">${{(order.price * order.quantity).toFixed(2) }}</td>
+        </ng-container>
+
+        <!-- Timing Column -->
+        <ng-container matColumnDef="timing">
+          <th mat-header-cell *matHeaderCellDef>Timing</th>
+          <td mat-cell *matCellDef="let order">{{ order.timing }}</td>
         </ng-container>
 
         <!-- Status Column -->
@@ -113,16 +135,10 @@
           </td>
         </ng-container>
 
-        <!-- Commission Column -->
-        <ng-container matColumnDef="commission">
-          <th mat-header-cell *matHeaderCellDef>Commission</th>
-          <td mat-cell *matCellDef="let order">${{ order.commission.toFixed(2) }}</td>
-        </ng-container>
-
-        <!-- Net Proceeds Column -->
-        <ng-container matColumnDef="netProceeds">
-          <th mat-header-cell *matHeaderCellDef>Net Proceeds</th>
-          <td mat-cell *matCellDef="let order">${{ order.netProceeds.toFixed(2) }}</td>
+        <!-- Currency Column -->
+        <ng-container matColumnDef="currency">
+          <th mat-header-cell *matHeaderCellDef>Currency</th>
+          <td mat-cell *matCellDef="let order">{{order.currency}}</td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
