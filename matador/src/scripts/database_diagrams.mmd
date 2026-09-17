@@ -1,0 +1,110 @@
+---
+config:
+    class:
+        hideEmptiesEnabled: true
+---
+
+classDiagram
+    class User {
+        int user_id PK
+        string fname
+        string lname
+        string email
+        string pwd_hash
+        int phone
+        string role_type
+        timestamp created_at
+        totalPortfolioValue() double
+        getUserHoldings() Holding[]
+    }
+
+    class Holding {
+        int holding_id PK
+        int user_id FK
+        string ticker
+        string asset_type
+        int qty
+        string currency
+        numeric avg_price
+        adjustQuantity(double amount) void
+    }
+
+    class Cash {
+        int cash_account_id PK
+        int user_id FK
+        string currency
+        numeric balance
+        adjustBalance(double amount) void
+    }
+
+    class Order {
+        int order_id PK
+        int user_id FK
+        string ticker
+        string asset_type
+        string action_type
+        string order_type
+        int qty
+        numeric price
+        string timing
+        string status
+        timestamp submitted_at
+        string currency
+    }
+
+    class OrderExecutor {
+        executeOrder(Order order) Trade | False
+    }
+
+    class OrderValidator {
+        validateOrder(Order order) boolean
+    }
+
+    class SettlementReport {
+        createReport(Order order) Report
+        print(Report) void
+    }
+
+    class Trade {
+        int trade_id PK
+        int order_id FK
+        int user_id FK
+        string ticker
+        string asset_type
+        string action_type
+        int qty
+        numeric price
+        string currency
+        timestamp executed_at
+    }
+
+    class Feeable {
+        <<interface>>
+        calculateFee(tradeValue double) double
+    }
+
+    class Instrument {
+        <<abstract>>
+        ticker String
+        calculateFee(tradeValue double)* double
+    }
+
+    class EquityInstrument
+    class FXInstrument
+    class CryptoInstrument
+
+    User "1" --> "*" Holding : owns
+    User "1" --> "*" Cash : maintains
+    User "1" --> "*" Order : submits
+    OrderExecutor "1" ..> "1" OrderValidator : uses
+    OrderValidator "1" ..> "*" Order : validates
+    OrderExecutor "1" ..> "*" Order : executes
+    OrderExecutor "1" ..> "*" Trade : generate
+    Order "*" -- "1" Instrument : involves
+    EquityInstrument --|> Instrument : type
+    FXInstrument --|> Instrument : type
+    CryptoInstrument --|> Instrument : type
+    SettlementReport "1" ..> "*" Trade : reports
+    Trade "1" --> "1" Order : fulfills
+    Trade "*" --> "1" User : involves
+    OrderExecutor "1" ..> "*" Holding : updates
