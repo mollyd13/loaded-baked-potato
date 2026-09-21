@@ -39,7 +39,7 @@ CREATE TABLE "order" (
 	qty INTEGER NOT NULL, -- for forex: qty of base currency
 	price NUMERIC(38,2) NOT NULL,
 	timing TEXT NOT NULL, -- day/gtc
-	status TEXT NOT NULL,
+	order_status TEXT NOT NULL,
 	submitted_at TIMESTAMP NOT NULL,
 	currency TEXT NOT NULL -- for forex: quote currency
 );
@@ -78,7 +78,7 @@ CREATE TABLE "order" (
 -- this means lose 1000 usd and gain 910 eur
 
 CREATE TABLE trade (
-	trade_id SERIAL PRIMARY KEY.
+	trade_id SERIAL PRIMARY KEY,
 	order_id INTEGER NOT NULL REFERENCES "order"(order_id),
 	user_id INTEGER NOT NULL REFERENCES "user"(user_id),
 	ticker TEXT NOT NULL, -- aapl/btc/eurusd
@@ -86,6 +86,7 @@ CREATE TABLE trade (
 	action_type TEXT NOT NULL, -- buy/sell
 	qty INTEGER NOT NULL, -- for forex: qty of base currency, NO PARTIAL FILLS (all or none)
 	price NUMERIC(38,2) NOT NULL, -- actual execution value
-	currency TEXT NOT NULL -- for forex: quote currency,
+	currency TEXT NOT NULL, -- for forex: quote currency,
+	fee NUMERIC(38,2) NOT NULL, -- fee charged for the trade
 	executed_at TIMESTAMP NOT NULL -- update cash and holdings IMMEDIATELY when trade executes
 );

@@ -1,0 +1,34 @@
+sequenceDiagram
+    participant U as User
+    participant OE as OrderExecutor
+    participant OV as OrderValidator
+    participant I as Instrument
+    participant H as Holding
+    participant C as Cash
+    participant T as Trade
+    participant SR as SettlementReport
+
+
+    U->>OE: executeOrder() call
+    activate OE
+    OE->>OV: validateOrder() call
+    activate OV
+    OV-->>U: get user balance
+    activate U
+    U-->>OV: get balance result
+    deactivate U
+    OV-->>OE: validateOrder() result
+    deactivate OV
+    OE->>I: calculateFee() call
+    activate I
+    I-->>OE: calculateFee() result
+    deactivate I
+    OE->>H: new Holding() call
+    OE->>C: adjustBalance() call
+    OE-->>T: create Trade instance
+    OE->>SR: generateReport() call
+    activate SR
+    SR-->>OE: generateReport() result
+    deactivate SR
+    OE->>U: executeOrder() result
+    deactivate OE
