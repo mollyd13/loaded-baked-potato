@@ -27,11 +27,30 @@
         </mat-form-field>
 
         <mat-form-field class="filter-field">
-          <mat-label>Type</mat-label>
-          <mat-select [(ngModel)]="filterOrderType" (selectionChange)="applyFilters()">
-            <mat-option value="ALL">All Types</mat-option>
+          <mat-label>Action Type</mat-label>
+          <mat-select [(ngModel)]="filterActionType" (selectionChange)="applyFilters()">
+            <mat-option value="ALL">All Actions</mat-option>
             <mat-option value="BUY">Buy</mat-option>
             <mat-option value="SELL">Sell</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="filter-field">
+          <mat-label>Order Type</mat-label>
+          <mat-select [(ngModel)]="filterOrderType" (selectionChange)="applyFilters()">
+            <mat-option value="ALL">All Order Types</mat-option>
+            <mat-option value="Market">Market</mat-option>
+            <mat-option value="Limit">Limit</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="filter-field">
+          <mat-label>Asset Type</mat-label>
+          <mat-select [(ngModel)]="filterAssetType" (selectionChange)="applyFilters()">
+            <mat-option value="ALL">All Assets</mat-option>
+            <mat-option value="Equity">Equity</mat-option>
+            <mat-option value="Crypto">Crypto</mat-option>
+            <mat-option value="FX">FX</mat-option>
           </mat-select>
         </mat-form-field>
 
@@ -82,7 +101,7 @@
         <!-- Asset Type Column -->
         <ng-container matColumnDef="assetType">
           <th mat-header-cell *matHeaderCellDef>Asset Type</th>
-          <td mat-cell *matCellDef="let order" [class.buy]="order.assetType === 'BUY'" [class.sell]="order.assetType === 'SELL'" class="asset-type-cell">
+          <td mat-cell *matCellDef="let order" [class.equity]="order.assetType === 'EQUITY'" [class.crypto]="order.assetType === 'CRYPTO'" [class.fx]="order.assetType === 'FX'" class="asset-type-cell">
             {{ order.assetType }}
           </td>
         </ng-container>
@@ -98,7 +117,7 @@
         <!-- Order Type Column -->
         <ng-container matColumnDef="orderType">
           <th mat-header-cell *matHeaderCellDef>Order Type</th>
-          <td mat-cell *matCellDef="let order" [class.buy]="order.orderType === 'BUY'" [class.sell]="order.orderType === 'SELL'" class="order-type-cell">
+          <td mat-cell *matCellDef="let order" [class.market]="order.orderType === 'MARKET'" [class.limit]="order.orderType === 'LIMIT'" class="order-type-cell">
             {{ order.orderType }}
           </td>
         </ng-container>

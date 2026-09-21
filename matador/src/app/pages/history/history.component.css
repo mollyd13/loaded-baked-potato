@@ -74,14 +74,16 @@
 }
 
 .filter-controls {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   align-items: flex-start;
 }
 
 .filter-field {
-  width: 100%;
+  flex: 1 1 180px;
+  min-width: 140px;
+  max-width: 220px;
 }
 
 .filter-field ::ng-deep .mat-mdc-form-field {
@@ -92,12 +94,12 @@
   display: flex;
   gap: 8px;
   align-items: flex-start;
-  width: 100%;
 }
 
 .filter-end-and-reset .filter-field {
-  flex: 1;
+  flex: 1 1 180px;
   min-width: 140px;
+  max-width: 220px;
 }
 
 .filter-end-and-reset .reset-button {

@@ -60,20 +60,22 @@ export class HistoryComponent implements OnInit {
   
   allOrders: Order[] = [
     { id: 'ORD-001', timestamp: new Date('2024-01-15T10:30:00'), instrument: 'Apple Inc.', symbol: 'AAPL', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 50, price: 180.25, timing: 'day', status: 'FILLED', currency: 'USD' },
-    { id: 'ORD-002', timestamp: new Date('2024-01-14T14:15:00'), instrument: 'Microsoft Corp.', symbol: 'MSFT', assetType: 'Equity', actionType: 'SELL', orderType: 'Market', quantity: 30, price: 412.50, timing: 'day', status: 'FILLED', currency: 'USD' },
+    { id: 'ORD-002', timestamp: new Date('2024-01-14T14:15:00'), instrument: 'Microsoft Corp.', symbol: 'MSFT', assetType: 'Crypto', actionType: 'SELL', orderType: 'Market', quantity: 30, price: 412.50, timing: 'day', status: 'FILLED', currency: 'USD' },
     { id: 'ORD-003', timestamp: new Date('2024-01-12T09:45:00'), instrument: 'Alphabet Inc.', symbol: 'GOOGL', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 100, price: 140.80, timing: 'day', status: 'FILLED', currency: 'USD' },
-    { id: 'ORD-004', timestamp: new Date('2024-01-10T16:20:00'), instrument: 'Amazon.com Inc.', symbol: 'AMZN', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 75, price: 172.30, timing: 'day', status: 'PARTIALLY_FILLED', currency: 'USD' },
-    { id: 'ORD-005', timestamp: new Date('2024-01-08T11:00:00'), instrument: 'Tesla Inc.', symbol: 'TSLA', assetType: 'Equity', actionType: 'SELL', orderType: 'Market', quantity: 40, price: 178.90, timing: 'day', status: 'FILLED', currency: 'USD' },
+    { id: 'ORD-004', timestamp: new Date('2024-01-10T16:20:00'), instrument: 'Amazon.com Inc.', symbol: 'AMZN', assetType: 'Equity', actionType: 'BUY', orderType: 'Limit', quantity: 75, price: 172.30, timing: 'day', status: 'PARTIALLY_FILLED', currency: 'USD' },
+    { id: 'ORD-005', timestamp: new Date('2024-01-08T11:00:00'), instrument: 'Tesla Inc.', symbol: 'TSLA', assetType: 'FX', actionType: 'SELL', orderType: 'Limit', quantity: 40, price: 178.90, timing: 'day', status: 'FILLED', currency: 'USD' },
     { id: 'ORD-006', timestamp: new Date('2024-01-05T13:30:00'), instrument: 'JPMorgan Chase & Co.', symbol: 'JPM', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 60, price: 188.00, timing: 'day', status: 'PENDING', currency: 'USD' },
     { id: 'ORD-007', timestamp: new Date('2024-01-02T10:15:00'), instrument: 'Visa Inc.', symbol: 'V', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 25, price: 278.50, timing: 'day', status: 'FILLED', currency: 'USD' },
-    { id: 'ORD-008', timestamp: new Date('2023-12-28T15:45:00'), instrument: 'NVIDIA Corporation', symbol: 'NVDA', assetType: 'Equity', actionType: 'SELL', orderType: 'Market', quantity: 200, price: 850.00, timing: 'day', status: 'FILLED', currency: 'USD' },
-    { id: 'ORD-009', timestamp: new Date('2023-12-25T12:00:00'), instrument: 'Apple Inc.', symbol: 'AAPL', assetType: 'Equity', actionType: 'SELL', orderType: 'Market', quantity: 100, price: 189.50, timing: 'day', status: 'CANCELLED', currency: 'USD' },
+    { id: 'ORD-008', timestamp: new Date('2023-12-28T15:45:00'), instrument: 'NVIDIA Corporation', symbol: 'NVDA', assetType: 'FX', actionType: 'SELL', orderType: 'Limit', quantity: 200, price: 850.00, timing: 'day', status: 'FILLED', currency: 'USD' },
+    { id: 'ORD-009', timestamp: new Date('2023-12-25T12:00:00'), instrument: 'Apple Inc.', symbol: 'AAPL', assetType: 'Crypto', actionType: 'SELL', orderType: 'Market', quantity: 100, price: 189.50, timing: 'day', status: 'CANCELLED', currency: 'USD' },
     { id: 'ORD-010', timestamp: new Date('2023-12-20T09:30:00'), instrument: 'Microsoft Corp.', symbol: 'MSFT', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 45, price: 378.20, timing: 'day', status: 'FILLED', currency: 'USD' },
   ];
   
   filteredOrders: Order[] = [];
   filterStatus: string = 'ALL';
+  filterActionType: string = 'ALL';
   filterOrderType: string = 'ALL';
+  filterAssetType: string = 'ALL';
   startDate: Date | null = null;
   endDate: Date | null = null;
 
@@ -98,17 +100,21 @@ export class HistoryComponent implements OnInit {
   applyFilters(): void {
     this.filteredOrders = this.allOrders.filter(order => {
       const statusMatch = this.filterStatus === 'ALL' || order.status === this.filterStatus;
-      const typeMatch = this.filterOrderType === 'ALL' || order.orderType === this.filterOrderType;
+      const actionTypeMatch = this.filterActionType === 'ALL' || order.actionType === this.filterActionType;
+      const orderTypeMatch = this.filterOrderType === 'ALL' || order.orderType === this.filterOrderType;
+      const assetTypeMatch = this.filterAssetType === 'ALL' || order.assetType === this.filterAssetType;
       const startMatch = !this.startDate || order.timestamp >= this.startDate;
       const endMatch = !this.endDate || order.timestamp <= this.endDate;
-      return statusMatch && typeMatch && startMatch && endMatch;
+      return statusMatch && actionTypeMatch && orderTypeMatch && assetTypeMatch && startMatch && endMatch;
     });
     this.updateSummaries();
   }
 
   resetFilters(): void {
     this.filterStatus = 'ALL';
+    this.filterActionType = 'ALL';
     this.filterOrderType = 'ALL';
+    this.filterAssetType = 'ALL';
     this.startDate = null;
     this.endDate = null;
     this.filteredOrders = [...this.allOrders];
