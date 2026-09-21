@@ -34,6 +34,9 @@ public class UserProfile {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
     
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+    
     // Relationships
     @OneToMany(mappedBy = "userProfile", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Holding> holdings;
@@ -60,6 +63,18 @@ public class UserProfile {
         this.phone = phone;
         this.roleType = roleType;
         this.createdAt = createdAt;
+    }
+    
+    public UserProfile(String firstName, String lastName, String email, String passwordHash, 
+                      Integer phone, String roleType, LocalDateTime createdAt, LocalDateTime deletedAt) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.passwordHash = passwordHash;
+        this.phone = phone;
+        this.roleType = roleType;
+        this.createdAt = createdAt;
+        this.deletedAt = deletedAt;
     }
     
     // Getters and Setters
@@ -125,6 +140,14 @@ public class UserProfile {
     
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+    
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
+    
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
     }
     
     public List<Holding> getHoldings() {
