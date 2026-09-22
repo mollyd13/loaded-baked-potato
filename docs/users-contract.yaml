@@ -11,6 +11,79 @@ servers:
   - url: /v1
 
 paths:
+  /users:
+    post: 
+      summary: Create a new user
+      operationId: createUser
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+            example:
+              fname: "Jane"
+              lname: "Doe"
+              email: "jane.doe@example.com"
+              pwd: "plain_password"
+              phone: "123-456-7890"
+      responses:
+        '201':
+          description: The user was successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+              example:
+                id: 42
+                fname: "Jane"
+                lname: "Doe"
+                email: "jane.doe@example.com"
+                pwd_hash: "hashed_password"
+                phone: "123-456-7890"
+                role_type: "admin"
+                created_at: "2024-06-01T12:00:00Z"
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "missing or invalid JWT"
+    get:
+      summary: Retrieve a list of all users
+      operationId: listUsers
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserResponse'
+              example:
+                - id: 42
+                  fname: "John"
+                  lname: "Doe"
+                  email: "john.doe@example.com"
+                  pwd_hash: "hashed_password"
+                  phone: "123-456-7890"
+                  role_type: "admin"
+                  created_at: "2024-06-01T12:00:00Z"
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "missing or invalid JWT"
   /users/{id}:
     get:
       summary: Retrieve information about a specified user
@@ -32,43 +105,131 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserResponse'
               example:
-                id: "42"
-                status: ACCEPTED
-                fee: 15.0
+                id: 42
+                fname: "John"
+                lname: "Doe"
+                email: "john.doe@example.com"
+                pwd_hash: "hashed_password"
+                phone: "123-456-7890"
+                role_type: "admin"
+                created_at: "2024-06-01T12:00:00Z"
         '401':
           description: Missing or invalid JWT
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "missing or invalid JWT"
         '404':
-          description: No order exists with the given id
+          description: No user exists with the given id
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
-                message: "no order found with id 999"
+                message: "no user found with id 999"
+    patch:
+      summary: Update information for a specified user
+      operationId: updateUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The user id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPatchRequest'
+      responses:
+        '204':
+          description: The user was successfully updated
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "missing or invalid JWT"
+        '404':
+          description: No user exists with the given id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "no user found with id 999"
+    delete: 
+      summary: Delete a specified user
+      operationId: deleteUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The user id
+          schema:
+            type: string
+      responses:
+        '204':
+          description: The user was successfully deleted
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "missing or invalid JWT"
+        '404':
+          description: No user exists with the given id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "no user found with id 999"
 
 components:
   schemas:
     UserResponse:
       type: object
-      required: [id, fname, lname, email, pwd_hash, phone, roll_type, created_at]
+      required: [id, fname, lname, email, pwd_hash, phone, role_type, created_at]
       properties:
         id:
           type: number
           format: int
+          description: The unique identifier of the user
         fname:
           type: string
-          description: user's first name
+          description: The user's first name
         lname:
           type: string
-          description: user's last name
-        reason:
+          description: The user's last name
+        email:
           type: string
-          nullable: true
-          description: Present only when status is REJECTED
+          description: The user's email address
+        pwd_hash:
+          type: string
+          description: The hashed password of the user
+        phone:
+          type: string
+          description: The user's phone number
+        role_type:
+          type: string
+          description: The type of role assigned to the user
+        created_at:
+          type: string
+          format: date-time
+          description: The timestamp when the user was created
 
     ErrorResponse:
       type: object
@@ -76,6 +237,36 @@ components:
       properties:
         message:
           type: string
+
+    UserCreateRequest:
+      type: object
+      required: [fname, lname, email, pwd, phone]
+      properties:
+        fname:
+          type: string
+          description: The user's first name
+        lname:
+          type: string
+          description: The user's last name
+        email:
+          type: string
+          description: The user's email address
+        pwd:
+          type: string
+          description: The plain text password of the user
+        phone:
+          type: string
+          description: The user's phone number
+    
+    UserPatchRequest:
+      type: object
+      properties:
+        field: 
+          type: string
+          description: The name of the field to be updated
+        value:
+          type: string
+          description: The new value for the specified field
 
   securitySchemes:
     bearerAuth:
