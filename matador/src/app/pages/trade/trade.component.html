@@ -170,34 +170,6 @@
         </div>
       </mat-card>
 
-      <mat-card class="risk-card">
-        <div class="card-header">
-          <h3>Risk &amp; Limits</h3>
-        </div>
-
-        <div class="detail-row">
-          <span>Available Margin</span>
-          <span>{{ availableBalance | currency: 'USD' }}</span>
-        </div>
-        <div class="detail-row">
-          <span>Position Limit</span>
-          <span>{{ positionLimit }} Shares</span>
-        </div>
-        <div class="detail-row">
-          <span>Stop Loss</span>
-          <span>{{ stopLoss ? (stopLoss | currency: 'USD') : 'Not set' }}</span>
-        </div>
-        <div class="detail-row">
-          <span>Take Profit</span>
-          <span>{{ takeProfit ? (takeProfit | currency: 'USD') : 'Not set' }}</span>
-        </div>
-
-        <div class="risk-warning" *ngIf="isVolatile">
-          <mat-icon>warning_amber</mat-icon>
-          <span>High volatility detected. Confirm before transmitting.</span>
-        </div>
-      </mat-card>
-
     </div>
 
   </div>
