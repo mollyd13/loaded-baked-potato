@@ -1,1 +1,171 @@
-<p>Trade History</p>
+<div class="order-history">
+  <!-- Summary Section -->
+  <div class="summary-grid">
+    <mat-card class="summary-card" *ngFor="let card of orderSummaries">
+      <span class="summary-label">{{ card.label }}</span>
+      <span class="summary-value">{{ card.value }}</span>
+      <span *ngIf="card.changeText" class="summary-change" [class.positive]="card.changePositive" [class.negative]="card.changePositive === false">
+        {{ card.changeText }}
+      </span>
+    </mat-card>
+  </div>
+
+  <!-- Filter Section -->
+  <mat-card class="filter-card">
+    <div class="filter-header">
+      <h3>Order History</h3>
+      <div class="filter-controls">
+        <mat-form-field class="filter-field">
+          <mat-label>Status</mat-label>
+          <mat-select [(ngModel)]="filterStatus" (selectionChange)="applyFilters()">
+            <mat-option value="ALL">All Statuses</mat-option>
+            <mat-option value="FILLED">Filled</mat-option>
+            <mat-option value="PARTIALLY_FILLED">Partially Filled</mat-option>
+            <mat-option value="PENDING">Pending</mat-option>
+            <mat-option value="CANCELLED">Cancelled</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="filter-field">
+          <mat-label>Action Type</mat-label>
+          <mat-select [(ngModel)]="filterActionType" (selectionChange)="applyFilters()">
+            <mat-option value="ALL">All Actions</mat-option>
+            <mat-option value="BUY">Buy</mat-option>
+            <mat-option value="SELL">Sell</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="filter-field">
+          <mat-label>Order Type</mat-label>
+          <mat-select [(ngModel)]="filterOrderType" (selectionChange)="applyFilters()">
+            <mat-option value="ALL">All Order Types</mat-option>
+            <mat-option value="Market">Market</mat-option>
+            <mat-option value="Limit">Limit</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="filter-field">
+          <mat-label>Asset Type</mat-label>
+          <mat-select [(ngModel)]="filterAssetType" (selectionChange)="applyFilters()">
+            <mat-option value="ALL">All Assets</mat-option>
+            <mat-option value="Equity">Equity</mat-option>
+            <mat-option value="Crypto">Crypto</mat-option>
+            <mat-option value="FX">FX</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="filter-field">
+          <mat-label>Start Date</mat-label>
+          <input matInput [matDatepicker]="startPicker" [(ngModel)]="startDate" (dateChange)="applyFilters()">
+          <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+          <mat-datepicker #startPicker></mat-datepicker>
+        </mat-form-field>
+
+        <div class="filter-end-and-reset">
+          <mat-form-field class="filter-field">
+            <mat-label>End Date</mat-label>
+            <input matInput [matDatepicker]="endPicker" [(ngModel)]="endDate" (dateChange)="applyFilters()">
+            <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+          </mat-form-field>
+
+          <button mat-raised-button (click)="resetFilters()" class="reset-button">
+            <mat-icon>clear</mat-icon>
+            Reset
+          </button>
+        </div>
+      </div>
+    </div>
+  </mat-card>
+
+  <!-- Orders Table Section -->
+  <mat-card class="orders-card">
+    <div class="table-scroll">
+      <table mat-table [dataSource]="filteredOrders" class="orders-table">
+
+        <!-- Timestamp Column -->
+        <ng-container matColumnDef="timestamp">
+          <th mat-header-cell *matHeaderCellDef>Date & Time</th>
+          <td mat-cell *matCellDef="let order">{{ formatDate(order.timestamp) }}</td>
+        </ng-container>
+
+        <!-- Instrument Column -->
+        <ng-container matColumnDef="instrument">
+          <th mat-header-cell *matHeaderCellDef>Instrument</th>
+          <td mat-cell *matCellDef="let order">
+            <span class="instrument-name">{{ order.instrument }}</span>
+            <span class="instrument-symbol">{{ order.symbol }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Asset Type Column -->
+        <ng-container matColumnDef="assetType">
+          <th mat-header-cell *matHeaderCellDef>Asset Type</th>
+          <td mat-cell *matCellDef="let order" [class.equity]="order.assetType === 'EQUITY'" [class.crypto]="order.assetType === 'CRYPTO'" [class.fx]="order.assetType === 'FX'" class="asset-type-cell">
+            {{ order.assetType }}
+          </td>
+        </ng-container>
+
+        <!-- Action Type Column -->
+        <ng-container matColumnDef="actionType">
+          <th mat-header-cell *matHeaderCellDef>Action Type</th>
+          <td mat-cell *matCellDef="let order" [class.buy]="order.actionType === 'BUY'" [class.sell]="order.actionType === 'SELL'" class="action-type-cell">
+            {{ order.actionType }}
+          </td>
+        </ng-container>
+
+        <!-- Order Type Column -->
+        <ng-container matColumnDef="orderType">
+          <th mat-header-cell *matHeaderCellDef>Order Type</th>
+          <td mat-cell *matCellDef="let order" [class.market]="order.orderType === 'MARKET'" [class.limit]="order.orderType === 'LIMIT'" class="order-type-cell">
+            {{ order.orderType }}
+          </td>
+        </ng-container>
+
+        <!-- Quantity Column -->
+        <ng-container matColumnDef="quantity">
+          <th mat-header-cell *matHeaderCellDef>Quantity</th>
+          <td mat-cell *matCellDef="let order">{{ order.quantity }}</td>
+        </ng-container>
+
+        <!-- Price Column -->
+        <ng-container matColumnDef="price">
+          <th mat-header-cell *matHeaderCellDef>Price</th>
+          <td mat-cell *matCellDef="let order">${{ order.price.toFixed(2) }}</td>
+        </ng-container>
+
+        <!-- Total Value Column -->
+        <ng-container matColumnDef="totalValue">
+          <th mat-header-cell *matHeaderCellDef>Total Value</th>
+          <td mat-cell *matCellDef="let order">${{(order.price * order.quantity).toFixed(2) }}</td>
+        </ng-container>
+
+        <!-- Timing Column -->
+        <ng-container matColumnDef="timing">
+          <th mat-header-cell *matHeaderCellDef>Timing</th>
+          <td mat-cell *matCellDef="let order">{{ order.timing }}</td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let order" [class.filled]="order.status === 'FILLED'" [class.partially-filled]="order.status === 'PARTIALLY_FILLED'" [class.pending]="order.status === 'PENDING'" [class.cancelled]="order.status === 'CANCELLED'" class="status-cell">
+            {{ order.status.replace('_', ' ') }}
+          </td>
+        </ng-container>
+
+        <!-- Currency Column -->
+        <ng-container matColumnDef="currency">
+          <th mat-header-cell *matHeaderCellDef>Currency</th>
+          <td mat-cell *matCellDef="let order">{{order.currency}}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </div>
+    <div class="table-footer" *ngIf="filteredOrders.length === 0">
+      <span>No orders found matching the selected filters.</span>
+    </div>
+  </mat-card>
+</div>
