@@ -1,0 +1,204 @@
+<div class="trade">
+
+  <div class="trade-header">
+    <div class="trade-heading">
+      <h2>Place Order</h2>
+      <span class="trade-subtitle">Execute trade with instant confirmation</span>
+    </div>
+    <button mat-stroked-button class="template-button" (click)="saveTemplate()">
+      <mat-icon>bookmark_border</mat-icon>
+      Save Template
+    </button>
+  </div>
+
+  <div class="trade-grid">
+
+    <div class="trade-column">
+
+      <mat-card class="quote-card">
+        <div class="quote-header">
+          <div class="quote-identity">
+            <span class="ticker-chip">{{ quote.ticker }}</span>
+            <span class="quote-name">{{ quote.name }}</span>
+          </div>
+          <div class="quote-meta">
+            <span class="change-chip" [class.positive]="isPositive" [class.negative]="!isPositive">
+              {{ isPositive ? '+' : '' }}{{ quote.changePct | number: '1.2-2' }}%
+            </span>
+            <button mat-icon-button aria-label="Save quote as template" (click)="saveTemplate()">
+              <mat-icon>more_horiz</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <div class="quote-body">
+          <span class="quote-price">{{ quote.price | currency: 'USD' }}</span>
+          <span class="quote-change" [class.positive]="isPositive" [class.negative]="!isPositive">
+            {{ isPositive ? '+' : '' }}{{ quote.changePct | number: '1.2-2' }}%
+          </span>
+        </div>
+
+        <svg class="sparkline" viewBox="0 0 120 40" preserveAspectRatio="none" aria-hidden="true">
+          <polyline [attr.points]="sparklinePoints"></polyline>
+        </svg>
+      </mat-card>
+
+      <mat-card class="form-card">
+        <div class="card-header">
+          <h3>Order Form</h3>
+          <div class="card-header-meta">
+            <span class="pill">{{ orderTypeLabel }}</span>
+            <span class="pill">{{ timing }}</span>
+          </div>
+        </div>
+
+        <div class="action-toggle" role="group" aria-label="Order action">
+          <button
+            type="button"
+            class="action-option"
+            [class.selected]="action === 'BUY'"
+            [attr.aria-pressed]="action === 'BUY'"
+            (click)="setAction('BUY')"
+          >
+            BUY
+          </button>
+          <button
+            type="button"
+            class="action-option"
+            [class.selected]="action === 'SELL'"
+            [attr.aria-pressed]="action === 'SELL'"
+            (click)="setAction('SELL')"
+          >
+            SELL
+          </button>
+        </div>
+
+        <label class="field-label" for="share-quantity">Share Quantity</label>
+        <div class="field stepper-field">
+          <input
+            id="share-quantity"
+            type="number"
+            min="1"
+            [max]="positionLimit"
+            [ngModel]="quantity"
+            (ngModelChange)="onQuantityChange($event)"
+          />
+          <div class="stepper-buttons">
+            <button type="button" aria-label="Decrease quantity" (click)="decrement()">&minus;</button>
+            <button type="button" aria-label="Increase quantity" (click)="increment()">+</button>
+          </div>
+        </div>
+
+        <label class="field-label" for="limit-price">Limit Price (Optional)</label>
+        <div class="field price-field">
+          <input
+            id="limit-price"
+            type="number"
+            min="0"
+            step="0.01"
+            [placeholder]="quote.price | number: '1.2-2'"
+            [(ngModel)]="limitPrice"
+          />
+          <span class="field-suffix">{{ orderTypeLabel }}</span>
+        </div>
+
+        <div class="cost-summary">
+          <div class="cost-row total">
+            <span>Estimated Total Cost</span>
+            <span class="cost-value">{{ estimatedTotal | currency: 'USD' }}</span>
+          </div>
+          <div class="cost-row">
+            <span>System Fee</span>
+            <span>{{ systemFee | currency: 'USD' }}</span>
+          </div>
+          <div class="cost-row">
+            <span>Available Balance</span>
+            <span>{{ availableBalance | currency: 'USD' }}</span>
+          </div>
+        </div>
+
+        <p class="balance-error" *ngIf="exceedsBalance">
+          <mat-icon>error_outline</mat-icon>
+          Estimated total exceeds your available balance.
+        </p>
+
+        <div class="form-actions">
+          <button
+            mat-flat-button
+            class="transmit-button"
+            [disabled]="!canTransmit"
+            (click)="transmitOrder()"
+          >
+            Transmit {{ action === 'BUY' ? 'Buy' : 'Sell' }} Order
+          </button>
+          <button mat-stroked-button class="abort-button" (click)="abortOperation()">
+            Abort Operation
+          </button>
+        </div>
+      </mat-card>
+
+    </div>
+
+    <div class="trade-column">
+
+      <mat-card class="detail-card">
+        <div class="card-header">
+          <h3>Order Detail Log</h3>
+          <span class="pill">INSTANT {{ action }}</span>
+        </div>
+
+        <div class="detail-row">
+          <span>Transaction Mode</span>
+          <span class="detail-mode">{{ transactionMode }}</span>
+        </div>
+        <div class="detail-row">
+          <span>Share Quantity</span>
+          <span>{{ quantity }} Shares</span>
+        </div>
+        <div class="detail-row">
+          <span>Terminal Price / Share</span>
+          <span>{{ executionPrice | currency: 'USD' }}</span>
+        </div>
+        <div class="detail-row">
+          <span>System Fee</span>
+          <span>{{ systemFee | currency: 'USD' }}</span>
+        </div>
+
+        <div class="detail-total">
+          <span>Estimated Total Cost</span>
+          <span class="detail-total-value">{{ estimatedTotal | currency: 'USD' }}</span>
+        </div>
+      </mat-card>
+
+      <mat-card class="risk-card">
+        <div class="card-header">
+          <h3>Risk &amp; Limits</h3>
+        </div>
+
+        <div class="detail-row">
+          <span>Available Margin</span>
+          <span>{{ availableBalance | currency: 'USD' }}</span>
+        </div>
+        <div class="detail-row">
+          <span>Position Limit</span>
+          <span>{{ positionLimit }} Shares</span>
+        </div>
+        <div class="detail-row">
+          <span>Stop Loss</span>
+          <span>{{ stopLoss ? (stopLoss | currency: 'USD') : 'Not set' }}</span>
+        </div>
+        <div class="detail-row">
+          <span>Take Profit</span>
+          <span>{{ takeProfit ? (takeProfit | currency: 'USD') : 'Not set' }}</span>
+        </div>
+
+        <div class="risk-warning" *ngIf="isVolatile">
+          <mat-icon>warning_amber</mat-icon>
+          <span>High volatility detected. Confirm before transmitting.</span>
+        </div>
+      </mat-card>
+
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,415 @@
+.trade {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 20px;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+/* Numeric values share the terminal-style monospace face. */
+.ticker-chip,
+.quote-price,
+.field input,
+.cost-value,
+.detail-row > span:last-child,
+.detail-total-value {
+  font-family: "Roboto Mono", "Courier New", monospace;
+  font-weight: 600;
+}
+
+/* Label on the left, value on the right. */
+.trade-header,
+.quote-header,
+.quote-body,
+.card-header,
+.cost-row,
+.detail-row,
+.detail-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.trade-header {
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.trade-heading h2 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.trade-subtitle,
+.quote-name,
+.field-label {
+  color: var(--text-color);
+  opacity: 0.7;
+}
+
+.trade-subtitle {
+  font-size: 13px;
+}
+
+.template-button mat-icon,
+.balance-error mat-icon,
+.risk-warning mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.template-button mat-icon {
+  margin-right: 4px;
+}
+
+.trade-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+}
+
+.trade-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.quote-card,
+.form-card,
+.detail-card,
+.risk-card {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 20px 24px;
+}
+
+/* Quote card */
+
+.quote-identity,
+.quote-meta,
+.card-header-meta,
+.stepper-buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.quote-identity {
+  gap: 10px;
+}
+
+.ticker-chip,
+.change-chip,
+.pill {
+  padding: 4px 10px;
+  background: #0000000d;
+  color: var(--text-color);
+}
+
+.ticker-chip {
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.quote-name {
+  font-size: 14px;
+}
+
+.change-chip,
+.pill {
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.change-chip.positive,
+.quote-change.positive {
+  color: var(--success-color);
+}
+
+.change-chip.negative,
+.quote-change.negative {
+  color: var(--error-color);
+}
+
+.quote-body {
+  align-items: baseline;
+  margin-top: 12px;
+}
+
+.quote-price {
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.quote-change {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sparkline {
+  width: 100%;
+  height: 48px;
+  margin-top: 12px;
+}
+
+.sparkline polyline {
+  fill: none;
+  stroke: var(--primary-color);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Shared card header */
+
+.card-header {
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.pill {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Order form */
+
+.action-toggle,
+.form-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.action-option {
+  padding: 12px 16px;
+  border: 1px solid #0000001f;
+  border-radius: 8px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.action-option.selected {
+  border-color: transparent;
+  background: var(--primary-color);
+  color: var(--light-text-color);
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 6px 8px 6px 14px;
+  border: 1px solid #00000024;
+  border-radius: 8px;
+}
+
+.field:focus-within {
+  border-color: var(--primary-color);
+}
+
+.field input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 18px;
+  color: var(--text-color);
+}
+
+.stepper-buttons button {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #00000024;
+  border-radius: 6px;
+  background: transparent;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.stepper-buttons button:hover {
+  background: #0000000a;
+}
+
+.field-suffix {
+  padding-right: 6px;
+  font-size: 13px;
+  color: var(--text-color);
+  opacity: 0.6;
+}
+
+.cost-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 8px;
+  background: #00000008;
+}
+
+.cost-row,
+.detail-row {
+  font-size: 13px;
+  color: var(--text-color);
+}
+
+.cost-row.total {
+  font-weight: 600;
+}
+
+.cost-value,
+.detail-mode,
+.detail-total-value {
+  color: var(--primary-color);
+}
+
+.cost-value {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.balance-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--error-color);
+}
+
+.form-actions {
+  margin: 20px 0 0;
+  gap: 12px;
+}
+
+.transmit-button,
+.abort-button {
+  padding: 10px 16px;
+  font-weight: 600;
+}
+
+/* Material owns these colors through its own tokens, so set them there. */
+.transmit-button {
+  --mdc-filled-button-container-color: var(--primary-color);
+  --mdc-filled-button-label-text-color: var(--light-text-color);
+}
+
+.transmit-button[disabled] {
+  opacity: 0.5;
+}
+
+.abort-button {
+  --mdc-outlined-button-label-text-color: var(--error-color);
+}
+
+.template-button {
+  --mdc-outlined-button-label-text-color: var(--text-color);
+}
+
+/* Detail and risk cards */
+
+.detail-row {
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.detail-row > span:last-child {
+  text-align: right;
+}
+
+.detail-total {
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px solid #0000001a;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.detail-total-value {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.risk-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #0000000a;
+  font-size: 12px;
+  color: var(--text-color);
+}
+
+.risk-warning mat-icon {
+  flex-shrink: 0;
+  color: var(--secondary-color);
+}
+
+@media (max-width: 1100px) {
+  .trade-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .trade {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .quote-card,
+  .form-card,
+  .detail-card,
+  .risk-card {
+    padding: 16px;
+  }
+  .quote-price {
+    font-size: 28px;
+  }
+
+  .form-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
