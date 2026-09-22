@@ -1,0 +1,84 @@
+openapi: 3.0.3
+info:
+  title: User Access and Creation
+  description: >
+    Sends and receives user data
+  version: 1.0.0
+  license:
+    name: Internal use only
+
+servers:
+  - url: /v1
+
+paths:
+  /users/{id}:
+    get:
+      summary: Retrieve information about a specified user
+      operationId: getUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The user id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The user was found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+              example:
+                id: "42"
+                status: ACCEPTED
+                fee: 15.0
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No order exists with the given id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "no order found with id 999"
+
+components:
+  schemas:
+    UserResponse:
+      type: object
+      required: [id, fname, lname, email, pwd_hash, phone, roll_type, created_at]
+      properties:
+        id:
+          type: number
+          format: int
+        fname:
+          type: string
+          description: user's first name
+        lname:
+          type: string
+          description: user's last name
+        reason:
+          type: string
+          nullable: true
+          description: Present only when status is REJECTED
+
+    ErrorResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
