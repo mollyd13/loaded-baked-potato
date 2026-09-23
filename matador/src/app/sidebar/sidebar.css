@@ -1,5 +1,5 @@
-  mat-toolbar {
-    background: #b80a0a;
+mat-toolbar {
+    background: var(--primary-color);
     color: white;
   }
   
@@ -9,7 +9,7 @@
     gap: 20px;
     width: 200px;
     border-right: none;
-    background: #b80a0a;
+    background: var(--primary-color);
     color: white;
     border-radius: 0;
     text-align: center;
@@ -91,7 +91,6 @@
     background-color: #e7898986;
   }
 
-
   .bottom-nav{
     position: absolute;
     bottom: 20px;
@@ -118,24 +117,32 @@
     font-size: 50px;
     height: 50px;
     width: 50px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    color:black
   }
 
   .username-container {
     display: flex;
     flex-direction: column;
+    align-items: center;
   }
   
   .username {
     color: white;
-    font-size: 20px;
-    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 10px;
+    height: fit-content;
   }
 
   .user-role {
-    color: rgb(197, 197, 197);
-    font-size: 12px;
-    margin: 0;
-    margin-top: -8px;
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    height: fit-content;
+    text-align: center;
+    margin-top: -10px;
   }
 
 
