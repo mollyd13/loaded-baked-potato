@@ -34,7 +34,7 @@ public class UserProfile {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
     
-    @Column(name = "deleted_at")
+    @Column(name = "deleted_at", nullable = true)
     private LocalDateTime deletedAt;
     
     // Relationships
