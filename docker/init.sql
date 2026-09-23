@@ -125,3 +125,8 @@ CREATE TABLE IF NOT EXISTS app.trade (
 
 -- Verify database was created successfully
 SELECT datname, datistemplate FROM pg_database WHERE datname = 'primary';
+
+INSERT INTO user_profile (fname, lname, email, pwd_hash, phone, role_type, created_at)
+VALUES 
+('Test', 'User', 'test@example.com', '$2a$10$slYQmyNdGzin7olVN3p5Be7DlH.PKZbv5H8KfzzIgXJ7VxkYa6pFm', 1234567890, 'USER', NOW()),
+('Admin', 'User', 'admin@example.com', '$2a$10$slYQmyNdGzin7olVN3p5Be7DlH.PKZbv5H8KfzzIgXJ7VxkYa6pFm', 9876543210, 'ADMIN', NOW());
