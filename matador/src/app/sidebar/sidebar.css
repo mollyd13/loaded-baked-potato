@@ -137,7 +137,7 @@ mat-toolbar {
   }
 
   .user-role {
-    color: white;
+    color: rgb(197, 197, 197);
     font-size: 14px;
     font-weight: 500;
     height: fit-content;
