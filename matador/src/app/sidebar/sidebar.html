@@ -1,12 +1,18 @@
-<mat-toolbar class="mat-elevation-z8">
+<mat-toolbar>
   <div class="display-left">
       <button
         mat-icon-button
         (click)="sidenav.toggle()" class="nav-button"
         >
-        <mat-icon *ngIf="!sidenav.opened"> menu </mat-icon>
-        <mat-icon *ngIf="sidenav.opened"> close </mat-icon>
+        <mat-icon> menu </mat-icon>
       </button>
+        <div class="app-title-container">
+          <mat-icon>trending_up</mat-icon>
+          <div class = "text-container">
+            <span class="app-title">Matador</span>
+            <span class="app-subtitle">Catchy Slogan</span>
+          </div>
+        </div>
 
   </div>
   
@@ -22,39 +28,35 @@
 </mat-toolbar>
 <mat-sidenav-container>
   <mat-sidenav
-    class="mat-elevation-z8"
-    #sidenav="matSidenav"
     [mode]="sidenavMode"
     [opened]="sidenavMode === 'side'"
     [disableClose]="sidenavMode === 'side'"
   >
     <!-- <mat-nav-list> -->
     <mat-list-item>
-      <a class="menu-icons" routerLink="/dashboard">
+      <a routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="menu-icons" routerLink="/dashboard">
         <mat-icon>house</mat-icon>
         <span>Home</span>
       </a>
     </mat-list-item>
     <mat-list-item>
-      <a class="menu-icons" routerLink="/trade">
+      <a routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="menu-icons" routerLink="/history">
+        <mat-icon>history</mat-icon>
+        <span>History</span>
+      </a>
+    </mat-list-item>
+    <mat-list-item>
+      <a routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="menu-icons" routerLink="/trade">
         <mat-icon>show_chart</mat-icon>
         <span>Trade</span>
       </a>
     </mat-list-item>
     <mat-list-item>
-      <a class="menu-icons" routerLink="/history">
-        <mat-icon>history</mat-icon>
-        <span>History</span>
+      <a routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="menu-icons" routerLink="/profile">
+        <mat-icon>person_outline</mat-icon>
+        <span>Profile</span>
       </a>
     </mat-list-item>
-    
-
-
-    <div class="bottom-nav">
-      <mat-divider></mat-divider>
-      
-
-    </div>
     <!-- </mat-nav-list> -->
   </mat-sidenav>
   <mat-sidenav-content>

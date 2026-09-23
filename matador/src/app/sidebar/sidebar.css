@@ -4,14 +4,62 @@ mat-toolbar {
   }
   
   mat-sidenav {
-    margin: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
     width: 200px;
     border-right: none;
     background: var(--primary-color);
     color: white;
-    border-radius: 10px;
-    padding: 16px;
+    border-radius: 0;
     text-align: center;
+  }
+  
+  mat-sidenav-container {
+    height: calc(100vh - 65px);
+  }
+
+  .app-title-container {
+    display: flex;
+  }
+
+  .text-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .display-left{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .app-title {
+    font-weight: bold;
+    font-size: 20px;
+  }
+  .app-subtitle {
+    font-weight: normal;
+    font-size: 14px;
+    margin-top: -5px;
+    color: rgb(197, 197, 197);
+  }
+
+  .app-title-container mat-icon { 
+    margin-right: 10px;
+    width: 50px;
+    height: 50px;
+    font-size: 50px;
+    border-radius: 10px;
+    background: #ffffff33;
+  }
+
+
+  .nav-button{
+    color: white;
+    cursor: pointer;
   }
   
   .content {
@@ -24,20 +72,23 @@ mat-toolbar {
     box-sizing: border-box;
   }
   
-  mat-sidenav-container {
-    height: calc(100vh - 65px);
-  }
 
   .menu-icons {
     display: flex;
     align-items: center;
-    margin-left: 20px;
-    margin-top: 20px;
+    padding: 10px;
+    margin:10px;
     color: inherit;
     text-decoration: none;
     mat-icon {
       margin-right: 8px;
+      margin-left: 8px;
     }
+    border-radius: 10px;
+  }
+
+  .menu-icons.active {
+    background-color: #e7898986;
   }
 
   .bottom-nav{
@@ -52,10 +103,7 @@ mat-toolbar {
     cursor: pointer;
     margin: 0;
   }
-  
-  .nav-button{
-    color: white;
-  }
+
   .display-right{
     display: flex;
     align-items: center;
@@ -89,7 +137,7 @@ mat-toolbar {
   }
 
   .user-role {
-    color: white;
+    color: rgb(197, 197, 197);
     font-size: 14px;
     font-weight: 500;
     height: fit-content;
