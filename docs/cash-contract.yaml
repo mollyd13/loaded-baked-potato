@@ -1,0 +1,202 @@
+openapi: 3.0.3
+info:
+  title: Cash Access and Creation
+  description: >
+    Sends and receives cash data
+  version: 1.0.0
+  license:
+    name: Internal use only
+
+servers:
+  - url: /v1
+
+paths:
+  /cash/{cash_account_id}:
+    get:
+      summary: Retrieve information about a specified cash account
+      operationId: getCash
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: cash_account_id
+          in: path
+          required: true
+          description: The cash account id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The cash account was found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CashResponse'
+              example:
+                cash_account_id: 42
+                user_id: 123
+                currency: "USD"
+                balance: 150.0
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No cash account exists with the given id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "no cash account found with id 999"
+    post:
+      summary: create a new cash account
+      operationId: createCash
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: cash_account_id
+          in: path
+          required: true
+          description: The cash account id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CashResponse'
+      responses:
+        '201':
+          description: The cash account was successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CashResponse'
+              example:
+                cash_account_id: 42
+                user_id: 123
+                currency: "USD"
+                balance: 150.0
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      summary: update a cash account
+      operationId: updateCash
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: cash_account_id
+          in: path
+          required: true
+          description: The cash account id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CashResponse'
+      responses:
+        '200':
+          description: the cash account was successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CashResponse'
+              example:
+                cash_account_id: 42
+                user_id: 123
+                currency: "USD"
+                balance: 150.0
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: no cash account exists with the given id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "no cash account found with id 999"
+    delete:
+      summary: delete a cash account
+      operationId: deleteCash
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: cash_account_id
+          in: path
+          required: true
+          description: The cash account id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: the cash account was successfully deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CashResponse'
+              example:
+                cash_account_id: 42
+                user_id: 123
+                currency: "USD"
+                balance: 150.0
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: no cash account exists with the given id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "no cash account found with id 999"
+
+components:
+  schemas:
+    CashResponse:
+      type: object
+      required: [cash_account_id, user_id, currency, balance]
+      properties:
+        cash_account_id:
+          type: number
+          format: int
+        user_id:
+          type: number
+          description: user who owns the cash account
+        currency:
+          type: string
+          description: currency of the cash account
+        balance:
+          type: number
+          description: balance of the cash account
+
+    ErrorResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
