@@ -32,11 +32,11 @@ CREATE TABLE IF NOT EXISTS app.user_profile (
 	fname TEXT NOT NULL,
 	lname TEXT NOT NULL,
 	email TEXT UNIQUE NOT NULL,
-	pwd_hash TEXT UNIQUE NOT NULL,
-	phone INTEGER UNIQUE NOT NULL,
+	pwd_hash TEXT NOT NULL,
+	phone TEXT UNIQUE NOT NULL,
 	role_type TEXT NOT NULL,
 	created_at TIMESTAMP NOT NULL,
-	deleted_at TIMESTAMP NOT NULL,
+	deleted_at TIMESTAMP
 );
 
 -- Holds only equities and crypto
