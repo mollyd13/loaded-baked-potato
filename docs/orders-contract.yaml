@@ -1,0 +1,324 @@
+openapi: 3.0.3
+info:
+  title: Orders Access and Creation
+  description: >
+    Sends and receives order data
+  version: 1.0.0
+  license:
+    name: Internal use only
+
+servers:
+  - url: /v1
+
+paths:
+  /orders:
+    post: 
+      summary: Create a new order
+      operationId: createOrder
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreateRequest'
+            example:
+              user_id: 7
+              ticker: "AAPL"
+              asset_type: "equity"
+              action_type: "buy"
+              order_type: "limit"
+              quantity: 10
+              price: 150.0
+              timing: "day"
+              currency: "USD"
+      responses:
+        '201':
+          description: The order was successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+              example:
+                order_id: 42
+                user_id: 7
+                ticker: "AAPL"
+                asset_type: "equity"
+                action_type: "buy"
+                order_type: "limit"
+                quantity: 10
+                price: 150.0
+                timing: "day"
+                status: "pending"
+                submitted_at: "2024-06-01T12:00:00Z"
+                currency: "USD"
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "missing or invalid JWT"
+    get:
+      summary: Retrieve a list of all orders
+      operationId: listOrders
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A list of orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderResponse'
+              example:
+                - order_id: 42
+                  user_id: 7
+                  ticker: "AAPL"
+                  asset_type: "equity"
+                  action_type: "buy"
+                  order_type: "market"
+                  quantity: 10
+                  price: 150.0
+                  timing: "day"
+                  status: "pending"
+                  submitted_at: "2024-06-01T12:00:00Z"
+                  currency: "USD"
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "missing or invalid JWT"
+  /orders/{id}:
+    get:
+      summary: Retrieve information about a specified order
+      operationId: getOrder
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The order id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The order was found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+              example:
+                order_id: 42
+                user_id: 7
+                ticker: "AAPL"
+                asset_type: "equity"
+                action_type: "buy"
+                order_type: "market"
+                quantity: 10
+                price: 150.0
+                timing: "day"
+                status: "pending"
+                submitted_at: "2024-06-01T12:00:00Z"
+                currency: "USD"
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "missing or invalid JWT"
+        '404':
+          description: No order exists with the given id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "no order found with id 999"
+    patch:
+      summary: Update information for a specified order
+      operationId: updateOrder
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The order id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderPatchRequest'
+            example:
+              field: "field"
+              value: "new_value"
+      responses:
+        '204':
+          description: The order was successfully updated
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "missing or invalid JWT"
+        '404':
+          description: No order exists with the given id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "no order found with id 999"
+    delete: 
+      summary: Delete a specified order
+      operationId: deleteOrder
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The order id
+          schema:
+            type: string
+      responses:
+        '204':
+          description: The order was successfully deleted
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "missing or invalid JWT"
+        '404':
+          description: No order exists with the given id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "no order found with id 999"
+
+components:
+  schemas:
+    OrderResponse:
+      type: object
+      required: [order_id, user_id, ticker, asset_type, action_type, order_type, quantity, price, timing, status, submitted_at, currency]
+      properties:
+        order_id:
+          type: number
+          format: int
+          description: The unique identifier of the order
+        user_id:
+          type: number
+          format: int
+          description: The unique identifier of the user who placed the order
+        ticker:
+          type: string
+          description: The ticker symbol of the ordered asset
+        asset_type:
+          type: string
+          description: The type of asset being ordered
+        action_type:
+          type: string
+          description: The action type of the order (e.g., buy or sell)
+        order_type:
+          type: string
+          description: The type of the order (e.g., market or limit)
+        quantity:
+          type: number
+          format: double
+          description: The quantity of the asset being ordered
+        price:
+          type: number
+          format: double
+          description: The price at which the order was placed
+        timing:
+          type: string
+          description: The timing of the order (e.g., day/gtc)
+        status:
+          type: string
+          description: The current status of the order (e.g., pending, completed, cancelled)
+        submitted_at:
+          type: string
+          format: date-time
+          description: The timestamp when the order was submitted
+        currency:
+          type: string
+          description: The currency in which the order was placed
+
+    ErrorResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+
+    OrderCreateRequest:
+      type: object
+      required: [user_id, ticker, asset_type, action_type, order_type, quantity, price, timing, currency]
+      properties:
+        user_id:
+          type: number
+          format: int
+          description: The unique identifier of the user who placed the order
+        ticker:
+          type: string
+          description: The ticker symbol of the ordered asset
+        asset_type:
+          type: string
+          description: The type of asset being ordered
+        action_type:
+          type: string
+          description: The action type of the order (e.g., buy or sell)
+        order_type:
+          type: string
+          description: The type of the order (e.g., market or limit)
+        quantity:
+          type: number
+          format: double
+          description: The quantity of the asset being ordered
+        price:
+          type: number
+          format: double
+          description: The price at which the order was placed
+        timing:
+          type: string
+          description: The timing of the order (e.g., day/gtc)
+        currency:
+          type: string
+          description: The currency in which the order was placed
+    
+    OrderPatchRequest:
+      type: object
+      properties:
+        field: 
+          type: string
+          description: The name of the order field to be updated
+        value:
+          type: string
+          description: The new value for the specified field
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

@@ -1,0 +1,189 @@
+openapi: 3.0.3
+info:
+  title: Instrument Access and Creation
+  description: >
+    Sends and receives instrument data
+  version: 1.0.0
+  license:
+    name: Internal use only
+
+servers:
+  - url: /v1
+
+paths:
+  /instrument/{ticker}:
+    get:
+      summary: Retrieve information about a specified instrument
+      operationId: getInstrument
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: ticker
+          in: path
+          required: true
+          description: The instrument ticker
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The instrument was found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstrumentResponse'
+              example:
+                ticker: "AAPL"
+                type: "Equity"
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No instrument exists with the given ticker
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "no instrument found with ticker AAPL"
+    post:
+      summary: create a new instrument
+      operationId: createInstrument
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: ticker
+          in: path
+          required: true
+          description: The instrument ticker
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstrumentResponse'
+      responses:
+        '201':
+          description: The instrument was successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstrumentResponse'
+              example:
+                ticker: "AAPL"
+                type: "Equity"
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      summary: update an instrument
+      operationId: updateInstrument
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: ticker
+          in: path
+          required: true
+          description: The instrument ticker
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstrumentResponse'
+      responses:
+        '200':
+          description: the instrument was successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstrumentResponse'
+              example:
+                ticker: "AAPL"
+                type: "Equity"
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: no instrument exists with the given ticker
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "no instrument found with ticker AAPL"
+    delete:
+      summary: delete an instrument
+      operationId: deleteInstrument
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: ticker
+          in: path
+          required: true
+          description: The instrument ticker
+          schema:
+            type: string
+      responses:
+        '200':
+          description: the instrument was successfully deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstrumentResponse'
+              example:
+                ticker: "AAPL"
+                type: "Equity"
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: no instrument exists with the given ticker
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "no instrument found with ticker AAPL"
+
+components:
+  schemas:
+    InstrumentResponse:
+      type: object
+      required: [ticker, type]
+      properties:
+        ticker:
+          type: string
+          format: string
+          description: ticker symbol of the instrument
+        type:
+          type: string
+          description: type of instrument
+
+    ErrorResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
