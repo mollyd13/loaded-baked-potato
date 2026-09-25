@@ -158,7 +158,7 @@ export class TradeComponent {
       ticker: this.quote.symbol,
       asset_type: 'EQUITY', // Replace with actual asset type
       action_type: this.orderForm.value.action,
-      order_type: this.orderForm.value.orderType.toUpperCase(),
+      order_type: this.orderTypeLabel.toUpperCase(),
       quantity: this.orderForm.value.quantity,
       price: this.executionPrice,
       timing: this.orderForm.value.timing, // Replace with actual timing if needed

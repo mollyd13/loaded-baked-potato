@@ -86,7 +86,10 @@
           </div>
         </div>
 
-      <label class="field-label" for="limit-price">Limit Price (Optional)</label>
+      <div class="field-label-container">
+        <label class="field-label" for="limit-price">Limit Price (Optional)</label>
+        <span class="order-type-indicator">{{ orderTypeLabel }}</span>
+      </div>
         <div class="field stepper-field">
           <input formControlName="limitPrice" id="limit-price" type="number" min="0" >
           <div class="stepper-buttons">
