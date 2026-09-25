@@ -157,3 +157,25 @@ mat-toolbar {
     outline: none;
     box-shadow: none;
   }
+  .profile-link {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .display-right .sign-out-button {
+    margin-left: 12px;
+    cursor: pointer;
+  }
+
+  .display-right .sign-out-button mat-icon {
+    font-size: 28px;
+    height: 28px;
+    width: 28px;
+    color: white;
+    background: none;
+  }
+
+  .sign-out-link {
+    cursor: pointer;
+  }

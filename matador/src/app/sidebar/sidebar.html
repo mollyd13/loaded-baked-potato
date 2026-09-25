@@ -16,14 +16,19 @@
 
   </div>
   
-  <div class="display-right" routerLink="/profile">
-    <button mat-icon-button>
-      <mat-icon style="color: white; cursor: pointer;">account_circle</mat-icon>
-    </button>
-    <div class="username-container">
-      <h3 class="username">User Name</h3>
-      <h4 class="user-role">Admin</h4>
+  <div class="display-right">
+    <div class="profile-link" routerLink="/profile">
+      <button mat-icon-button>
+        <mat-icon style="color: white; cursor: pointer;">account_circle</mat-icon>
+      </button>
+      <div class="username-container">
+        <h3 class="username">{{ auth.currentUser()?.firstName }} {{ auth.currentUser()?.lastName }}</h3>
+        <h4 class="user-role">{{ auth.currentUser()?.roleType }}</h4>
+      </div>
     </div>
+    <button mat-icon-button class="sign-out-button" (click)="signOut()" title="Sign out" aria-label="Sign out">
+      <mat-icon>logout</mat-icon>
+    </button>
   </div>
 </mat-toolbar>
 <mat-sidenav-container>
@@ -55,6 +60,12 @@
       <a routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="menu-icons" routerLink="/profile">
         <mat-icon>person_outline</mat-icon>
         <span>Profile</span>
+      </a>
+    </mat-list-item>
+    <mat-list-item>
+      <a class="menu-icons sign-out-link" (click)="signOut()">
+        <mat-icon>logout</mat-icon>
+        <span>Sign Out</span>
       </a>
     </mat-list-item>
     <!-- </mat-nav-list> -->

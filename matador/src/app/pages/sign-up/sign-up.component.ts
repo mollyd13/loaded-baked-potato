@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-sign-up',
@@ -13,13 +15,16 @@ import { RouterLink } from '@angular/router';
 export class SignUpComponent {
   form: FormGroup;
   submitted = false;
+  loading = false;
+  errorMessage = '';
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private auth: AuthService, private router: Router) {
     this.form = this.fb.group({
-      name: ['', [Validators.required]],
+      firstName: ['', [Validators.required]],
+      lastName: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required, Validators.pattern(/^[0-9()+\-\s]{7,15}$/)]],
-      password: ['', [Validators.required, Validators.minLength(8)]]
+      password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(72)]]
     });
   }
 
@@ -29,10 +34,20 @@ export class SignUpComponent {
 
   onSubmit(): void {
     this.submitted = true;
+    this.errorMessage = '';
     if (this.form.invalid) {
       return;
     }
-    // TODO: wire up to real registration API
-    console.log('Sign up form submitted', this.form.value);
+    this.loading = true;
+    this.auth.register(this.form.value).subscribe({
+      next: () => {
+        this.loading = false;
+        this.router.navigate(['/sign-in'], { queryParams: { registered: true } });
+      },
+      error: (err: HttpErrorResponse) => {
+        this.loading = false;
+        this.errorMessage = err.error?.message ?? 'Registration failed. Please try again.';
+      }
+    });
   }
 }
