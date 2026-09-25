@@ -22,11 +22,11 @@ public class UserProfile {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
     
-    @Column(name = "pwd_hash", nullable = false, unique = true)
+    @Column(name = "pwd_hash", nullable = false)
     private String passwordHash;
     
     @Column(name = "phone", nullable = false, unique = true)
-    private Integer phone;
+    private String phone;
     
     @Column(name = "role_type", nullable = false)
     private String roleType;
@@ -55,7 +55,7 @@ public class UserProfile {
     }
     
     public UserProfile(String firstName, String lastName, String email, String passwordHash, 
-                      Integer phone, String roleType, LocalDateTime createdAt) {
+                      String phone, String roleType, LocalDateTime createdAt) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -66,7 +66,7 @@ public class UserProfile {
     }
     
     public UserProfile(String firstName, String lastName, String email, String passwordHash, 
-                      Integer phone, String roleType, LocalDateTime createdAt, LocalDateTime deletedAt) {
+                      String phone, String roleType, LocalDateTime createdAt, LocalDateTime deletedAt) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -118,11 +118,11 @@ public class UserProfile {
         this.passwordHash = passwordHash;
     }
     
-    public Integer getPhone() {
+    public String getPhone() {
         return phone;
     }
     
-    public void setPhone(Integer phone) {
+    public void setPhone(String phone) {
         this.phone = phone;
     }
     
