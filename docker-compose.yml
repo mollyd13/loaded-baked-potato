@@ -1,4 +1,23 @@
 services:
+# Spring 
+  app:
+    build: ./app
+    container_name: spring-app
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      spring.datasource.url: jdbc:postgresql://primary:5432/${POSTGRES_DB:primary}
+      server.port: ${SERVER_PORT}
+    depends_on:
+      primary:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  # Postgres
   primary:
     image: postgres:latest
     container_name: primary-db
