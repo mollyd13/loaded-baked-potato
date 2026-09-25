@@ -1,20 +1,14 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-
-export type TradeAction = 'BUY' | 'SELL';
-
-export interface Quote {
-  ticker: string;
-  name: string;
-  price: number;
-  changePct: number;
-  /** Recent closes, oldest first, used to draw the sparkline. */
-  history: number[];
-}
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { PlaceOrderService } from '../../services/place-order.service';
+import { OrderRequest } from '../../models/order-request.model';
+import { Quote } from '../../models/quote.model';
 
 /** Flat per-order commission, in the account's currency. */
 const SYSTEM_FEE = 2.5;
@@ -25,77 +19,71 @@ const VOLATILITY_THRESHOLD_PCT = 2;
 @Component({
   selector: 'app-trade',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatCardModule, MatIconModule, MatButtonModule],
+  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatIconModule, MatButtonModule, MatFormFieldModule, MatSelectModule],
   templateUrl: './trade.component.html',
   styleUrl: './trade.component.css'
 })
 export class TradeComponent {
+
+  // mock quote for now
   quote: Quote = {
-    ticker: 'NVDA',
-    name: 'NVIDIA Corp.',
+    symbol: "NVDA", // ticker
     price: 485.20,
+    bid: 484.50,
+    ask: 485.50,
+    spreadBps: 20, // spread in basis points
+    currency: "USD",
+    change: 11.40,
     changePct: 2.40,
+    previousClose: 473.80, // previous closing price
+    asOf: new Date(), // timestamp of the quote
+    marketState: "OPEN", // current market state (e.g., open, closed)
     history: [468.10, 470.40, 469.20, 474.80, 473.10, 478.60, 481.90, 480.20, 483.70, 485.20]
   };
 
-  action: TradeAction = 'BUY';
-  quantity = 10;
-  /** Empty means a market order priced at the terminal quote. */
-  limitPrice: number | null = null;
-  orderType = 'Market';
-  timing = 'GTC';
+  orderForm: FormGroup;
+  availableBalance = 10000; // Mock available balance
 
-  readonly systemFee = SYSTEM_FEE;
-  availableBalance = 12450.00;
-  positionLimit = 500;
-  stopLoss: number | null = null;
-  takeProfit: number | null = null;
-
-  setAction(action: TradeAction): void {
-    this.action = action;
+  constructor(private placeOrderService: PlaceOrderService, private fb : FormBuilder) {
+    this.orderForm = this.fb.group({
+      action: ["BUY"],
+      quantity: [10],
+      limitPrice: [null],
+      orderType: ['Market'],
+      timing: ['GTC'],
+    });
   }
 
-  increment(): void {
-    if (this.quantity < this.positionLimit) {
-      this.quantity += 1;
-    }
-  }
 
-  decrement(): void {
-    if (this.quantity > 1) {
-      this.quantity -= 1;
-    }
-  }
-
-  /** Clamps whatever the user typed into [1, positionLimit] as a whole number. */
+  /** Clamps whatever the user typed into [1, Infinity] as a whole number. */
   onQuantityChange(value: unknown): void {
     const parsed = Math.floor(Number(value));
     if (!Number.isFinite(parsed) || parsed < 1) {
-      this.quantity = 1;
+      this.orderForm.patchValue({ quantity: 1 });
       return;
     }
-    this.quantity = Math.min(parsed, this.positionLimit);
+    this.orderForm.patchValue({ quantity: parsed });
   }
 
   /** The limit price when one is set, otherwise the live quote. */
   get executionPrice(): number {
-    return this.limitPrice && this.limitPrice > 0 ? this.limitPrice : this.quote.price;
+    return this.orderForm.value.limitPrice && this.orderForm.value.limitPrice > 0 ? this.orderForm.value.limitPrice : this.quote.price;
   }
 
   get orderTypeLabel(): string {
-    return this.limitPrice && this.limitPrice > 0 ? 'Limit' : 'Market';
+    return this.orderForm.value.limitPrice && this.orderForm.value.limitPrice > 0 ? 'Limit' : 'Market';
   }
 
   get subtotal(): number {
-    return this.quantity * this.executionPrice;
+    return this.orderForm.value.quantity * this.executionPrice;
   }
 
   get estimatedTotal(): number {
-    return this.subtotal + this.systemFee;
+    return this.subtotal + SYSTEM_FEE;
   }
 
   get transactionMode(): string {
-    return `INSTANT ${this.action} (${this.quote.ticker})`;
+    return `INSTANT ${this.orderForm.value.action} (${this.quote.symbol})`;
   }
 
   get isPositive(): boolean {
@@ -108,11 +96,15 @@ export class TradeComponent {
 
   /** A buy cannot settle for more cash than the account holds; a sell always can. */
   get exceedsBalance(): boolean {
-    return this.action === 'BUY' && this.estimatedTotal > this.availableBalance;
+    return this.orderForm.value.action === 'BUY' && this.estimatedTotal > this.availableBalance;
   }
 
   get canTransmit(): boolean {
-    return this.quantity > 0 && this.quantity <= this.positionLimit && !this.exceedsBalance;
+    return this.orderForm.value.quantity > 0 && !this.exceedsBalance;
+  }
+
+  get fee(): number {
+    return SYSTEM_FEE;
   }
 
   /** Quote history mapped onto a 120x40 viewBox as an SVG polyline. */
@@ -133,17 +125,52 @@ export class TradeComponent {
       .join(' ');
   }
 
+  decrementQuantity(): void {
+    const currentQuantity = this.orderForm.value.quantity;
+    if (currentQuantity > 1) {
+      this.orderForm.patchValue({ quantity: currentQuantity - 1 });
+    }
+  }
+
+  incrementQuantity(): void {
+    const currentQuantity = this.orderForm.value.quantity;
+    this.orderForm.patchValue({ quantity: currentQuantity + 1 });
+  }
+
+  decrementLimit(): void {
+    const currentLimit = this.orderForm.value.limitPrice;
+    if (currentLimit > 0) {
+      this.orderForm.patchValue({ limitPrice: Number((currentLimit - .01).toFixed(2)) });
+    }
+  }
+
+  incrementLimit(): void {
+    const currentLimit = this.orderForm.value.limitPrice;
+    this.orderForm.patchValue({ limitPrice: Number((currentLimit + .01).toFixed(2)) });
+  }
+
   transmitOrder(): void {
     if (!this.canTransmit) {
       return;
     }
-    // Placeholder for future order submission integration
+    const orderRequest: OrderRequest = {
+      user_id: 1, // Replace with actual user ID
+      ticker: this.quote.symbol,
+      asset_type: 'EQUITY', // Replace with actual asset type
+      action_type: this.orderForm.value.action,
+      order_type: this.orderForm.value.orderType.toUpperCase(),
+      quantity: this.orderForm.value.quantity,
+      price: this.executionPrice,
+      timing: this.orderForm.value.timing, // Replace with actual timing if needed
+      currency: 'USD' // Replace with actual currency if needed
+    };
+    this.placeOrderService.placeOrder(orderRequest);
   }
 
   abortOperation(): void {
-    this.quantity = 10;
-    this.limitPrice = null;
-    this.action = 'BUY';
+    this.orderForm.patchValue({ quantity: 10 });
+    this.orderForm.patchValue({ limitPrice: null });
+    this.orderForm.patchValue({ action: 'BUY' });
   }
 
   saveTemplate(): void {

@@ -18,8 +18,8 @@
       <mat-card class="quote-card">
         <div class="quote-header">
           <div class="quote-identity">
-            <span class="ticker-chip">{{ quote.ticker }}</span>
-            <span class="quote-name">{{ quote.name }}</span>
+            <span class="ticker-chip">{{ quote.symbol }}</span>
+            <span class="quote-name">NVIDIA Corp.</span>
           </div>
           <div class="quote-meta">
             <span class="change-chip" [class.positive]="isPositive" [class.negative]="!isPositive">
@@ -32,7 +32,7 @@
         </div>
 
         <div class="quote-body">
-          <span class="quote-price">{{ quote.price | currency: 'USD' }}</span>
+          <span class="quote-price">{{ quote.price | currency: quote.currency }}</span>
           <span class="quote-change" [class.positive]="isPositive" [class.negative]="!isPositive">
             {{ isPositive ? '+' : '' }}{{ quote.changePct | number: '1.2-2' }}%
           </span>
@@ -43,31 +43,35 @@
         </svg>
       </mat-card>
 
-      <mat-card class="form-card">
-        <div class="card-header">
-          <h3>Order Form</h3>
-          <div class="card-header-meta">
-            <span class="pill">{{ orderTypeLabel }}</span>
-            <span class="pill">{{ timing }}</span>
+      <form [formGroup]="orderForm" (ngSubmit)="transmitOrder()">
+        <mat-card class="form-card">
+          <div class="card-header">
+            <h3>Order Form</h3>
+            <div class="card-header-meta">
+              <mat-label>Select an option</mat-label>
+              <mat-select formControlName="timing">
+                <mat-option value="DAY">DAY</mat-option>
+                <mat-option value="GTC">GTC</mat-option>
+              </mat-select>
+            </div>
           </div>
-        </div>
 
         <div class="action-toggle" role="group" aria-label="Order action">
           <button
             type="button"
             class="action-option"
-            [class.selected]="action === 'BUY'"
-            [attr.aria-pressed]="action === 'BUY'"
-            (click)="setAction('BUY')"
+            [class.selected]="orderForm.value.action === 'BUY'"
+            [attr.aria-pressed]="orderForm.value.action === 'BUY'"
+            (click)="orderForm.patchValue({ action: 'BUY' })"
           >
             BUY
           </button>
           <button
             type="button"
             class="action-option"
-            [class.selected]="action === 'SELL'"
-            [attr.aria-pressed]="action === 'SELL'"
-            (click)="setAction('SELL')"
+            [class.selected]="orderForm.value.action === 'SELL'"
+            [attr.aria-pressed]="orderForm.value.action === 'SELL'"
+            (click)="orderForm.patchValue({ action: 'SELL' })"
           >
             SELL
           </button>
@@ -75,32 +79,22 @@
 
         <label class="field-label" for="share-quantity">Share Quantity</label>
         <div class="field stepper-field">
-          <input
-            id="share-quantity"
-            type="number"
-            min="1"
-            [max]="positionLimit"
-            [ngModel]="quantity"
-            (ngModelChange)="onQuantityChange($event)"
-          />
+          <input formControlName="quantity" id="share-quantity" type="number" min="1" >
           <div class="stepper-buttons">
-            <button type="button" aria-label="Decrease quantity" (click)="decrement()">&minus;</button>
-            <button type="button" aria-label="Increase quantity" (click)="increment()">+</button>
+            <button type="button" aria-label="Decrease quantity" (click)="decrementQuantity()">&minus;</button>
+            <button type="button" aria-label="Increase quantity" (click)="incrementQuantity()">+</button>
           </div>
         </div>
 
-        <label class="field-label" for="limit-price">Limit Price (Optional)</label>
-        <div class="field price-field">
-          <input
-            id="limit-price"
-            type="number"
-            min="0"
-            step="0.01"
-            [placeholder]="quote.price | number: '1.2-2'"
-            [(ngModel)]="limitPrice"
-          />
-          <span class="field-suffix">{{ orderTypeLabel }}</span>
+      <label class="field-label" for="limit-price">Limit Price (Optional)</label>
+        <div class="field stepper-field">
+          <input formControlName="limitPrice" id="limit-price" type="number" min="0" >
+          <div class="stepper-buttons">
+            <button type="button" aria-label="Decrease limit" (click)="decrementLimit()">&minus;</button>
+            <button type="button" aria-label="Increase limit" (click)="incrementLimit()">+</button>
+          </div>
         </div>
+
 
         <div class="cost-summary">
           <div class="cost-row total">
@@ -109,7 +103,7 @@
           </div>
           <div class="cost-row">
             <span>System Fee</span>
-            <span>{{ systemFee | currency: 'USD' }}</span>
+            <span>{{ fee | currency: 'USD' }}</span>
           </div>
           <div class="cost-row">
             <span>Available Balance</span>
@@ -127,24 +121,25 @@
             mat-flat-button
             class="transmit-button"
             [disabled]="!canTransmit"
-            (click)="transmitOrder()"
+            type="submit"
           >
-            Transmit {{ action === 'BUY' ? 'Buy' : 'Sell' }} Order
+            Transmit {{ orderForm.value.action === 'BUY' ? 'Buy' : 'Sell' }} Order
           </button>
-          <button mat-stroked-button class="abort-button" (click)="abortOperation()">
+          <button mat-stroked-button class="abort-button" type="button" (click)="abortOperation()">
             Abort Operation
           </button>
         </div>
-      </mat-card>
+        </mat-card>
+
+      </form>
 
     </div>
 
     <div class="trade-column">
-
       <mat-card class="detail-card">
         <div class="card-header">
           <h3>Order Detail Log</h3>
-          <span class="pill">INSTANT {{ action }}</span>
+          <span class="pill">INSTANT {{ orderForm.value.action }}</span>
         </div>
 
         <div class="detail-row">
@@ -153,7 +148,7 @@
         </div>
         <div class="detail-row">
           <span>Share Quantity</span>
-          <span>{{ quantity }} Shares</span>
+          <span>{{ orderForm.value.quantity }} Shares</span>
         </div>
         <div class="detail-row">
           <span>Terminal Price / Share</span>
@@ -161,7 +156,7 @@
         </div>
         <div class="detail-row">
           <span>System Fee</span>
-          <span>{{ systemFee | currency: 'USD' }}</span>
+          <span>{{ fee | currency: 'USD' }}</span>
         </div>
 
         <div class="detail-total">
