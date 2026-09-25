@@ -8,11 +8,21 @@
     <p class="auth-subtitle">Join us — it only takes a minute</p>
 
     <form class="auth-form" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <div class="error form-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
       <div class="field">
-        <label for="name">Name</label>
-        <input id="name" type="text" formControlName="name" autocomplete="name" placeholder="Jane Doe" />
-        <div class="error" *ngIf="submitted && f['name'].errors">
-          Name is required.
+        <label for="firstName">First Name</label>
+        <input id="firstName" type="text" formControlName="firstName" autocomplete="given-name" placeholder="Jane" />
+        <div class="error" *ngIf="submitted && f['firstName'].errors">
+          First name is required.
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="lastName">Last Name</label>
+        <input id="lastName" type="text" formControlName="lastName" autocomplete="family-name" placeholder="Doe" />
+        <div class="error" *ngIf="submitted && f['lastName'].errors">
+          Last name is required.
         </div>
       </div>
 
@@ -36,11 +46,11 @@
         <label for="password">Password</label>
         <input id="password" type="password" formControlName="password" autocomplete="new-password" placeholder="••••••••" />
         <div class="error" *ngIf="submitted && f['password'].errors">
-          Password must be at least 8 characters.
+          Password must be 8 to 72 characters.
         </div>
       </div>
 
-      <button type="submit">Sign Up</button>
+      <button type="submit" [disabled]="loading">{{ loading ? 'Creating account…' : 'Sign Up' }}</button>
 
       <p class="switch-link">
         Already have an account? <a routerLink="/sign-in">Sign In</a>

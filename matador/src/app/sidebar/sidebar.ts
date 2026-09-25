@@ -9,6 +9,7 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { CommonModule } from '@angular/common';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { filter } from 'rxjs';
+import { AuthService } from '../services/auth.service';
 
 @UntilDestroy()
 @Component({
@@ -25,7 +26,13 @@ export class Sidebar {
   sidenav!: MatSidenav;
   title = 'ng-sidebar-material';
   sidenavMode: 'side' | 'over' = 'side';
-  constructor(private observer: BreakpointObserver, private router: Router, private cdr: ChangeDetectorRef) {}
+  constructor(private observer: BreakpointObserver, private router: Router, private cdr: ChangeDetectorRef,
+    public auth: AuthService) {}
+
+  signOut() {
+    this.auth.logout().subscribe(() => this.router.navigate(['/sign-in']));
+  }
+
   ngAfterViewInit() {
     this.observer.observe(["(max-width: 800px)"]).subscribe((res) => {
       if (res.matches) {
