@@ -6,11 +6,10 @@ services:
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      spring.datasource.url: jdbc:postgresql://primary:5432/${POSTGRES_DB:primary}
-      server.port: ${SERVER_PORT}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://primary:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SERVER_PORT: ${SERVER_PORT}
     depends_on:
       primary:
         condition: service_healthy
