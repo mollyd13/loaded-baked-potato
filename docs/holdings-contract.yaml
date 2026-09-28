@@ -1,0 +1,223 @@
+openapi: 3.0.3
+info:
+  title: Holdings Access and Creation
+  description: >
+    Sends and receives holdings data
+  version: 1.0.0
+  license:
+    name: Internal use only
+
+servers:
+  - url: /v1
+
+paths:
+  /holdings/{holding_id}:
+    get:
+      summary: Retrieve information about a specified holding
+      operationId: getHolding
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: holding_id
+          in: path
+          required: true
+          description: The holding id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The holding was found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HoldingResponse'
+              example:
+                holding_id: 42
+                user_id: 123
+                ticker: "AAPL"
+                asset_type: "stock"
+                quantity: 10
+                currency: "USD"
+                avg_price: 150.0
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No holding exists with the given id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "no holding found with id 999"
+    post:
+      summary: create a new holding
+      operationId: createHolding
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: holding_id
+          in: path
+          required: true
+          description: The holding id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HoldingResponse'
+      responses:
+        '201':
+          description: The holding was successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HoldingResponse'
+              example:
+                holding_id: 42
+                user_id: 123
+                ticker: "AAPL"
+                asset_type: "stock"
+                quantity: 10
+                currency: "USD"
+                avg_price: 150.0
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      summary: update a holding
+      operationId: updateHolding
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: holding_id
+          in: path
+          required: true
+          description: The holding id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HoldingResponse'
+      responses:
+        '200':
+          description: the holding was successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HoldingResponse'
+              example:
+                holding_id: 42
+                user_id: 123
+                ticker: "AAPL"
+                asset_type: "stock"
+                quantity: 10
+                currency: "USD"
+                avg_price: 150.0
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: no holding exists with the given id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "no holding found with id 999"
+    delete:
+      summary: delete a holding
+      operationId: deleteHolding
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: holding_id
+          in: path
+          required: true
+          description: The holding id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: the holding was successfully deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HoldingResponse'
+              example:
+                holding_id: 42
+                user_id: 123
+                ticker: "AAPL"
+                asset_type: "stock"
+                quantity: 10
+                currency: "USD"
+                avg_price: 150.0
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: no holding exists with the given id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "no holding found with id 999"
+
+components:
+  schemas:
+    HoldingResponse:
+      type: object
+      required: [id, user_id, ticker, asset_type, quantity, currency, avg_price]
+      properties:
+        id:
+          type: number
+          format: int
+        user_id:
+          type: number
+          description: user who owns the holding
+        ticker:
+          type: string
+          description: ticker symbol of holding
+        asset_type:
+          type: string
+          description: asset type of holding
+        quantity:
+          type: number
+          description: quantity of the holding
+        currency:
+          type: string
+          description: currency of the holding
+        avg_price:
+          type: number
+          description: average price of the holding
+
+    ErrorResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

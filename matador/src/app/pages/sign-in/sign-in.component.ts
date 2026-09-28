@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-sign-in',
@@ -13,12 +15,22 @@ import { RouterLink } from '@angular/router';
 export class SignInComponent {
   form: FormGroup;
   submitted = false;
+  loading = false;
+  errorMessage = '';
+  infoMessage = '';
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private auth: AuthService, private router: Router, route: ActivatedRoute) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]]
     });
+
+    const params = route.snapshot.queryParamMap;
+    if (params?.get('registered')) {
+      this.infoMessage = 'Account created. Please sign in.';
+    } else if (params?.get('expired')) {
+      this.infoMessage = 'Your session has expired. Please sign in again.';
+    }
   }
 
   get f() {
@@ -27,10 +39,22 @@ export class SignInComponent {
 
   onSubmit(): void {
     this.submitted = true;
+    this.errorMessage = '';
     if (this.form.invalid) {
       return;
     }
-    // TODO: wire up to real authentication API
-    console.log('Sign in form submitted', this.form.value);
+    this.loading = true;
+    this.auth.login(this.form.value).subscribe({
+      next: () => {
+        this.loading = false;
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.loading = false;
+        this.errorMessage = err.status === 401
+          ? 'Invalid email or password.'
+          : 'Sign in failed. Please try again.';
+      }
+    });
   }
 }

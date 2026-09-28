@@ -17,11 +17,11 @@ export class AppComponent {
   isAuthRoute: boolean;
 
   constructor(private router: Router) {
-    this.isAuthRoute = AUTH_ROUTES.includes(this.router.url);
+    this.isAuthRoute = AUTH_ROUTES.includes(this.router.url.split('?')[0]);
     this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event) => {
-        this.isAuthRoute = AUTH_ROUTES.includes(event.urlAfterRedirects);
+        this.isAuthRoute = AUTH_ROUTES.includes(event.urlAfterRedirects.split('?')[0]);
       });
   }
 }

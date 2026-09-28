@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Sidebar } from './sidebar';
 
 describe('Sidebar', () => {
@@ -10,6 +12,8 @@ describe('Sidebar', () => {
     await TestBed.configureTestingModule({
       imports: [Sidebar],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         {
           provide: ActivatedRoute,
           useValue: { snapshot: { paramMap: { get: () => null } } }
