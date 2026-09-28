@@ -1,20 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { ApiService } from '../../api.service';
+import { StockQuote } from '../../api.service';
 
 export type TradeAction = 'BUY' | 'SELL';
-
-export interface Quote {
-  ticker: string;
-  name: string;
-  price: number;
-  changePct: number;
-  /** Recent closes, oldest first, used to draw the sparkline. */
-  history: number[];
-}
 
 /** Flat per-order commission, in the account's currency. */
 const SYSTEM_FEE = 2.5;
@@ -29,14 +22,46 @@ const VOLATILITY_THRESHOLD_PCT = 2;
   templateUrl: './trade.component.html',
   styleUrl: './trade.component.css'
 })
-export class TradeComponent {
-  quote: Quote = {
-    ticker: 'NVDA',
-    name: 'NVIDIA Corp.',
-    price: 485.20,
-    changePct: 2.40,
-    history: [468.10, 470.40, 469.20, 474.80, 473.10, 478.60, 481.90, 480.20, 483.70, 485.20]
-  };
+export class TradeComponent implements OnInit {
+  private apiService = inject(ApiService);
+  tickerInput: string = 'AAPL';  // User input for ticker
+  errorMessage: string | null = null;
+
+  data: StockQuote | null = null;
+
+  ngOnInit(): void {
+    // Load initial ticker on component init
+    this.loadStockQuote();
+  }
+
+  loadStockQuote(): void {
+    if (!this.tickerInput.trim()) {
+      this.errorMessage = 'Please enter a valid ticker symbol.';
+      return;
+    }
+
+    this.errorMessage = null;
+    this.apiService.getStockQuote(this.tickerInput.toUpperCase()).subscribe({
+      next: (response) => {
+        if (response.status === 200 && response.body) {
+          this.data = response.body;
+        }
+        else {
+          this.errorMessage = `Unexpected server response: ${response.status}`;
+        }
+      },
+      error: (err) => {
+        if (err.status === 400) {
+          this.errorMessage = 'Market endpoint not found.';
+        } else if (err.status === 401 || err.status === 403){
+          this.errorMessage = 'Authentication failed.';
+        } else {
+          this.errorMessage = `Unexpected network error: ${err.status}`;
+        } 
+        console.error(err);
+      }
+    });
+  }
 
   action: TradeAction = 'BUY';
   quantity = 10;
@@ -79,7 +104,7 @@ export class TradeComponent {
 
   /** The limit price when one is set, otherwise the live quote. */
   get executionPrice(): number {
-    return this.limitPrice && this.limitPrice > 0 ? this.limitPrice : this.quote.price;
+    return this.limitPrice && this.limitPrice > 0 ? this.limitPrice : (this.data?.data.price ?? 0);
   }
 
   get orderTypeLabel(): string {
@@ -95,15 +120,15 @@ export class TradeComponent {
   }
 
   get transactionMode(): string {
-    return `INSTANT ${this.action} (${this.quote.ticker})`;
+    return `INSTANT ${this.action} (${this.data?.data.symbol ?? 'N/A'})`;
   }
 
   get isPositive(): boolean {
-    return this.quote.changePct >= 0;
+    return (this.data?.data.changePercent ?? 0) >= 0;
   }
 
   get isVolatile(): boolean {
-    return Math.abs(this.quote.changePct) >= VOLATILITY_THRESHOLD_PCT;
+    return Math.abs(this.data?.data.changePercent ?? 0) >= VOLATILITY_THRESHOLD_PCT;
   }
 
   /** A buy cannot settle for more cash than the account holds; a sell always can. */
@@ -113,24 +138,6 @@ export class TradeComponent {
 
   get canTransmit(): boolean {
     return this.quantity > 0 && this.quantity <= this.positionLimit && !this.exceedsBalance;
-  }
-
-  /** Quote history mapped onto a 120x40 viewBox as an SVG polyline. */
-  get sparklinePoints(): string {
-    const points = this.quote.history;
-    if (points.length < 2) {
-      return '';
-    }
-    const min = Math.min(...points);
-    const max = Math.max(...points);
-    const span = max - min || 1;
-    return points
-      .map((value, index) => {
-        const x = (index / (points.length - 1)) * 120;
-        const y = 40 - ((value - min) / span) * 40;
-        return `${x.toFixed(2)},${y.toFixed(2)}`;
-      })
-      .join(' ');
   }
 
   transmitOrder(): void {
