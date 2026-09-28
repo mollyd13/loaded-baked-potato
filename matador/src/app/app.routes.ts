@@ -6,6 +6,7 @@ import { SignUpComponent } from './pages/sign-up/sign-up.component';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { TradeComponent } from './pages/trade/trade.component';
 import { authGuard } from './guards/auth.guard';
+import { AnalyticsComponent } from './pages/analytics/analytics.component';
 
 export const routes: Routes = [
     {
@@ -40,5 +41,9 @@ export const routes: Routes = [
         path: 'trade',
         component: TradeComponent,
         canActivate: [authGuard],
+      },
+      {
+        path: 'analytics',
+        component: AnalyticsComponent,
       }
 ];

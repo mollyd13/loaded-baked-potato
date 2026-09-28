@@ -1,0 +1,310 @@
+openapi: 3.0.3
+info:
+  title: Trades Access and Creation
+  description: >
+    Sends and receives trade data
+  version: 1.0.0
+  license:
+    name: Internal use only
+
+servers:
+  - url: /v1
+
+paths:
+  /trades:
+    post: 
+      summary: Create a new trade
+      operationId: createTrade
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TradeCreateRequest'
+            example:
+              order_id: 42
+              user_id: 7
+              ticker: "AAPL"
+              asset_type: "stock"
+              action_type: "buy"
+              quantity: 10
+              price: 150.0
+              currency: "USD"
+      responses:
+        '201':
+          description: The trade was successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeResponse'
+              example:
+                trade_id: 42
+                order_id: 42
+                user_id: 7
+                ticker: "AAPL"
+                asset_type: "stock"
+                action_type: "buy"
+                quantity: 10
+                price: 150.0
+                currency: "USD"
+                executed_at: "2024-06-01T12:00:00Z"
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "missing or invalid JWT"
+    get:
+      summary: Retrieve a list of all trades
+      operationId: listTrades
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: A list of trades
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TradeResponse'
+              example:
+                - trade_id: 42
+                  order_id: 42
+                  user_id: 7
+                  ticker: "AAPL"
+                  asset_type: "stock"
+                  action_type: "buy"
+                  quantity: 10
+                  price: 150.0
+                  currency: "USD"
+                  executed_at: "2024-06-01T12:00:00Z"
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "missing or invalid JWT"
+  /trades/{id}:
+    get:
+      summary: Retrieve information about a specified trade
+      operationId: getTrade
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The trade id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The trade was found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeResponse'
+              example:
+                trade_id: 42
+                order_id: 42
+                user_id: 7
+                ticker: "AAPL"
+                asset_type: "stock"
+                action_type: "buy"
+                quantity: 10
+                price: 150.0
+                currency: "USD"
+                executed_at: "2024-06-01T12:00:00Z"
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "missing or invalid JWT"
+        '404':
+          description: No trade exists with the given id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "no trade found with id 999"
+    patch:
+      summary: Update information for a specified trade
+      operationId: updateTrade
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The trade id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TradePatchRequest'
+            example:
+              field: "field"
+              value: "new_value"
+      responses:
+        '204':
+          description: The trade was successfully updated
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "missing or invalid JWT"
+        '404':
+          description: No trade exists with the given id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "no trade found with id 999"
+    delete: 
+      summary: Delete a specified trade
+      operationId: deleteTrade
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The trade id
+          schema:
+            type: string
+      responses:
+        '204':
+          description: The trade was successfully deleted
+        '401':
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "missing or invalid JWT"
+        '404':
+          description: No trade exists with the given id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "no trade found with id 999"
+
+components:
+  schemas:
+    TradeResponse:
+      type: object
+      required: [trade_id, order_id, user_id, ticker, asset_type, action_type, quantity, price, currency, executed_at]
+      properties:
+        trade_id:
+          type: number
+          format: int
+          description: The unique identifier of the trade
+        order_id:
+          type: number
+          format: int
+          description: The unique identifier of the order
+        user_id:
+          type: number
+          format: int
+          description: The unique identifier of the user who executed the trade
+        ticker:
+          type: string
+          description: The ticker symbol of the traded asset
+        asset_type:
+          type: string
+          description: The type of asset being traded
+        action_type:
+          type: string
+          description: The action type of the trade (e.g., buy or sell)
+        quantity:
+          type: number
+          format: double
+          description: The quantity of the asset being traded
+        price:
+          type: number
+          format: double
+          description: The price at which the trade was executed
+        currency:
+          type: string
+          description: The currency in which the trade was executed
+        executed_at:
+          type: string
+          format: date-time
+          description: The timestamp when the trade was executed
+
+    ErrorResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+
+    TradeCreateRequest:
+      type: object
+      required: [order_id, user_id, ticker, asset_type, action_type, quantity, price, currency]
+      properties:
+        order_id:
+          type: number
+          format: int
+          description: The unique identifier of the order
+        user_id:
+          type: number
+          format: int
+          description: The unique identifier of the user who executed the trade
+        ticker:
+          type: string
+          description: The ticker symbol of the traded asset
+        asset_type:
+          type: string
+          description: The type of asset being traded
+        action_type:
+          type: string
+          description: The action type of the trade (e.g., buy or sell)
+        quantity:
+          type: number
+          format: double
+          description: The quantity of the asset being traded
+        price:
+          type: number
+          format: double
+          description: The price at which the trade was executed
+        currency:
+          type: string
+          description: The currency in which the trade was executed
+    
+    TradePatchRequest:
+      type: object
+      properties:
+        field: 
+          type: string
+          description: The name of the field to be updated
+        value:
+          type: string
+          description: The new value for the specified field
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

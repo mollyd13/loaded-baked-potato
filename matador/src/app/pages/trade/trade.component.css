@@ -142,6 +142,16 @@
   color: var(--error-color);
 }
 
+.timing-select {
+  padding: 6px 12px;
+  border-radius: 5px;
+}
+
+.timing-select ::ng-deep .mat-mdc-select-trigger {
+  gap: 8px;
+  font-size: 13px;
+}
+
 .quote-body {
   align-items: baseline;
   margin-top: 12px;
@@ -220,13 +230,16 @@
   color: var(--light-text-color);
 }
 
-.field-label {
-  display: block;
-  margin-bottom: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+.order-type-indicator {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
+  color: var(--text-color);
+  opacity: 0.5;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: #0000000a;
 }
 
 .field {
