@@ -8,6 +8,9 @@
     <p class="auth-subtitle">Sign in to continue to your account</p>
 
     <form class="auth-form" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <div class="notice" *ngIf="infoMessage && !errorMessage">{{ infoMessage }}</div>
+      <div class="error form-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
       <div class="field">
         <label for="email">Email</label>
         <input id="email" type="email" formControlName="email" autocomplete="email" placeholder="you@example.com" />
@@ -24,7 +27,7 @@
         </div>
       </div>
 
-      <button type="submit">Sign In</button>
+      <button type="submit" [disabled]="loading">{{ loading ? 'Signing in…' : 'Sign In' }}</button>
 
       <p class="switch-link">
         Don't have an account? <a routerLink="/sign-up">Sign Up</a>
