@@ -1,4 +1,4 @@
-package com.matador.app.DTO;
+package com.matador.app.dto;
 import java.math.BigDecimal;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
