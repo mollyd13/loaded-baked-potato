@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.matador.app.DTO.OrderRequestDto;
+import com.matador.app.dto.OrderRequestDto;
 import com.matador.app.entity.Order;
 import com.matador.app.service.SubmitOrder;
 

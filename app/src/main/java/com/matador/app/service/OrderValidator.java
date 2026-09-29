@@ -1,7 +1,8 @@
 package com.matador.app.service;
 
-import com.matador.app.DTO.OrderRequestDto;
 import com.matador.app.domain.ValidationResult;
+import com.matador.app.dto.OrderRequestDto;
+
 import org.springframework.stereotype.Service;
 
 @Service
