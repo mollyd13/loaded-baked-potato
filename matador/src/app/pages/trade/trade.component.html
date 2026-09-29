@@ -56,6 +56,32 @@
         </div>
       </mat-card>
 
+      <div class="ticker-search">
+        <label class="field-label" for="ticker-input">Stock Ticker</label>
+        <div class="field ticker-field">
+          <input
+            id="ticker-input"
+            name="tickerInput"
+            type="text"
+            placeholder="Enter ticker (e.g., AAPL, NVDA)"
+            [(ngModel)]="tickerInput"
+            (keyup.enter)="loadStockQuote()"
+          />
+          <button 
+            type="button"
+            mat-raised-button 
+            color="primary"
+            (click)="loadStockQuote()"
+          >
+            Search
+          </button>
+        </div>
+        <div *ngIf="errorMessage" class="error-banner">
+          <mat-icon>error_outline</mat-icon>
+          {{ errorMessage }}
+        </div>
+      </div>
+
       <form [formGroup]="orderForm" (ngSubmit)="transmitOrder()">
         <mat-card class="form-card">
           <div class="card-header">

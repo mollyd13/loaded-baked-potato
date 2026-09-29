@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -22,7 +22,7 @@ const VOLATILITY_THRESHOLD_PCT = 2;
 @Component({
   selector: 'app-trade',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatIconModule, MatButtonModule, MatFormFieldModule, MatSelectModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatCardModule, MatIconModule, MatButtonModule, MatFormFieldModule, MatSelectModule],
   templateUrl: './trade.component.html',
   styleUrl: './trade.component.css'
 })
@@ -39,22 +39,32 @@ export class TradeComponent implements OnInit {
   }
 
   loadStockQuote(): void {
+    console.log('loadStockQuote called with ticker:', this.tickerInput);
+    
     if (!this.tickerInput.trim()) {
       this.errorMessage = 'Please enter a valid ticker symbol.';
+      console.warn('Empty ticker input');
       return;
     }
 
     this.errorMessage = null;
-    this.apiService.getStockQuote(this.tickerInput.toUpperCase()).subscribe({
+    const ticker = this.tickerInput;
+    console.log('Fetching stock quote for:', ticker);
+    
+    this.apiService.getStockQuote(ticker).subscribe({
       next: (response) => {
+        console.log('API Response:', response);
         if (response.status === 200 && response.body) {
           this.data = response.body;
+          console.log('Data loaded:', this.data);
         }
         else {
           this.errorMessage = `Unexpected server response: ${response.status}`;
+          console.error('Bad response status:', response.status);
         }
       },
       error: (err) => {
+        console.error('API Error:', err);
         if (err.status === 400) {
           this.errorMessage = 'Market endpoint not found.';
         } else if (err.status === 401 || err.status === 403){
