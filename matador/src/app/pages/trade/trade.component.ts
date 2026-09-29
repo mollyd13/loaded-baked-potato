@@ -28,7 +28,6 @@ const VOLATILITY_THRESHOLD_PCT = 2;
 })
 export class TradeComponent implements OnInit {
   private apiService = inject(ApiService);
-  tickerInput: string = 'AAPL';  // User input for ticker
   errorMessage: string | null = null;
 
   data: StockQuote | null = null;
@@ -39,19 +38,20 @@ export class TradeComponent implements OnInit {
   }
 
   loadStockQuote(): void {
-    console.log('loadStockQuote called with ticker:', this.tickerInput);
+    const ticker = this.orderForm.get('ticker')?.value;
+    console.log('loadStockQuote called with ticker:', ticker);
     
-    if (!this.tickerInput.trim()) {
+    if (!ticker || !ticker.trim()) {
       this.errorMessage = 'Please enter a valid ticker symbol.';
       console.warn('Empty ticker input');
       return;
     }
 
     this.errorMessage = null;
-    const ticker = this.tickerInput;
-    console.log('Fetching stock quote for:', ticker);
+    const upperTicker = ticker.toUpperCase();
+    console.log('Fetching stock quote for:', upperTicker);
     
-    this.apiService.getStockQuote(ticker).subscribe({
+    this.apiService.getStockQuote(upperTicker).subscribe({
       next: (response) => {
         console.log('API Response:', response);
         if (response.status === 200 && response.body) {
@@ -82,6 +82,7 @@ export class TradeComponent implements OnInit {
 
   constructor(private placeOrderService: PlaceOrderService, private fb : FormBuilder) {
     this.orderForm = this.fb.group({
+      ticker: ['AAPL'],
       action: ["BUY"],
       quantity: [10],
       limitPrice: [null],

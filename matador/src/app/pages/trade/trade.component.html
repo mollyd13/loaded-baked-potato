@@ -42,45 +42,19 @@
 
         <div class="bid-ask-info">
           <div class="bid-ask-row">
-            <span class="label">Bid:</span>
+            <span class="label">Bid: </span>
             <span class="value">{{ data?.data?.bid | currency: data?.data?.currency ?? 'USD' }}</span>
           </div>
           <div class="bid-ask-row">
-            <span class="label">Ask:</span>
+            <span class="label">Ask: </span>
             <span class="value">{{ data?.data?.ask | currency: data?.data?.currency ?? 'USD' }}</span>
           </div>
           <div class="bid-ask-row">
-            <span class="label">Last Updated:</span>
+            <span class="label">Last Updated: </span>
             <span class="value">{{ data?.data?.asOf }}</span>
           </div>
         </div>
       </mat-card>
-
-      <div class="ticker-search">
-        <label class="field-label" for="ticker-input">Stock Ticker</label>
-        <div class="field ticker-field">
-          <input
-            id="ticker-input"
-            name="tickerInput"
-            type="text"
-            placeholder="Enter ticker (e.g., AAPL, NVDA)"
-            [(ngModel)]="tickerInput"
-            (keyup.enter)="loadStockQuote()"
-          />
-          <button 
-            type="button"
-            mat-raised-button 
-            color="primary"
-            (click)="loadStockQuote()"
-          >
-            Search
-          </button>
-        </div>
-        <div *ngIf="errorMessage" class="error-banner">
-          <mat-icon>error_outline</mat-icon>
-          {{ errorMessage }}
-        </div>
-      </div>
 
       <form [formGroup]="orderForm" (ngSubmit)="transmitOrder()">
         <mat-card class="form-card">
@@ -99,9 +73,9 @@
           <div class="field ticker-field">
             <input
               id="ticker-input"
+              formControlName="ticker"
               type="text"
               placeholder="Enter ticker (e.g., AAPL, NVDA)"
-              [(ngModel)]="tickerInput"
               (keyup.enter)="loadStockQuote()"
             />
             <button 
