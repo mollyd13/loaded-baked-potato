@@ -2,7 +2,7 @@ package com.matador.app.service;
 import org.springframework.stereotype.Service;
 import java.util.NoSuchElementException;
 
-import com.matador.app.DTO.OrderRequestDto;
+import com.matador.app.dto.OrderRequest;
 import com.matador.app.domain.ValidationResult;
 import com.matador.app.entity.Order;
 import com.matador.app.entity.UserProfile;
@@ -23,7 +23,7 @@ public class SubmitOrder {
         this.userProfileRepository = userProfileRepository;
     }
 
-    public Order submit(OrderRequestDto request) {
+    public Order submit(OrderRequest request) {
 
         // validate
         ValidationResult result = orderValidator.validate(request);
