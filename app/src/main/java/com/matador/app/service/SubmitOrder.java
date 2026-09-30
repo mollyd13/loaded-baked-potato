@@ -1,5 +1,7 @@
 package com.matador.app.service;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
 import java.util.NoSuchElementException;
 
 import com.matador.app.dto.OrderRequest;
@@ -25,17 +27,23 @@ public class SubmitOrder {
 
     public Order submit(OrderRequest request) {
 
-        // validate
-        ValidationResult result = orderValidator.validate(request);
+        // Moved auth check to submission
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new SecurityException("User is not authenticated");
+        }
+        
+        String authenticatedEmail = authentication.getName();
+        UserProfile authenticatedUser = userProfileRepository.findByEmail(authenticatedEmail)
+            .orElseThrow(() -> new NoSuchElementException("Authenticated user not found: " + authenticatedEmail));
+
+
+        ValidationResult result = orderValidator.validate(request, authenticatedUser);
         if (!result.isValid()) {
            throw new OrderRejectedException("Order validation failed: " + result.getReason());
         }
 
-        // mock user profile for now
-        UserProfile user = userProfileRepository.findById(request.userId()).orElseThrow(() -> new NoSuchElementException("User not found: " + request.userId()));
-
-        // create order from dto
-        Order order = new Order(user,
+        Order order = new Order(authenticatedUser,
             request.ticker(),
             request.assetType(),
             request.actionType(),
@@ -48,7 +56,6 @@ public class SubmitOrder {
             request.currency()
         );
 
-        //save order to repository
         return orderRepository.save(order);
     }
 }

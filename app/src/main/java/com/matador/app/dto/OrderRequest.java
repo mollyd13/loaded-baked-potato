@@ -10,9 +10,6 @@ import com.matador.app.validation.ValidAssetType;
 import com.matador.app.validation.ValidCurrencyCode;
 
 public record OrderRequest(
-        @NotNull(message = "userId is required")
-        Integer userId,
-
         @NotBlank(message = "ticker is required")
         String ticker,
 
