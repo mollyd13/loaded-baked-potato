@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -80,7 +81,7 @@ export class TradeComponent implements OnInit {
   orderForm: FormGroup;
   availableBalance = 10000; // Mock available balance
 
-  constructor(private placeOrderService: PlaceOrderService, private fb : FormBuilder) {
+  constructor(private placeOrderService: PlaceOrderService, private fb : FormBuilder, private router: Router) {
     this.orderForm = this.fb.group({
       ticker: ['AAPL'],
       action: ["BUY"],
@@ -185,6 +186,13 @@ export class TradeComponent implements OnInit {
       currency: 'USD' // Replace with actual currency if needed
     };
     this.placeOrderService.placeOrder(orderRequest);
+    this.router.navigate(['/order-confirmation'],
+      {
+        queryParams: {
+          orderRequest: JSON.stringify(orderRequest)
+        }
+      }
+    );
   }
 
   abortOperation(): void {
