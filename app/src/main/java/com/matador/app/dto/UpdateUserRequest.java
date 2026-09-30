@@ -3,8 +3,14 @@ import jakarta.validation.constraints.NotBlank;
 
 public record UpdateUserRequest(
     @NotBlank
-    String field,
-    @NotBlank 
-    String newValue
+    String fname,
+    @NotBlank
+    String lname,
+    @NotBlank
+    String email,
+    @NotBlank
+    String password,
+    @NotBlank
+    String phone
 ) {
 }
