@@ -23,11 +23,11 @@ public class UpdateUserService {
     public void updateUser(UpdateUserRequest request, int id) {
 
         UserProfile user = userRepository.findById(id).orElseThrow(() -> new NoSuchElementException("User not found"));
-        user.setFirstName(request.fname());
-        user.setLastName(request.lname());
-        user.setEmail(request.email());
+        user.setFirstName(request.fname().trim());
+        user.setLastName(request.lname().trim());
+        user.setEmail(request.email().trim());
         user.setPasswordHash(passwordEncoder.encode(request.password()));
-        user.setPhone(request.phone());
+        user.setPhone(request.phone().trim());
         userRepository.save(user);
     }
 }

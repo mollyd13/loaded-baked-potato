@@ -19,14 +19,8 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<String> updateUser(@PathVariable Integer id, @Valid @RequestBody UpdateUserRequest request) {
-        try {
-            updateUserService.updateUser(request, id);
-            return ResponseEntity.status(204).body("User updated successfully");
-        } catch (Exception e) {
-            return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Failed with error: " + e.getMessage());
-        }
+        updateUserService.updateUser(request, id);
+        return ResponseEntity.status(204).body("User updated successfully");
     }
     
 }
