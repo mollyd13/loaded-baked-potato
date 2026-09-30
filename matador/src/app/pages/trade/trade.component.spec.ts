@@ -25,7 +25,6 @@ describe('TradeComponent', () => {
     expect(component.action).toBe('BUY');
     expect(component.quantity).toBe(10);
     expect(component.limitPrice).toBeNull();
-    expect(component.quote.ticker).toBe('NVDA');
   });
 
   describe('cost calculation', () => {

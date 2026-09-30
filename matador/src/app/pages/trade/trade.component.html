@@ -1,5 +1,7 @@
 <div class="trade">
 
+  
+
   <div class="trade-header">
     <div class="trade-heading">
       <h2>Place Order</h2>
@@ -18,12 +20,12 @@
       <mat-card class="quote-card">
         <div class="quote-header">
           <div class="quote-identity">
-            <span class="ticker-chip">{{ quote.symbol }}</span>
-            <span class="quote-name">NVIDIA Corp.</span>
+            <span class="ticker-chip">{{ data?.data?.symbol ?? 'N/A' }}</span>
+            <span class="quote-name">{{ data?.data?.symbol ?? 'Loading...' }}</span>
           </div>
           <div class="quote-meta">
             <span class="change-chip" [class.positive]="isPositive" [class.negative]="!isPositive">
-              {{ isPositive ? '+' : '' }}{{ quote.changePct | number: '1.2-2' }}%
+              {{ isPositive ? '+' : '' }}{{ data?.data?.changePercent | number: '1.2-2' }}%
             </span>
             <button mat-icon-button aria-label="Save quote as template" (click)="saveTemplate()">
               <mat-icon>more_horiz</mat-icon>
@@ -32,15 +34,26 @@
         </div>
 
         <div class="quote-body">
-          <span class="quote-price">{{ quote.price | currency: quote.currency }}</span>
+          <span class="quote-price">{{ data?.data?.price | currency: data?.data?.currency ?? 'USD' }}</span>
           <span class="quote-change" [class.positive]="isPositive" [class.negative]="!isPositive">
-            {{ isPositive ? '+' : '' }}{{ quote.changePct | number: '1.2-2' }}%
+            {{ isPositive ? '+' : '' }}{{ data?.data?.change | number: '1.2-2' }} ({{ data?.data?.changePercent | number: '1.2-2' }}%)
           </span>
         </div>
 
-        <svg class="sparkline" viewBox="0 0 120 40" preserveAspectRatio="none" aria-hidden="true">
-          <polyline [attr.points]="sparklinePoints"></polyline>
-        </svg>
+        <div class="bid-ask-info">
+          <div class="bid-ask-row">
+            <span class="label">Bid: </span>
+            <span class="value">{{ data?.data?.bid | currency: data?.data?.currency ?? 'USD' }}</span>
+          </div>
+          <div class="bid-ask-row">
+            <span class="label">Ask: </span>
+            <span class="value">{{ data?.data?.ask | currency: data?.data?.currency ?? 'USD' }}</span>
+          </div>
+          <div class="bid-ask-row">
+            <span class="label">Last Updated: </span>
+            <span class="value">{{ data?.data?.asOf }}</span>
+          </div>
+        </div>
       </mat-card>
 
       <form [formGroup]="orderForm" (ngSubmit)="transmitOrder()">
@@ -54,6 +67,32 @@
               </mat-select>
             </div>
           </div>
+
+        <div class="ticker-search">
+          <label class="field-label" for="ticker-input">Stock Ticker</label>
+          <div class="field ticker-field">
+            <input
+              id="ticker-input"
+              formControlName="ticker"
+              type="text"
+              placeholder="Enter ticker (e.g., AAPL, NVDA)"
+              (keyup.enter)="loadStockQuote()"
+            />
+            <button 
+              type="button"
+              mat-raised-button 
+              color="primary"
+              (click)="loadStockQuote()"
+            >
+              Search
+            </button>
+            
+          </div>
+          <div *ngIf="errorMessage" class="error-banner">
+            <mat-icon>error_outline</mat-icon>
+            {{ errorMessage }}
+          </div>
+        </div>
 
         <div class="action-toggle" role="group" aria-label="Order action">
           <button
