@@ -7,6 +7,7 @@ import { ProfileComponent } from './pages/profile/profile.component';
 import { TradeComponent } from './pages/trade/trade.component';
 import { authGuard } from './guards/auth.guard';
 import { AnalyticsComponent } from './pages/analytics/analytics.component';
+import { TradeLookupComponent } from './pages/trade-lookup/trade-lookup.component';
 
 export const routes: Routes = [
     {
@@ -45,5 +46,9 @@ export const routes: Routes = [
       {
         path: 'analytics',
         component: AnalyticsComponent,
+      },
+      {
+        path: 'trade-lookup',
+        component: TradeLookupComponent,
       }
 ];
