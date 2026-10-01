@@ -21,7 +21,7 @@ export class UpdateUserService {
   constructor(private http: HttpClient, private auth: AuthService) { }
 
   updateUser(payload: UserPayload) {
-    return this.withCsrf(() => this.http.put<UserPayload>(`/users/${this.auth.currentUser()?.userId}`, payload));
+    return this.withCsrf(() => this.http.put<string>(`/users/${this.auth.currentUser()?.userId}`, payload));
   }
 
     /** Ensures the XSRF-TOKEN cookie is set before a state-changing request. */
