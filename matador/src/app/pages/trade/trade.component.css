@@ -289,6 +289,23 @@
   opacity: 0.6;
 }
 
+.ticker-search {
+  margin-bottom: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #00000024;
+}
+
+.ticker-field {
+  gap: 8px;
+}
+
+.ticker-field button {
+  padding: 10px 18px;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .cost-summary {
   display: flex;
   flex-direction: column;
