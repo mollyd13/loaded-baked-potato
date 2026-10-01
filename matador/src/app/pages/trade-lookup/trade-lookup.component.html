@@ -1,0 +1,187 @@
+<div class="lookup">
+
+  <div class="lookup-header">
+    <div>
+      <h2>Trade Lookup</h2>
+      <span class="subtitle">Trace any order from submission to outcome. Records are read-only.</span>
+    </div>
+
+    <div class="filter-controls">
+      <mat-form-field class="search-field">
+        <mat-label>Search</mat-label>
+        <input matInput [(ngModel)]="searchText" (ngModelChange)="applyFilters()" placeholder="Order ID, client ID, name or symbol" />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field class="filter-field">
+        <mat-label>Period</mat-label>
+        <mat-select [(ngModel)]="filterPeriod" (selectionChange)="applyFilters()">
+          <mat-option value="1">Last 24 hours</mat-option>
+          <mat-option value="7">Last 7 days</mat-option>
+          <mat-option value="30">Last 30 days</mat-option>
+          <mat-option value="ALL">All time</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button class="reset-button" type="button" (click)="resetFilters()">
+        <mat-icon>restart_alt</mat-icon>
+        Reset
+      </button>
+    </div>
+  </div>
+
+  <div class="status-chips">
+    <button
+      type="button"
+      class="status-chip"
+      *ngFor="let s of statusCounts"
+      [ngClass]="'status-' + s.status.toLowerCase()"
+      [class.active]="filterStatus === s.status"
+      (click)="toggleStatus(s.status)"
+    >
+      <span class="chip-count">{{ s.count }}</span>
+      {{ s.label }}
+    </button>
+  </div>
+
+  <div class="lookup-grid">
+    <mat-card class="panel-card">
+      <div class="panel-header">
+        <h3>Orders</h3>
+        <span class="panel-note">{{ results.length }} found</span>
+      </div>
+
+      <div class="table-scroll">
+        <table mat-table [dataSource]="results" class="orders-table">
+
+          <ng-container matColumnDef="submittedAt">
+            <th mat-header-cell *matHeaderCellDef>Submitted</th>
+            <td mat-cell *matCellDef="let t">{{ t.submittedAt | date:'MMM d, HH:mm' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="orderId">
+            <th mat-header-cell *matHeaderCellDef>Order ID</th>
+            <td mat-cell *matCellDef="let t" class="mono">{{ t.orderId }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="client">
+            <th mat-header-cell *matHeaderCellDef>Client</th>
+            <td mat-cell *matCellDef="let t">
+              <span class="primary-text">{{ t.clientName }}</span>
+              <span class="secondary-text">{{ t.clientId }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="instrument">
+            <th mat-header-cell *matHeaderCellDef>Instrument</th>
+            <td mat-cell *matCellDef="let t">
+              <span class="primary-text">{{ t.symbol }}</span>
+              <span class="secondary-text">{{ t.assetClass }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="side">
+            <th mat-header-cell *matHeaderCellDef>Side</th>
+            <td mat-cell *matCellDef="let t" [class.buy]="t.side === 'BUY'" [class.sell]="t.side === 'SELL'">{{ t.side }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="quantity">
+            <th mat-header-cell *matHeaderCellDef>Qty</th>
+            <td mat-cell *matCellDef="let t">{{ t.quantity }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let t">
+              <span class="status-badge" [ngClass]="'status-' + t.status.toLowerCase()">{{ statusLabel(t.status) }}</span>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr
+            mat-row
+            *matRowDef="let row; columns: displayedColumns;"
+            class="order-row"
+            [class.selected]="row === selected"
+            tabindex="0"
+            (click)="select(row)"
+            (keydown.enter)="select(row)"
+          ></tr>
+        </table>
+      </div>
+      <p class="empty-state" *ngIf="results.length === 0">No orders match this search.</p>
+    </mat-card>
+
+    <mat-card class="panel-card detail-card">
+      <ng-container *ngIf="selected as t; else noSelection">
+        <div class="detail-header">
+          <div>
+            <span class="mono detail-id">{{ t.orderId }}</span>
+            <h3>{{ t.side }} {{ t.quantity }} {{ t.symbol }}</h3>
+            <span class="secondary-text">{{ t.instrument }} · {{ t.clientName }} ({{ t.clientId }})</span>
+          </div>
+          <span class="status-badge large" [ngClass]="'status-' + t.status.toLowerCase()">{{ statusLabel(t.status) }}</span>
+        </div>
+
+        <div class="fact-grid">
+          <div class="fact"><span class="fact-label">Order type</span><span>{{ t.orderType }}{{ t.limitPrice !== null ? ' @ ' + money(t.limitPrice, t.currency) : '' }}</span></div>
+          <div class="fact"><span class="fact-label">Quote used</span><span>{{ money(t.quotePrice, t.currency) }}</span></div>
+          <div class="fact"><span class="fact-label">Fill price</span><span>{{ money(t.fillPrice, t.currency) }}</span></div>
+          <div class="fact"><span class="fact-label">Fee</span><span>{{ money(t.fee, t.currency) }}</span></div>
+          <div class="fact"><span class="fact-label">Settled amount</span><span class="strong">{{ money(t.settledAmount, t.currency) }}</span></div>
+          <div class="fact" *ngIf="t.rejectionReason"><span class="fact-label">Rejection reason</span><span class="sell">{{ t.rejectionReason }}</span></div>
+        </div>
+
+        <h4 class="section-title">Lifecycle</h4>
+        <ol class="timeline">
+          <li class="timeline-item" *ngFor="let e of t.events" [ngClass]="'event-' + e.type.toLowerCase()">
+            <span class="timeline-icon"><mat-icon>{{ eventIcon(e.type) }}</mat-icon></span>
+            <div class="timeline-body">
+              <div class="timeline-title">
+                <span>{{ eventLabel(e.type) }}</span>
+                <span class="timeline-time" [title]="e.at.toISOString()">{{ e.at | date:'MMM d, y, HH:mm:ss.SSS' }} · {{ elapsed(t, e.at) }}</span>
+              </div>
+              <p class="timeline-summary">{{ e.summary }}</p>
+              <ul class="rule-checks" *ngIf="e.checks">
+                <li *ngFor="let c of e.checks" [class.failed]="!c.passed">
+                  <mat-icon>{{ c.passed ? 'check' : 'close' }}</mat-icon>
+                  <span class="rule-name">{{ c.rule }}</span>
+                  <span class="secondary-text">{{ c.detail }}</span>
+                </li>
+              </ul>
+            </div>
+          </li>
+        </ol>
+
+        <ng-container *ngIf="t.balanceChanges.length > 0">
+          <h4 class="section-title">Effect on account</h4>
+          <div class="balance-row" *ngFor="let b of t.balanceChanges">
+            <span class="fact-label">{{ b.label }}</span>
+            <span>{{ b.before }}</span>
+            <mat-icon>arrow_forward</mat-icon>
+            <span class="strong">{{ b.after }}</span>
+          </div>
+        </ng-container>
+
+        <div class="detail-footer">
+          <span class="secondary-text">
+            <mat-icon>lock</mat-icon>
+            Permanent record. It cannot be edited.
+          </span>
+          <button class="reset-button" type="button" (click)="downloadRecord()">
+            <mat-icon>download</mat-icon>
+            Download record
+          </button>
+        </div>
+      </ng-container>
+
+      <ng-template #noSelection>
+        <div class="no-selection">
+          <mat-icon>manage_search</mat-icon>
+          <p>Select an order to see its full lifecycle.</p>
+        </div>
+      </ng-template>
+    </mat-card>
+  </div>
+
+</div>
