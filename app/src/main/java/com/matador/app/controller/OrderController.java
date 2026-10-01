@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.matador.app.DTO.OrderRequestDto;
+import com.matador.app.dto.OrderRequest;
 import com.matador.app.entity.Order;
 import com.matador.app.service.SubmitOrder;
 
@@ -19,9 +19,9 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<String> submitOrder(@Valid @RequestBody OrderRequestDto dto) {
+    public ResponseEntity<String> submitOrder(@Valid @RequestBody OrderRequest request) {
         try {
-            Order savedOrder = submitOrderService.submit(dto);
+            Order savedOrder = submitOrderService.submit(request);
             return ResponseEntity.ok("Order " + savedOrder.getOrderId() + " submitted successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Order submission failed: " + e.getMessage());

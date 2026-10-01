@@ -1,4 +1,4 @@
-package com.matador.app.DTO;
+package com.matador.app.dto;
 import java.math.BigDecimal;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -9,10 +9,7 @@ import com.matador.app.validation.ValidTiming;
 import com.matador.app.validation.ValidAssetType;
 import com.matador.app.validation.ValidCurrencyCode;
 
-public record OrderRequestDto(
-        @NotNull(message = "userId is required")
-        Integer userId,
-
+public record OrderRequest(
         @NotBlank(message = "ticker is required")
         String ticker,
 

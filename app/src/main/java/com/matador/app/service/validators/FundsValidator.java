@@ -1,6 +1,6 @@
 package com.matador.app.service.validators;
 
-import com.matador.app.DTO.OrderRequestDto;
+import com.matador.app.dto.OrderRequest;
 import com.matador.app.domain.ValidationResult;
 import com.matador.app.entity.Cash;
 import com.matador.app.entity.UserProfile;
@@ -48,7 +48,7 @@ public class FundsValidator {
      * @param request the order request
      * @return ValidationResult indicating if validation passed
      */
-    public ValidationResult validate(UserProfile user, OrderRequestDto request) {
+    public ValidationResult validate(UserProfile user, OrderRequest request) {
         Optional<Cash> cashAccount = cashRepository.findByUserProfileAndCurrency(user, request.currency());
 
         if (cashAccount.isEmpty()) {
