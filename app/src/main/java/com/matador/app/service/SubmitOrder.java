@@ -27,7 +27,7 @@ public class SubmitOrder {
 
     public Order submit(OrderRequest request) {
 
-        // Moved auth check to submission
+        // Auth validation now occurs here
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new SecurityException("User is not authenticated");
