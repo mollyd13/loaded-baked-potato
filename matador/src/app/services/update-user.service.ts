@@ -10,7 +10,6 @@ export interface UserPayload {
   lname: string;
   email: string;
   phone: string;
-  password: string;
 }
 
 @Injectable({

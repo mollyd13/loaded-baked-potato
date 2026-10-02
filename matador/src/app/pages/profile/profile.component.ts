@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { FormBuilder, FormControl, FormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -10,14 +11,17 @@ import { FormGroup } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { UpdateUserService } from '../../services/update-user.service';
 import { HttpErrorResponse } from '@angular/common/http';
+import { MatCardModule } from '@angular/material/card';
+import { ChangePasswordDialogComponent } from '../../components/change-password-dialog/change-password-dialog.component';
 
 @Component({
   selector: 'app-profile',
-  imports: [MatIconModule, MatButtonModule, MatFormFieldModule, MatInputModule, FormsModule, CommonModule, ReactiveFormsModule],
+  imports: [MatIconModule, MatButtonModule, MatFormFieldModule, MatInputModule, FormsModule, CommonModule, ReactiveFormsModule, MatCardModule, MatDialogModule],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
 export class ProfileComponent {
+  readonly dialog = inject(MatDialog);
   form: FormGroup;
   submitted = false;
 
@@ -26,8 +30,7 @@ export class ProfileComponent {
         fname: ['', [Validators.required]],
         lname: ['', [Validators.required]],
         email: ['', [Validators.required, Validators.email]],
-        phone: ['', [Validators.required, Validators.pattern(/^(\+\d{1,3}\s?)?(\(?\d{2,4}\)?[\s.-]?)?\d{3}[\s.-]?\d{4}$/)]],
-        password: ['', [Validators.required, Validators.minLength(8)]]
+        phone: ['', [Validators.required, Validators.pattern(/^(\+\d{1,3}\s?)?(\(?\d{2,4}\)?[\s.-]?)?\d{3}[\s.-]?\d{4}$/)]]
       });
       this.initializeForm();
   }
@@ -38,13 +41,23 @@ export class ProfileComponent {
       lname: this.auth.currentUser()?.lastName,
       phone: this.auth.currentUser()?.phone,
       email: this.auth.currentUser()?.email,
-      password: '********'
     });
     this.form.disable();
   }
 
   toggleEditModeOn() {
     this.form.enable();
+  }
+
+  openDialog(): void {
+    const dialogRef = this.dialog.open(ChangePasswordDialogComponent);
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed');
+      if (result !== undefined) {
+       console.log(result);
+      }
+    });
   }
 
   onSubmit(): void {
@@ -57,7 +70,6 @@ export class ProfileComponent {
       fname: this.form.value.fname,
       lname: this.form.value.lname,
       email: this.form.value.email,
-      password: this.form.value.password,
       phone: this.form.value.phone
     }).subscribe({
       next: () => {
@@ -85,3 +97,4 @@ export class ProfileComponent {
     return hasError && isFieldInteracted;
   }
 }
+
