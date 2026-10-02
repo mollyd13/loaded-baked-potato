@@ -1,14 +1,17 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { ApiService } from '../../api.service';
+import { StockQuote } from '../../api.service';
+
+export type TradeAction = 'BUY' | 'SELL';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { PlaceOrderService } from '../../services/place-order.service';
 import { OrderRequest } from '../../models/order-request.model';
-import { Quote } from '../../models/quote.model';
 
 /** Flat per-order commission, in the account's currency. */
 const SYSTEM_FEE = 2.5;
@@ -19,33 +22,67 @@ const VOLATILITY_THRESHOLD_PCT = 2;
 @Component({
   selector: 'app-trade',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatIconModule, MatButtonModule, MatFormFieldModule, MatSelectModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatCardModule, MatIconModule, MatButtonModule, MatFormFieldModule, MatSelectModule],
   templateUrl: './trade.component.html',
   styleUrl: './trade.component.css'
 })
-export class TradeComponent {
+export class TradeComponent implements OnInit {
+  private apiService = inject(ApiService);
+  errorMessage: string | null = null;
 
-  // mock quote for now
-  quote: Quote = {
-    symbol: "NVDA", // ticker
-    price: 485.20,
-    bid: 484.50,
-    ask: 485.50,
-    spreadBps: 20, // spread in basis points
-    currency: "USD",
-    change: 11.40,
-    changePct: 2.40,
-    previousClose: 473.80, // previous closing price
-    asOf: new Date(), // timestamp of the quote
-    marketState: "OPEN", // current market state (e.g., open, closed)
-    history: [468.10, 470.40, 469.20, 474.80, 473.10, 478.60, 481.90, 480.20, 483.70, 485.20]
-  };
+  data: StockQuote | null = null;
+
+  ngOnInit(): void {
+    // Load initial ticker on component init
+    this.loadStockQuote();
+  }
+
+  loadStockQuote(): void {
+    const ticker = this.orderForm.get('ticker')?.value;
+    console.log('loadStockQuote called with ticker:', ticker);
+    
+    if (!ticker || !ticker.trim()) {
+      this.errorMessage = 'Please enter a valid ticker symbol.';
+      console.warn('Empty ticker input');
+      return;
+    }
+
+    this.errorMessage = null;
+    const upperTicker = ticker.toUpperCase();
+    console.log('Fetching stock quote for:', upperTicker);
+    
+    this.apiService.getStockQuote(upperTicker).subscribe({
+      next: (response) => {
+        console.log('API Response:', response);
+        if (response.status === 200 && response.body) {
+          this.data = response.body;
+          console.log('Data loaded:', this.data);
+        }
+        else {
+          this.errorMessage = `Unexpected server response: ${response.status}`;
+          console.error('Bad response status:', response.status);
+        }
+      },
+      error: (err) => {
+        console.error('API Error:', err);
+        if (err.status === 400) {
+          this.errorMessage = 'Market endpoint not found.';
+        } else if (err.status === 401 || err.status === 403){
+          this.errorMessage = 'Authentication failed.';
+        } else {
+          this.errorMessage = `Unexpected network error: ${err.status}`;
+        } 
+        console.error(err);
+      }
+    });
+  }
 
   orderForm: FormGroup;
   availableBalance = 10000; // Mock available balance
 
   constructor(private placeOrderService: PlaceOrderService, private fb : FormBuilder) {
     this.orderForm = this.fb.group({
+      ticker: ['AAPL'],
       action: ["BUY"],
       quantity: [10],
       limitPrice: [null],
@@ -67,7 +104,7 @@ export class TradeComponent {
 
   /** The limit price when one is set, otherwise the live quote. */
   get executionPrice(): number {
-    return this.orderForm.value.limitPrice && this.orderForm.value.limitPrice > 0 ? this.orderForm.value.limitPrice : this.quote.price;
+    return this.orderForm.value.limitPrice && this.orderForm.value.limitPrice > 0 ? this.orderForm.value.limitPrice : (this.data?.data.price ?? 0);
   }
 
   get orderTypeLabel(): string {
@@ -83,15 +120,15 @@ export class TradeComponent {
   }
 
   get transactionMode(): string {
-    return `INSTANT ${this.orderForm.value.action} (${this.quote.symbol})`;
+    return `INSTANT ${this.orderForm.value.action} (${this.data?.data.symbol ?? 'N/A'})`;
   }
 
   get isPositive(): boolean {
-    return this.quote.changePct >= 0;
+    return (this.data?.data.changePercent ?? 0) >= 0;
   }
 
   get isVolatile(): boolean {
-    return Math.abs(this.quote.changePct) >= VOLATILITY_THRESHOLD_PCT;
+    return Math.abs(this.data?.data.changePercent ?? 0) >= VOLATILITY_THRESHOLD_PCT;
   }
 
   /** A buy cannot settle for more cash than the account holds; a sell always can. */
@@ -107,23 +144,6 @@ export class TradeComponent {
     return SYSTEM_FEE;
   }
 
-  /** Quote history mapped onto a 120x40 viewBox as an SVG polyline. */
-  get sparklinePoints(): string {
-    const points = this.quote.history;
-    if (points.length < 2) {
-      return '';
-    }
-    const min = Math.min(...points);
-    const max = Math.max(...points);
-    const span = max - min || 1;
-    return points
-      .map((value, index) => {
-        const x = (index / (points.length - 1)) * 120;
-        const y = 40 - ((value - min) / span) * 40;
-        return `${x.toFixed(2)},${y.toFixed(2)}`;
-      })
-      .join(' ');
-  }
 
   decrementQuantity(): void {
     const currentQuantity = this.orderForm.value.quantity;
@@ -155,7 +175,7 @@ export class TradeComponent {
     }
     const orderRequest: OrderRequest = {
       user_id: 1, // Replace with actual user ID
-      ticker: this.quote.symbol,
+      ticker: this.data?.data.symbol ?? 'N/A',
       asset_type: 'EQUITY', // Replace with actual asset type
       action_type: this.orderForm.value.action,
       order_type: this.orderTypeLabel.toUpperCase(),
