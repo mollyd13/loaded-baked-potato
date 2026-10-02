@@ -60,6 +60,19 @@ public class OrderExecutionService {
     }
 
     /**
+     * Called once per message. If the same message arrives twice, the second call
+     * finds the order is no longer PENDING and does nothing.
+     */
+    @Transactional
+    public Trade executeOrder(Integer orderId) {
+        Optional<Order> order = orderRepository.findByIdForUpdate(orderId);
+        if (order.isEmpty() || !"PENDING".equals(order.get().getOrderStatus())) {
+            return null; // already FILLED or REJECTED: duplicate, ignore it
+        }
+        return executeTrade(order.get());
+    }
+
+    /**
      * Executes a single trade from a pending order.
      * Calculates actual fees, creates trade record, and updates user balances.
      * 
