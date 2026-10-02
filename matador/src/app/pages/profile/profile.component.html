@@ -50,14 +50,15 @@
                 <mat-error *ngIf="getFieldError('email', 'required')">Email is required</mat-error>
                 <mat-error *ngIf="getFieldError('email', 'email')">Please enter a valid email</mat-error>
             </mat-form-field>
-            <mat-form-field appearance="outline">
-                <mat-label>Password</mat-label>
-                <input formControlName="password" matInput type="password" placeholder="Enter new password">
-                <mat-icon matSuffix class="edit-icon">password</mat-icon>
-                <mat-hint>Minimum 8 characters</mat-hint>
-                <mat-error *ngIf="getFieldError('password', 'required')">Password is required</mat-error>
-                <mat-error *ngIf="getFieldError('password', 'minlength')">Password must be at least 8 characters</mat-error>
-            </mat-form-field>
+            <mat-card>
+                <mat-card-content class="password-section">
+                    <p>Password</p>
+                    <button mat-flat-button type="button" class="change-password-btn" (click)="openDialog()">
+                        Change
+                        <mat-icon>arrow_forward</mat-icon>
+                    </button>
+                </mat-card-content>
+            </mat-card>
         </div>
     </form>
 </div>
