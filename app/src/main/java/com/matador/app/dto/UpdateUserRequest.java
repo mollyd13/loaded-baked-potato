@@ -9,8 +9,6 @@ public record UpdateUserRequest(
     String lname,
     @NotBlank
     String email,
-    @NotBlank
-    String password,
     @NotBlank @Pattern(regexp = "^[0-9()+\\-\\s]{7,15}$")
     String phone
 ) {

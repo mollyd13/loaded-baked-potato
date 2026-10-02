@@ -1,5 +1,5 @@
 package com.matador.app.service;
-
+import com.matador.app.dto.ChangePasswordRequest;
 import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
@@ -20,14 +20,26 @@ public class UpdateUserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public void updateUser(UpdateUserRequest request, int id) {
+    public void updateUserInfo(UpdateUserRequest request, int id) {
 
         UserProfile user = userRepository.findById(id).orElseThrow(() -> new NoSuchElementException("User not found"));
         user.setFirstName(request.fname().trim());
         user.setLastName(request.lname().trim());
         user.setEmail(request.email().trim());
-        user.setPasswordHash(passwordEncoder.encode(request.password()));
         user.setPhone(request.phone().trim());
         userRepository.save(user);
+    }
+
+    public void changePassword(int id, ChangePasswordRequest request) {
+        UserProfile user = userRepository.findById(id).orElseThrow(() -> new NoSuchElementException("User not found"));
+        if (!checkCurrentPassword(user, request)) {
+            throw new IllegalArgumentException("Inputted password does not match the current password");
+        }
+        user.setPasswordHash(passwordEncoder.encode(request.newPassword())); 
+        userRepository.save(user);
+    }
+
+    public boolean checkCurrentPassword(UserProfile user, ChangePasswordRequest request) {
+        return passwordEncoder.matches(request.currentPassword(), user.getPasswordHash());
     }
 }

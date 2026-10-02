@@ -1,6 +1,6 @@
 package com.matador.app.service.validators;
 
-import com.matador.app.DTO.OrderRequestDto;
+import com.matador.app.dto.OrderRequestDto;
 import com.matador.app.domain.ValidationResult;
 import org.springframework.stereotype.Component;
 

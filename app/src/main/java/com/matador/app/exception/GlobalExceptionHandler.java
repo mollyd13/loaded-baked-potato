@@ -51,6 +51,16 @@ public class GlobalExceptionHandler {
                 .build());
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
+        return ResponseEntity
+            .status(HttpStatus.UNAUTHORIZED)
+            .body(ErrorResponse.builder(ex, HttpStatus.UNAUTHORIZED, ex.getMessage())
+                .property("timestamp", LocalDateTime.now())
+                .property("path", request.getRequestURI())
+                .build());
+    }
+
     @ExceptionHandler(Exception.class)
     ResponseEntity<ErrorResponse> handleUnexpected(Exception ex, HttpServletRequest request) {
         return ResponseEntity
