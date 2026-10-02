@@ -10,7 +10,10 @@ import com.matador.app.repository.OrderRepository;
 import com.matador.app.repository.TradeRepository;
 import com.matador.app.repository.UserProfileRepository;
 import com.matador.app.service.HoldingService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -38,6 +41,8 @@ import java.util.Optional;
 @Service
 public class OrderExecutionService {
 
+    private static final Logger log = LoggerFactory.getLogger(OrderExecutionService.class);
+
     private final OrderRepository orderRepository;
     private final TradeRepository tradeRepository;
     private final CashRepository cashRepository;
@@ -57,6 +62,30 @@ public class OrderExecutionService {
         this.userProfileRepository = userProfileRepository;
         this.feeCalculator = feeCalculator;
         this.holdingService = holdingService;
+    }
+
+    /**
+     * Entry point for the OrderAcceptedEvent consumer. Idempotent: delivering the
+     * same order id twice executes it once.
+     * - The order row is locked, so a concurrent duplicate waits for the first to finish.
+     * - Anything no longer PENDING (FILLED/REJECTED) is skipped and nothing changes.
+     *
+     * REQUIRES_NEW because the consumer runs after the submitting transaction has committed.
+     *
+     * @return the Trade if this call executed the order, null if it was skipped or rejected
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public Trade executeOrder(Integer orderId) {
+        Optional<Order> order = orderRepository.findByIdForUpdate(orderId);
+        if (order.isEmpty()) {
+            log.warn("Order {} not found, ignoring event", orderId);
+            return null;
+        }
+        if (!"PENDING".equals(order.get().getOrderStatus())) {
+            log.info("Order {} already {}, ignoring duplicate event", orderId, order.get().getOrderStatus());
+            return null;
+        }
+        return executeTrade(order.get());
     }
 
     /**
@@ -119,125 +148,3 @@ public class OrderExecutionService {
             markOrderAsRejected(order, "Insufficient funds at execution time");
             return null;
         }
-
-        // 2. Create Trade entity
-        Trade trade = new Trade(
-            order,
-            user,
-            order.getTicker(),
-            order.getAssetType(),
-            order.getActionType(),
-            order.getQuantity(),
-            order.getPrice(),
-            order.getCurrency(),
-            actualFee,
-            LocalDateTime.now()
-        );
-
-        // 3. Update cash balance (debit order cost and fee)
-        cashAccount.setBalance(cashAccount.getBalance().subtract(totalCost));
-        cashRepository.save(cashAccount);
-
-        // 4. Update or create holding
-        // - If user already owns the ticker, update quantity and average price
-        // - If new holding, create it
-        Optional<Holding> existingHolding = holdingService.getHoldingByTicker(user, order.getTicker());
-        if (existingHolding.isPresent()) {
-            holdingService.updateHoldingOnBuy(existingHolding.get(), order.getQuantity(), order.getPrice());
-        } else {
-            holdingService.createHolding(user, order.getTicker(), order.getAssetType(), 
-                                        order.getQuantity(), order.getCurrency(), order.getPrice());
-        }
-        
-        // 5. Save trade
-        tradeRepository.save(trade);
-
-        // 6. Update order status to FILLED
-        order.setOrderStatus("FILLED");
-        orderRepository.save(order);
-
-        return trade;
-    }
-
-    /**
-     * Executes a SELL order.
-     * - Debits holding by quantity sold
-     * - Credits cash account by (proceeds - fee)
-     * - Creates Trade record with actual fee
-     */
-    private Trade executeSellTrade(Order order, UserProfile user, BigDecimal actualFee) {
-        // TODO: Full implementation
-        // 1. Verify user owns sufficient shares (should have been validated)
-        Optional<Holding> holding = holdingService.getHoldingByTicker(user, order.getTicker());
-        if (holding.isEmpty() || holding.get().getQuantity() < order.getQuantity()) {
-            markOrderAsRejected(order, "Insufficient holdings at execution time");
-            return null;
-        }
-
-        // 2. Create Trade entity
-        Trade trade = new Trade(
-            order,
-            user,
-            order.getTicker(),
-            order.getAssetType(),
-            order.getActionType(),
-            order.getQuantity(),
-            order.getPrice(),
-            order.getCurrency(),
-            actualFee,
-            LocalDateTime.now()
-        );
-
-        // 3. Calculate proceeds (price - fee, fee is deducted from sale proceeds)
-        BigDecimal grossProceeds = order.getPrice().multiply(new BigDecimal(order.getQuantity()));
-        BigDecimal netProceeds = grossProceeds.subtract(actualFee);
-
-        // 4. Update cash balance (credit with net proceeds)
-        Optional<Cash> cashAccount = cashRepository.findByUserProfileAndCurrency(user, order.getCurrency());
-        if (cashAccount.isEmpty()) {
-            markOrderAsRejected(order, "Cash account not found for currency: " + order.getCurrency());
-            return null;
-        }
-
-        cashAccount.get().setBalance(cashAccount.get().getBalance().add(netProceeds));
-        cashRepository.save(cashAccount.get());
-
-        // 5. Update holding (reduce quantity)
-        holdingService.updateHoldingOnSell(holding.get(), order.getQuantity());
-
-        // 6. Save trade
-        tradeRepository.save(trade);
-
-        // 7. Update order status to FILLED
-        order.setOrderStatus("FILLED");
-        orderRepository.save(order);
-
-        return trade;
-    }
-
-    /**
-     * Marks an order as rejected with a reason.
-     * Called when order cannot be executed despite passing validation.
-     */
-    private void markOrderAsRejected(Order order, String reason) {
-        order.setOrderStatus("REJECTED");
-        orderRepository.save(order);
-        // TODO: Optionally log rejection reason to a rejection_reason column or audit table
-    }
-
-    /**
-     * Example: Schedule this to run periodically (e.g., via @Scheduled)
-     * to process all pending orders that are eligible for execution
-     */
-    // @Scheduled(fixedRate = 1000) // Run every second
-    // public void processAllPendingOrders() {
-    //     List<Order> pendingOrders = orderRepository.findByOrderStatus("PENDING");
-    //     for (Order order : pendingOrders) {
-    //         try {
-    //             executeTrade(order);
-    //         } catch (Exception e) {
-    //             markOrderAsRejected(order, "Execution error: " + e.getMessage());
-    //         }
-    //     }
-    // }
-}
