@@ -13,6 +13,7 @@ import { UpdateUserService } from '../../services/update-user.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
 import { ChangePasswordDialogComponent } from '../../components/change-password-dialog/change-password-dialog.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-profile',
@@ -25,7 +26,7 @@ export class ProfileComponent {
   form: FormGroup;
   submitted = false;
 
-    constructor(private fb: FormBuilder, public auth: AuthService, private userService: UpdateUserService) {
+    constructor(private fb: FormBuilder, public auth: AuthService, private userService: UpdateUserService, private snackBar: MatSnackBar) {
       this.form = this.fb.group({
         fname: ['', [Validators.required]],
         lname: ['', [Validators.required]],
@@ -73,10 +74,16 @@ export class ProfileComponent {
       phone: this.form.value.phone
     }).subscribe({
       next: () => {
-        console.log('Profile updated successfully');
+        this.snackBar.open('Profile updated successfully', 'Close', {
+          duration: 3000,
+          panelClass: ['success-snackbar']
+        });
       },
       error: (err: HttpErrorResponse) => {
-        console.error('Error updating profile', err);
+        this.snackBar.open('Error updating profile', 'Close', {
+          duration: 3000,
+          panelClass: ['error-snackbar']
+        });
       }
     });
     console.log('Update submitted', this.form.value);

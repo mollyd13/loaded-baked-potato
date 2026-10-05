@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ProfileComponent } from './profile.component';
 import { AuthService } from '../../services/auth.service';
 import { UpdateUserService } from '../../services/update-user.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { of, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -10,13 +11,13 @@ describe('ProfileComponent', () => {
   let fixture: ComponentFixture<ProfileComponent>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
   let mockUpdateUserService: jasmine.SpyObj<UpdateUserService>;
+  let mockSnackBar: jasmine.SpyObj<MatSnackBar>;
 
   const validFormData = {
     fname: 'John',
     lname: 'Doe',
     email: 'john.doe@example.com',
-    phone: '(555) 123-4567',
-    password: 'SecurePass123'
+    phone: '(555) 123-4567'
   };
 
   beforeEach(async () => {
@@ -30,12 +31,14 @@ describe('ProfileComponent', () => {
     });
 
     mockUpdateUserService = jasmine.createSpyObj('UpdateUserService', ['updateUser']);
+    mockSnackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
 
     await TestBed.configureTestingModule({
       imports: [ProfileComponent],
       providers: [
         { provide: AuthService, useValue: mockAuthService },
-        { provide: UpdateUserService, useValue: mockUpdateUserService }
+        { provide: UpdateUserService, useValue: mockUpdateUserService },
+        { provide: MatSnackBar, useValue: mockSnackBar }
       ]
     }).compileComponents();
 
@@ -154,26 +157,6 @@ describe('ProfileComponent', () => {
     });
   });
 
-  describe('Form Validation - Password', () => {
-    it('should reject empty password', () => {
-      component.form.enable();
-      component.form.patchValue({ password: '' });
-      expect(component.form.get('password')?.hasError('required')).toBeTrue();
-    });
-
-    it('should reject password shorter than 8 characters', () => {
-      component.form.enable();
-      component.form.patchValue({ password: 'pass123' });
-      expect(component.form.get('password')?.hasError('minlength')).toBeTrue();
-    });
-
-    it('should accept valid password', () => {
-      component.form.enable();
-      component.form.patchValue({ password: 'SecurePass123' });
-      expect(component.form.get('password')?.valid).toBeTrue();
-    });
-  });
-
   describe('Form Submission', () => {
     it('should not submit invalid form', () => {
       component.form.enable();
@@ -191,17 +174,19 @@ describe('ProfileComponent', () => {
         fname: 'John',
         lname: 'Doe',
         email: 'john.doe@example.com',
-        phone: '(555) 123-4567',
-        password: 'SecurePass123'
+        phone: '(555) 123-4567'
       });
     });
 
-    it('should set submitted flag to true when onSubmit is called', () => {
+    it('should show success snackbar on successful submission', () => {
+      mockUpdateUserService.updateUser.and.returnValue(of('User profile updated successfully'));
       component.form.enable();
       component.form.setValue(validFormData);
-      mockUpdateUserService.updateUser.and.returnValue(of('User profile updated successfully'));
       component.onSubmit();
-      expect(component.submitted).toBeFalse(); // Should be reset to false after submission
+      expect(mockSnackBar.open).toHaveBeenCalledWith('Profile updated successfully', 'Close', {
+        duration: 3000,
+        panelClass: ['success-snackbar']
+      });
     });
 
     it('should disable form after successful submission', () => {
@@ -212,14 +197,24 @@ describe('ProfileComponent', () => {
       expect(component.form.disabled).toBeTrue();
     });
 
-    it('should handle submission error', () => {
-      const errorResponse = new HttpErrorResponse({ status: 400, statusText: 'Bad Request' });
-      mockUpdateUserService.updateUser.and.returnValue(throwError(() => errorResponse));
-      spyOn(console, 'error');
+    it('should reset submitted flag after submission', () => {
+      mockUpdateUserService.updateUser.and.returnValue(of('User profile updated successfully'));
       component.form.enable();
       component.form.setValue(validFormData);
       component.onSubmit();
-      expect(console.error).toHaveBeenCalledWith('Error updating profile', errorResponse);
+      expect(component.submitted).toBeFalse();
+    });
+
+    it('should handle submission error', () => {
+      const errorResponse = new HttpErrorResponse({ status: 400, statusText: 'Bad Request' });
+      mockUpdateUserService.updateUser.and.returnValue(throwError(() => errorResponse));
+      component.form.enable();
+      component.form.setValue(validFormData);
+      component.onSubmit();
+      expect(mockSnackBar.open).toHaveBeenCalledWith('Error updating profile', 'Close', {
+        duration: 3000,
+        panelClass: ['error-snackbar']
+      });
     });
   });
 

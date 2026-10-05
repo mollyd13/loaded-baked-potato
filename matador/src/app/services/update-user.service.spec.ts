@@ -12,8 +12,7 @@ describe('UpdateUserService', () => {
     fname: 'John',
     lname: 'Doe',
     email: 'john.doe@example.com',
-    phone: '(555) 123-4567',
-    password: 'SecurePass123'
+    phone: '(555) 123-4567'
   };
 
   const mockUserId = '12345';
@@ -179,8 +178,7 @@ describe('UpdateUserService', () => {
         fname: 'UpdatedFirst',
         lname: 'UpdatedLast',
         email: 'updated@example.com',
-        phone: '(555) 999-8888',
-        password: 'NewPassword123'
+        phone: '(555) 999-8888'
       };
 
       service.updateUser(updatedPayload).subscribe(() => {
@@ -212,17 +210,15 @@ describe('UpdateUserService', () => {
         }
       });
 
-      // First updateUser call
-      const csrfRequest1 = httpMock.expectOne('api/auth/csrf');
-      csrfRequest1.flush({});
-      const updateRequest1 = httpMock.expectOne(`/users/${mockUserId}`);
-      updateRequest1.flush('User updated successfully');
+      // Expect 2 CSRF requests (one for each call)
+      const csrfRequests = httpMock.match('api/auth/csrf');
+      expect(csrfRequests.length).toBe(2);
+      csrfRequests.forEach(req => req.flush({}));
 
-      // Second updateUser call
-      const csrfRequest2 = httpMock.expectOne('api/auth/csrf');
-      csrfRequest2.flush({});
-      const updateRequest2 = httpMock.expectOne(`/users/${mockUserId}`);
-      updateRequest2.flush('User updated successfully');
+      // Expect 2 PUT requests
+      const updateRequests = httpMock.match(`/users/${mockUserId}`);
+      expect(updateRequests.length).toBe(2);
+      updateRequests.forEach(req => req.flush('User updated successfully'));
     });
   });
 });

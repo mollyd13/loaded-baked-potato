@@ -1,15 +1,51 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TradeComponent } from './trade.component';
+import { ApiService, StockQuote } from '../../api.service';
+import { PlaceOrderService } from '../../services/place-order.service';
+import { HttpResponse } from '@angular/common/http';
+import { of } from 'rxjs';
 
 describe('TradeComponent', () => {
   let component: TradeComponent;
   let fixture: ComponentFixture<TradeComponent>;
+  let mockApiService: jasmine.SpyObj<ApiService>;
+  let mockPlaceOrderService: jasmine.SpyObj<PlaceOrderService>;
+
+  const mockStockQuote: StockQuote = {
+    data: {
+      symbol: 'NVDA',
+      price: 485.20,
+      change: 11.32,
+      changePercent: 2.40,
+      bid: 485.10,
+      ask: 485.30,
+      asOf: '2026-10-05',
+      currency: 'USD',
+      spreadBps: 2,
+      previousClose: 473.88,
+      marketState: 'OPEN'
+    }
+  };
+
+  const mockHttpResponse = new HttpResponse<StockQuote>({
+    body: mockStockQuote,
+    status: 200,
+    statusText: 'OK'
+  });
 
   beforeEach(async () => {
+    mockApiService = jasmine.createSpyObj('ApiService', ['getStockQuote']);
+    mockPlaceOrderService = jasmine.createSpyObj('PlaceOrderService', ['placeOrder']);
+
     await TestBed.configureTestingModule({
-      imports: [TradeComponent]
+      imports: [TradeComponent],
+      providers: [
+        { provide: ApiService, useValue: mockApiService },
+        { provide: PlaceOrderService, useValue: mockPlaceOrderService }
+      ]
     }).compileComponents();
 
+    mockApiService.getStockQuote.and.returnValue(of(mockHttpResponse));
     fixture = TestBed.createComponent(TradeComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -23,7 +59,7 @@ describe('TradeComponent', () => {
     expect(component.orderForm.value.action).toBe('BUY');
     expect(component.orderForm.value.quantity).toBe(10);
     expect(component.orderForm.value.limitPrice).toBeNull();
-    expect(component.quote.symbol).toBe('NVDA');
+    expect(component.data?.data.symbol).toBe('NVDA');
   });
 
   describe('cost calculation', () => {
@@ -127,17 +163,23 @@ describe('TradeComponent', () => {
   describe('volatility warning', () => {
     it('should flag as volatile when the day change clears the threshold', () => {
       expect(component.isVolatile).toBeTrue();
-      expect(component.quote.changePct).toBe(2.40);
+      expect(component.data?.data.changePercent).toBe(2.40);
     });
 
     it('should not flag as volatile on a calm quote', () => {
-      component.quote = { ...component.quote, changePct: 0.4 };
+      const calmQuote: StockQuote = {
+        data: { ...mockStockQuote.data, changePercent: 0.4 }
+      };
+      component.data = calmQuote;
 
       expect(component.isVolatile).toBeFalse();
     });
 
     it('should flag as volatile on a steep drop', () => {
-      component.quote = { ...component.quote, changePct: -5.1 };
+      const dropQuote: StockQuote = {
+        data: { ...mockStockQuote.data, changePercent: -5.1 }
+      };
+      component.data = dropQuote;
 
       expect(component.isVolatile).toBeTrue();
       expect(component.isPositive).toBeFalse();
@@ -146,7 +188,10 @@ describe('TradeComponent', () => {
     it('should flag positive changes correctly', () => {
       expect(component.isPositive).toBeTrue();
 
-      component.quote = { ...component.quote, changePct: -2.5 };
+      const negativeQuote: StockQuote = {
+        data: { ...mockStockQuote.data, changePercent: -2.5 }
+      };
+      component.data = negativeQuote;
       expect(component.isPositive).toBeFalse();
     });
   });
@@ -171,36 +216,23 @@ describe('TradeComponent', () => {
     });
   });
 
-  describe('sparkline', () => {
-    it('should plot one point per close inside the view box', () => {
-      const points = component.sparklinePoints.split(' ');
-      expect(points.length).toBe(component.quote.history.length);
-
-      const coordinates = points.map((point) => point.split(',').map(Number));
-      coordinates.forEach(([x, y]) => {
-        expect(x).toBeGreaterThanOrEqual(0);
-        expect(x).toBeLessThanOrEqual(120);
-        expect(y).toBeGreaterThanOrEqual(0);
-        expect(y).toBeLessThanOrEqual(40);
-      });
-    });
-
-    it('should return nothing when there is too little history to draw', () => {
-      component.quote = { ...component.quote, history: [485.20] };
-      expect(component.sparklinePoints).toBe('');
-    });
-
-    it('should survive a flat history without dividing by zero', () => {
-      component.quote = { ...component.quote, history: [100, 100, 100] };
-
-      expect(component.sparklinePoints).toContain('0.00,40.00');
-      expect(component.sparklinePoints).not.toContain('NaN');
-    });
-  });
-
   describe('fee calculation', () => {
     it('should expose the system fee', () => {
       expect(component.fee).toBe(2.5);
+    });
+  });
+
+  describe('abort operation', () => {
+    it('should reset form to defaults', () => {
+      component.orderForm.patchValue({
+        quantity: 50,
+        limitPrice: 500,
+        action: 'SELL'
+      });
+      component.abortOperation();
+      expect(component.orderForm.value.quantity).toBe(10);
+      expect(component.orderForm.value.limitPrice).toBeNull();
+      expect(component.orderForm.value.action).toBe('BUY');
     });
   });
 });

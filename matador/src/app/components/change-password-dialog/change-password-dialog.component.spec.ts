@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { provideHttpClient } from '@angular/common/http';
 import { ChangePasswordDialogComponent } from './change-password-dialog.component';
 
 describe('ChangePasswordDialogComponent', () => {
@@ -8,7 +9,11 @@ describe('ChangePasswordDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ChangePasswordDialogComponent]
+      imports: [ChangePasswordDialogComponent, MatDialogModule],
+      providers: [
+        { provide: MatDialogRef, useValue: {} },
+        provideHttpClient(),
+      ]
     })
     .compileComponents();
 
