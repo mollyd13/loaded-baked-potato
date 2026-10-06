@@ -1,6 +1,6 @@
 package com.matador.app.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.matador.app.entity.UserProfile;
 import com.matador.app.repository.UserProfileRepository;
 import com.matador.app.service.AuthService;
