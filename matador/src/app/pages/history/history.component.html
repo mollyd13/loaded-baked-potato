@@ -167,11 +167,33 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="clickable-row"
+            [class.selected-row]="row === selectedOrder" (click)="selectOrder(row)"></tr>
       </table>
     </div>
     <div class="table-footer" *ngIf="filteredOrders.length === 0">
       <span>No orders found matching the selected filters.</span>
     </div>
   </mat-card>
+
+    <!-- Trade Detail -->
+  <mat-card class="detail-card" *ngIf="selectedOrder as o">
+    <div class="detail-header">
+      <h3>Trade Detail: {{ o.symbol }} (#{{ o.id }})</h3>
+      <button mat-icon-button aria-label="Close detail" (click)="selectedOrder = null">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="detail-grid">
+      <div><span class="detail-label">Placed / Executed</span><span>{{ formatDate(o.timestamp) }}</span></div>
+      <div><span class="detail-label">Action</span><span>{{ o.actionType }} {{ o.quantity }} {{ o.symbol }}</span></div>
+      <div><span class="detail-label">Order Type / Timing</span><span>{{ o.orderType }} / {{ o.timing }}</span></div>
+      <div><span class="detail-label">Priced At</span><span>${{ o.price.toFixed(2) }} {{ o.currency }}</span></div>
+      <div><span class="detail-label">Gross Value</span><span>${{ (o.price * o.quantity).toFixed(2) }}</span></div>
+      <div><span class="detail-label">Fee</span><span>${{ o.fee.toFixed(2) }}</span></div>
+      <div><span class="detail-label">Net Settled</span><span>${{ netAmount(o).toFixed(2) }}</span></div>
+      <div><span class="detail-label">Status</span><span>{{ o.status.replace('_', ' ') }}</span></div>
+    </div>
+  </mat-card>
+  
 </div>
