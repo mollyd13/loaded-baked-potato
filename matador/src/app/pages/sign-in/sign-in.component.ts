@@ -39,9 +39,7 @@ export class SignInComponent {
 
   onSubmit(): void {
     this.submitted = true;
-    this.errorMessage = err.status === 401 ? 'Invalid email or password.'
-  : err.status === 423 ? 'Account locked after 5 failed attempts. Try again in 15 minutes.'
-  : 'Sign in failed. Please try again.';
+    this.errorMessage = '';
     if (this.form.invalid) {
       return;
     }
@@ -53,8 +51,8 @@ export class SignInComponent {
       },
       error: (err: HttpErrorResponse) => {
         this.loading = false;
-        this.errorMessage = err.status === 401
-          ? 'Invalid email or password.'
+        this.errorMessage = err.status === 401 ? 'Invalid email or password.'
+          : err.status === 423 ? 'Account locked after 5 failed attempts. Try again in 15 minutes.'
           : 'Sign in failed. Please try again.';
       }
     });

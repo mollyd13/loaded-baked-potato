@@ -60,11 +60,18 @@ export class HistoryComponent implements OnInit {
   displayedColumns: string[] = ['timestamp', 'instrument', 'assetType', 'actionType', 'orderType', 'quantity', 'price', 'totalValue', 'fee', 'timing', 'status', 'currency'];
 
   allOrders: Order[] = [
-    { id: '1', timestamp: new Date('2026-09-30T14:32:00'), instrument: 'Apple Inc.', symbol: 'AAPL', assetType: 'EQUITY', actionType: 'BUY', orderType: 'MARKET', quantity: 50, price: 184.20, fee: 0.00, timing: 'DAY', status: 'FILLED', currency: 'USD' },
-    { id: '2', timestamp: new Date('2026-09-29T10:15:00'), instrument: 'Bitcoin', symbol: 'BTC', assetType: 'CRYPTO', actionType: 'BUY', orderType: 'LIMIT', quantity: 2, price: 62000.00, fee: 434.00, timing: 'GTC', status: 'FILLED', currency: 'USD' },
-    { id: '3', timestamp: new Date('2026-09-28T16:05:00'), instrument: 'EUR/USD', symbol: 'EURUSD', assetType: 'FX', actionType: 'SELL', orderType: 'MARKET', quantity: 1000, price: 1.09, fee: 8.18, timing: 'DAY', status: 'FILLED', currency: 'USD' }
+    { id: 'ORD-001', timestamp: new Date('2024-01-15T10:30:00'), instrument: 'Apple Inc.', symbol: 'AAPL', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 50, price: 180.25, fee: 0.00, timing: 'day', status: 'FILLED', currency: 'USD' },
+    { id: 'ORD-002', timestamp: new Date('2024-01-14T14:15:00'), instrument: 'Microsoft Corp.', symbol: 'MSFT', assetType: 'Crypto', actionType: 'SELL', orderType: 'Market', quantity: 30, price: 412.50, fee: 43.31, timing: 'day', status: 'FILLED', currency: 'USD' },
+    { id: 'ORD-003', timestamp: new Date('2024-01-12T09:45:00'), instrument: 'Alphabet Inc.', symbol: 'GOOGL', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 100, price: 140.80, fee: 0.00, timing: 'day', status: 'FILLED', currency: 'USD' },
+    { id: 'ORD-004', timestamp: new Date('2024-01-10T16:20:00'), instrument: 'Amazon.com Inc.', symbol: 'AMZN', assetType: 'Equity', actionType: 'BUY', orderType: 'Limit', quantity: 75, price: 172.30, fee: 0.00, timing: 'day', status: 'PARTIALLY_FILLED', currency: 'USD' },
+    { id: 'ORD-005', timestamp: new Date('2024-01-08T11:00:00'), instrument: 'Tesla Inc.', symbol: 'TSLA', assetType: 'FX', actionType: 'SELL', orderType: 'Limit', quantity: 40, price: 178.90, fee: 53.67, timing: 'day', status: 'FILLED', currency: 'USD' },
+    { id: 'ORD-006', timestamp: new Date('2024-01-05T13:30:00'), instrument: 'JPMorgan Chase & Co.', symbol: 'JPM', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 60, price: 188.00, fee: 0.00, timing: 'day', status: 'PENDING', currency: 'USD' },
+    { id: 'ORD-007', timestamp: new Date('2024-01-02T10:15:00'), instrument: 'Visa Inc.', symbol: 'V', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 25, price: 278.50, fee: 0.00, timing: 'day', status: 'FILLED', currency: 'USD' },
+    { id: 'ORD-008', timestamp: new Date('2023-12-28T15:45:00'), instrument: 'NVIDIA Corporation', symbol: 'NVDA', assetType: 'FX', actionType: 'SELL', orderType: 'Limit', quantity: 200, price: 850.00, fee: 1275.00, timing: 'day', status: 'FILLED', currency: 'USD' },
+    { id: 'ORD-009', timestamp: new Date('2023-12-25T12:00:00'), instrument: 'Apple Inc.', symbol: 'AAPL', assetType: 'Crypto', actionType: 'SELL', orderType: 'Market', quantity: 100, price: 189.50, fee: 66.33, timing: 'day', status: 'CANCELLED', currency: 'USD' },
+    { id: 'ORD-010', timestamp: new Date('2023-12-20T09:30:00'), instrument: 'Microsoft Corp.', symbol: 'MSFT', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 45, price: 378.20, fee: 0.00, timing: 'day', status: 'FILLED', currency: 'USD' },
   ];
-
+  
   filteredOrders: Order[] = [];
   filterStatus: string = 'ALL';
   filterActionType: string = 'ALL';
@@ -93,11 +100,13 @@ export class HistoryComponent implements OnInit {
     const totalOrders = this.filteredOrders.length;
     const filledOrders = this.filteredOrders.filter(o => o.status === 'FILLED').length;
     const totalVolume = this.filteredOrders.reduce((sum, o) => sum + (o.price * o.quantity), 0);
-    const buyOrders = this.filteredOrders.filter(o => o.orderType === 'BUY').length;
+    const buyOrders = this.filteredOrders.filter(o => o.actionType === 'BUY').length;
+    const totalFees = this.filteredOrders.reduce((sum, o) => sum + o.fee, 0);
 
     this.orderSummaries = [
       { label: 'Total Orders', value: totalOrders.toString(), changeText: `${filledOrders} Filled`, changePositive: true },
       { label: 'Total Volume', value: `$${(totalVolume / 1000).toFixed(1)}K`, changeText: `${buyOrders} Buys`, changePositive: true },
+      { label: 'Total Commissions', value: `${totalFees.toFixed(2)}` },
       { label: 'Avg Order Value', value: `$${(totalOrders > 0 ? totalVolume / totalOrders : 0).toFixed(2)}` }
     ];
   }

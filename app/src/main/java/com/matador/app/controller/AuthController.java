@@ -47,7 +47,7 @@ public class AuthController {
         this.authService = authService;
         this.authenticationManager = authenticationManager;
         this.securityContextRepository = securityContextRepository;
-        
+        this.loginAttempts = loginAttempts;
     }
 
     /**
