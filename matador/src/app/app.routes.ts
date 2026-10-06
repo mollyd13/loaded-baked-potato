@@ -45,5 +45,10 @@ export const routes: Routes = [
       {
         path: 'analytics',
         component: AnalyticsComponent,
+      },
+      {
+        path: 'analytics',
+        component: AnalyticsComponent,
+        canActivate: [authGuard],
       }
 ];
