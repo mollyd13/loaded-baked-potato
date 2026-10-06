@@ -78,6 +78,17 @@ export class HistoryComponent implements OnInit {
     this.updateSummaries();
   }
 
+    selectedOrder: Order | null = null;
+
+  selectOrder(order: Order): void {
+    this.selectedOrder = this.selectedOrder === order ? null : order;
+  }
+
+  netAmount(o: Order): number {
+    const gross = o.price * o.quantity;
+    return o.actionType === 'BUY' ? gross + o.fee : gross - o.fee;
+  }
+
   updateSummaries(): void {
     const totalOrders = this.filteredOrders.length;
     const filledOrders = this.filteredOrders.filter(o => o.status === 'FILLED').length;
