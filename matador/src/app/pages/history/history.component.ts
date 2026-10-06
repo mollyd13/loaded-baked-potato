@@ -21,6 +21,7 @@ interface Order {
   orderType: string;
   quantity: number;
   price: number;
+  fee: number;
 
   timing: string;
   status: 'FILLED' | 'PARTIALLY_FILLED' | 'PENDING' | 'CANCELLED';
@@ -56,21 +57,14 @@ interface OrderSummary {
 })
 export class HistoryComponent implements OnInit {
   orderSummaries: OrderSummary[] = [];
-  displayedColumns: string[] = ['timestamp', 'instrument', 'assetType', 'actionType', 'orderType', 'quantity', 'price', 'totalValue', 'timing', 'status', 'currency'];
-  
+  displayedColumns: string[] = ['timestamp', 'instrument', 'assetType', 'actionType', 'orderType', 'quantity', 'price', 'totalValue', 'fee', 'timing', 'status', 'currency'];
+
   allOrders: Order[] = [
-    { id: 'ORD-001', timestamp: new Date('2024-01-15T10:30:00'), instrument: 'Apple Inc.', symbol: 'AAPL', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 50, price: 180.25, timing: 'day', status: 'FILLED', currency: 'USD' },
-    { id: 'ORD-002', timestamp: new Date('2024-01-14T14:15:00'), instrument: 'Microsoft Corp.', symbol: 'MSFT', assetType: 'Crypto', actionType: 'SELL', orderType: 'Market', quantity: 30, price: 412.50, timing: 'day', status: 'FILLED', currency: 'USD' },
-    { id: 'ORD-003', timestamp: new Date('2024-01-12T09:45:00'), instrument: 'Alphabet Inc.', symbol: 'GOOGL', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 100, price: 140.80, timing: 'day', status: 'FILLED', currency: 'USD' },
-    { id: 'ORD-004', timestamp: new Date('2024-01-10T16:20:00'), instrument: 'Amazon.com Inc.', symbol: 'AMZN', assetType: 'Equity', actionType: 'BUY', orderType: 'Limit', quantity: 75, price: 172.30, timing: 'day', status: 'PARTIALLY_FILLED', currency: 'USD' },
-    { id: 'ORD-005', timestamp: new Date('2024-01-08T11:00:00'), instrument: 'Tesla Inc.', symbol: 'TSLA', assetType: 'FX', actionType: 'SELL', orderType: 'Limit', quantity: 40, price: 178.90, timing: 'day', status: 'FILLED', currency: 'USD' },
-    { id: 'ORD-006', timestamp: new Date('2024-01-05T13:30:00'), instrument: 'JPMorgan Chase & Co.', symbol: 'JPM', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 60, price: 188.00, timing: 'day', status: 'PENDING', currency: 'USD' },
-    { id: 'ORD-007', timestamp: new Date('2024-01-02T10:15:00'), instrument: 'Visa Inc.', symbol: 'V', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 25, price: 278.50, timing: 'day', status: 'FILLED', currency: 'USD' },
-    { id: 'ORD-008', timestamp: new Date('2023-12-28T15:45:00'), instrument: 'NVIDIA Corporation', symbol: 'NVDA', assetType: 'FX', actionType: 'SELL', orderType: 'Limit', quantity: 200, price: 850.00, timing: 'day', status: 'FILLED', currency: 'USD' },
-    { id: 'ORD-009', timestamp: new Date('2023-12-25T12:00:00'), instrument: 'Apple Inc.', symbol: 'AAPL', assetType: 'Crypto', actionType: 'SELL', orderType: 'Market', quantity: 100, price: 189.50, timing: 'day', status: 'CANCELLED', currency: 'USD' },
-    { id: 'ORD-010', timestamp: new Date('2023-12-20T09:30:00'), instrument: 'Microsoft Corp.', symbol: 'MSFT', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 45, price: 378.20, timing: 'day', status: 'FILLED', currency: 'USD' },
+    { id: '1', timestamp: new Date('2026-09-30T14:32:00'), instrument: 'Apple Inc.', symbol: 'AAPL', assetType: 'EQUITY', actionType: 'BUY', orderType: 'MARKET', quantity: 50, price: 184.20, fee: 0.00, timing: 'DAY', status: 'FILLED', currency: 'USD' },
+    { id: '2', timestamp: new Date('2026-09-29T10:15:00'), instrument: 'Bitcoin', symbol: 'BTC', assetType: 'CRYPTO', actionType: 'BUY', orderType: 'LIMIT', quantity: 2, price: 62000.00, fee: 434.00, timing: 'GTC', status: 'FILLED', currency: 'USD' },
+    { id: '3', timestamp: new Date('2026-09-28T16:05:00'), instrument: 'EUR/USD', symbol: 'EURUSD', assetType: 'FX', actionType: 'SELL', orderType: 'MARKET', quantity: 1000, price: 1.09, fee: 8.18, timing: 'DAY', status: 'FILLED', currency: 'USD' }
   ];
-  
+
   filteredOrders: Order[] = [];
   filterStatus: string = 'ALL';
   filterActionType: string = 'ALL';
