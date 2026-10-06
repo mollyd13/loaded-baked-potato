@@ -106,7 +106,7 @@ export class HistoryComponent implements OnInit {
     this.orderSummaries = [
       { label: 'Total Orders', value: totalOrders.toString(), changeText: `${filledOrders} Filled`, changePositive: true },
       { label: 'Total Volume', value: `$${(totalVolume / 1000).toFixed(1)}K`, changeText: `${buyOrders} Buys`, changePositive: true },
-      { label: 'Total Commissions', value: `${totalFees.toFixed(2)}` },
+      { label: 'Total Commissions', value: `$${totalFees.toFixed(2)}` },
       { label: 'Avg Order Value', value: `$${(totalOrders > 0 ? totalVolume / totalOrders : 0).toFixed(2)}` }
     ];
   }
