@@ -129,7 +129,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 message: "no user found with id 999"
-    patch:
+    put:
       summary: Update information for a specified user
       operationId: updateUser
       security:
@@ -146,7 +146,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserPatchRequest'
+              $ref: '#/components/schemas/UserPutRequest'
       responses:
         '204':
           description: The user was successfully updated
@@ -258,15 +258,24 @@ components:
           type: string
           description: The user's phone number
     
-    UserPatchRequest:
+    UserPutRequest:
       type: object
       properties:
-        field: 
+        fname:
           type: string
-          description: The name of the field to be updated
-        value:
+          description: The user's first name
+        lname:
           type: string
-          description: The new value for the specified field
+          description: The user's last name
+        email:
+          type: string
+          description: The user's email address
+        pwd:
+          type: string
+          description: The plain text password of the user
+        phone:
+          type: string
+          description: The user's phone number
 
   securitySchemes:
     bearerAuth:

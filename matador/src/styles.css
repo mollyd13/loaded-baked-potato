@@ -1,14 +1,41 @@
 /* You can add global styles to this file, and also import other style files */
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 :root {
-  --primary-color: #c74d4d;
-  --secondary-color: #df6b6b;
-  --contrast-color: #c01e62;
+  --primary-color: #3F51B5;
+  --secondary-color: #6b7ddf;
+  --contrast-color: #3e5ce6;
   --text-color: black;
   --light-text-color: white;
   --success-color: #16a34a;
   --error-color: #dc2626;
+}
+
+/* Override Material defaults for minimal white theme */
+mat-card,
+.mat-mdc-card,
+mat-sidenav-container,
+.mat-sidenav-container {
+  background-color: white;
+  color: inherit;
+  box-shadow: none;
+}
+
+/* Ensure form fields have white backgrounds */
+.mat-mdc-text-field-wrapper {
+  background-color: white;
+}
+
+.mdc-text-field {
+  background-color: white;
+}
+
+/* Override Material button themes */
+.mat-mdc-button, 
+.mat-mdc-raised-button,
+.mat-mdc-flat-button {
+  --mdc-theme-primary: var(--primary-color);
 }

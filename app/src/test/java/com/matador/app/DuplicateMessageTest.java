@@ -1,7 +1,8 @@
-package com.matador.app.service;
+package com.matador.app;
 
 import com.matador.app.entity.*;
 import com.matador.app.repository.*;
+import com.matador.app.service.*;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;

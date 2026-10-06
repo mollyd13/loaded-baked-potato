@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 
 import com.matador.app.dto.OrderRequest;
 import com.matador.app.domain.ValidationResult;
+import com.matador.app.dto.OrderRequest;
 import com.matador.app.entity.Order;
 import com.matador.app.entity.UserProfile;
 import com.matador.app.exception.OrderRejectedException;
