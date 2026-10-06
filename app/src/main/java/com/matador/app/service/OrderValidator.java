@@ -1,7 +1,7 @@
 package com.matador.app.service;
 
 import com.matador.app.domain.ValidationResult;
-import com.matador.app.dto.OrderRequestDto;
+import com.matador.app.dto.OrderRequest;
 import com.matador.app.entity.UserProfile;
 import com.matador.app.service.validators.FundsValidator;
 import com.matador.app.service.validators.HoldingsValidator;
@@ -47,7 +47,7 @@ public class OrderValidator {
      * @param request the order request to validate
      * @return ValidationResult indicating success or specific failure reason
      */
-    public ValidationResult validate(OrderRequestDto request) {
+    public ValidationResult validate(OrderRequest request) {
         
         // 1. Validate user exists and is active
         ValidationResult userValidation = userValidator.validate(request.userId());

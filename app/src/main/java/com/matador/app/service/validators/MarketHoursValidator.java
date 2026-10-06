@@ -1,6 +1,6 @@
 package com.matador.app.service.validators;
 
-import com.matador.app.dto.OrderRequestDto;
+import com.matador.app.dto.OrderRequest;
 import com.matador.app.domain.ValidationResult;
 import org.springframework.stereotype.Component;
 
@@ -34,7 +34,7 @@ public class MarketHoursValidator {
      * @param request the order request
      * @return ValidationResult indicating if validation passed
      */
-    public ValidationResult validate(OrderRequestDto request) {
+    public ValidationResult validate(OrderRequest request) {
         String assetType = request.assetType().toUpperCase();
 
         return switch (assetType) {
@@ -48,7 +48,7 @@ public class MarketHoursValidator {
     /**
      * Crypto trades 24/7, no market hours restriction
      */
-    private ValidationResult validateCryptoHours(OrderRequestDto request) {
+    private ValidationResult validateCryptoHours(OrderRequest request) {
         return ValidationResult.valid();
     }
 
@@ -56,7 +56,7 @@ public class MarketHoursValidator {
      * Validates equity market hours: 9:30 AM - 4:00 PM ET, Monday-Friday
      * DAY orders rejected outside regular hours; GTC allowed anytime (execute at market open)
      */
-    private ValidationResult validateEquityHours(OrderRequestDto request) {
+    private ValidationResult validateEquityHours(OrderRequest request) {
         ZonedDateTime nowET = ZonedDateTime.now(ET_ZONE);
         LocalTime currentTime = nowET.toLocalTime();
         DayOfWeek dayOfWeek = nowET.getDayOfWeek();
@@ -95,7 +95,7 @@ public class MarketHoursValidator {
      * Validates FX market hours: Sunday 5:00 PM ET - Friday 5:00 PM ET
      * Closed: Friday 5:00 PM ET - Sunday 5:00 PM ET
      */
-    private ValidationResult validateFXHours(OrderRequestDto request) {
+    private ValidationResult validateFXHours(OrderRequest request) {
         ZonedDateTime nowET = ZonedDateTime.now(ET_ZONE);
         LocalTime currentTime = nowET.toLocalTime();
         DayOfWeek dayOfWeek = nowET.getDayOfWeek();

@@ -9,7 +9,7 @@ import com.matador.app.validation.ValidTiming;
 import com.matador.app.validation.ValidAssetType;
 import com.matador.app.validation.ValidCurrencyCode;
 
-public record OrderRequestDto(
+public record OrderRequest(
         @NotNull(message = "userId is required")
         Integer userId,
 
