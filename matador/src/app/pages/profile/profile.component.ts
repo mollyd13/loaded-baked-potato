@@ -7,6 +7,7 @@ import { FormBuilder, FormControl, FormsModule, Validators } from '@angular/form
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FormGroup } from '@angular/forms';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-profile',
@@ -27,7 +28,13 @@ export class ProfileComponent {
     password: 'password123'
   };
 
-    constructor(private fb: FormBuilder) {
+    constructor(private fb: FormBuilder, private auth: AuthService) {
+  const u = this.auth.currentUser();
+  if (u) {
+    this.mockUser.fullName = `${u.firstName} ${u.lastName}`;
+    this.mockUser.email = u.email;
+    this.mockUser.phoneNumber = u.phone;
+  }
       this.form = this.fb.group({
         fullName: ['', [Validators.required]],
         email: ['', [Validators.required, Validators.email]],
