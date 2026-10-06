@@ -19,9 +19,9 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<String> submitOrder(@Valid @RequestBody OrderRequest dto) {
+    public ResponseEntity<String> submitOrder(@Valid @RequestBody OrderRequest request) {
         try {
-            Order savedOrder = submitOrderService.submit(dto);
+            Order savedOrder = submitOrderService.submit(request);
             return ResponseEntity.ok("Order " + savedOrder.getOrderId() + " submitted successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Order submission failed: " + e.getMessage());

@@ -1,6 +1,7 @@
 package com.matador.app.service;
 
 import com.matador.app.entity.Cash;
+import com.matador.app.entity.Holding;
 import com.matador.app.entity.Order;
 import com.matador.app.entity.Trade;
 import com.matador.app.entity.UserProfile;
@@ -8,6 +9,7 @@ import com.matador.app.repository.CashRepository;
 import com.matador.app.repository.OrderRepository;
 import com.matador.app.repository.TradeRepository;
 import com.matador.app.repository.UserProfileRepository;
+import com.matador.app.service.HoldingService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,17 +43,33 @@ public class OrderExecutionService {
     private final CashRepository cashRepository;
     private final UserProfileRepository userProfileRepository;
     private final FeeCalculator feeCalculator;
+    private final HoldingService holdingService;
 
     public OrderExecutionService(OrderRepository orderRepository,
                                  TradeRepository tradeRepository,
                                  CashRepository cashRepository,
                                  UserProfileRepository userProfileRepository,
-                                 FeeCalculator feeCalculator) {
+                                 FeeCalculator feeCalculator,
+                                 HoldingService holdingService) {
         this.orderRepository = orderRepository;
         this.tradeRepository = tradeRepository;
         this.cashRepository = cashRepository;
         this.userProfileRepository = userProfileRepository;
         this.feeCalculator = feeCalculator;
+        this.holdingService = holdingService;
+    }
+
+    /**
+     * Called once per message. If the same message arrives twice, the second call
+     * finds the order is no longer PENDING and does nothing.
+     */
+    @Transactional
+    public Trade executeOrder(Integer orderId) {
+        Optional<Order> order = orderRepository.findByIdForUpdate(orderId);
+        if (order.isEmpty() || !"PENDING".equals(order.get().getOrderStatus())) {
+            return null; // already FILLED or REJECTED: duplicate, ignore it
+        }
+        return executeTrade(order.get());
     }
 
     /**
@@ -136,8 +154,14 @@ public class OrderExecutionService {
         // 4. Update or create holding
         // - If user already owns the ticker, update quantity and average price
         // - If new holding, create it
-        // (See HoldingService or similar for implementation)
-
+        Optional<Holding> existingHolding = holdingService.getHoldingByTicker(user, order.getTicker());
+        if (existingHolding.isPresent()) {
+            holdingService.updateHoldingOnBuy(existingHolding.get(), order.getQuantity(), order.getPrice());
+        } else {
+            holdingService.createHolding(user, order.getTicker(), order.getAssetType(), 
+                                        order.getQuantity(), order.getCurrency(), order.getPrice());
+        }
+        
         // 5. Save trade
         tradeRepository.save(trade);
 
@@ -157,11 +181,11 @@ public class OrderExecutionService {
     private Trade executeSellTrade(Order order, UserProfile user, BigDecimal actualFee) {
         // TODO: Full implementation
         // 1. Verify user owns sufficient shares (should have been validated)
-        // Optional<Holding> holding = holdingRepository.findByUserProfileAndTicker(user, order.getTicker());
-        // if (holding.isEmpty() || holding.get().getQuantity() < order.getQuantity()) {
-        //     markOrderAsRejected(order, "Insufficient holdings at execution time");
-        //     return null;
-        // }
+        Optional<Holding> holding = holdingService.getHoldingByTicker(user, order.getTicker());
+        if (holding.isEmpty() || holding.get().getQuantity() < order.getQuantity()) {
+            markOrderAsRejected(order, "Insufficient holdings at execution time");
+            return null;
+        }
 
         // 2. Create Trade entity
         Trade trade = new Trade(
@@ -182,18 +206,17 @@ public class OrderExecutionService {
         BigDecimal netProceeds = grossProceeds.subtract(actualFee);
 
         // 4. Update cash balance (credit with net proceeds)
-        // Cash cashAccount = cashRepository.findByUserProfileAndCurrency(user, order.getCurrency()).get();
-        // cashAccount.setBalance(cashAccount.getBalance().add(netProceeds));
-        // cashRepository.save(cashAccount);
+        Optional<Cash> cashAccount = cashRepository.findByUserProfileAndCurrency(user, order.getCurrency());
+        if (cashAccount.isEmpty()) {
+            markOrderAsRejected(order, "Cash account not found for currency: " + order.getCurrency());
+            return null;
+        }
+
+        cashAccount.get().setBalance(cashAccount.get().getBalance().add(netProceeds));
+        cashRepository.save(cashAccount.get());
 
         // 5. Update holding (reduce quantity)
-        // Holding holding = holdingRepository.findByUserProfileAndTicker(user, order.getTicker()).get();
-        // holding.setQuantity(holding.getQuantity() - order.getQuantity());
-        // if (holding.getQuantity() == 0) {
-        //     holdingRepository.delete(holding); // Remove fully liquidated holdings
-        // } else {
-        //     holdingRepository.save(holding);
-        // }
+        holdingService.updateHoldingOnSell(holding.get(), order.getQuantity());
 
         // 6. Save trade
         tradeRepository.save(trade);
