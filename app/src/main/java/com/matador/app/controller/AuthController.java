@@ -36,15 +36,18 @@ public class AuthController {
     private final AuthService authService;
     private final AuthenticationManager authenticationManager;
     private final SecurityContextRepository securityContextRepository;
+    private final com.matador.app.service.LoginAttemptService loginAttempts;
     private final SecurityContextHolderStrategy securityContextHolderStrategy =
         SecurityContextHolder.getContextHolderStrategy();
+    
 
     public AuthController(AuthService authService,
                           AuthenticationManager authenticationManager,
-                          SecurityContextRepository securityContextRepository) {
+                          SecurityContextRepository securityContextRepository, com.matador.app.service.LoginAttemptService loginAttempts) {
         this.authService = authService;
         this.authenticationManager = authenticationManager;
         this.securityContextRepository = securityContextRepository;
+        
     }
 
     /**
@@ -64,9 +67,19 @@ public class AuthController {
     public UserResponse login(@Valid @RequestBody LoginRequest request,
                               HttpServletRequest httpRequest,
                               HttpServletResponse httpResponse) {
-        Authentication authentication = authenticationManager.authenticate(
-            UsernamePasswordAuthenticationToken.unauthenticated(
-                AuthService.normalizeEmail(request.email()), request.password()));
+        String email = AuthService.normalizeEmail(request.email());
+if (loginAttempts.isLocked(email)) {
+    throw new org.springframework.security.authentication.LockedException("locked");
+}
+Authentication authentication;
+try {
+    authentication = authenticationManager.authenticate(
+        UsernamePasswordAuthenticationToken.unauthenticated(email, request.password()));
+} catch (org.springframework.security.authentication.BadCredentialsException ex) {
+    loginAttempts.recordFailure(email);
+    throw ex;
+}
+loginAttempts.reset(email);
 
         // Prevent session fixation by rotating the session id on sign in
         if (httpRequest.getSession(false) != null) {
@@ -100,4 +113,11 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> handleValidation(MethodArgumentNotValidException ex) {
         return ResponseEntity.badRequest().body(Map.of("message", "Invalid request"));
     }
+
+    @ExceptionHandler(org.springframework.security.authentication.LockedException.class)
+public ResponseEntity<Map<String, String>> handleLocked(AuthenticationException ex) {
+    return ResponseEntity.status(HttpStatus.LOCKED)
+        .body(Map.of("message", "Too many failed attempts. Try again in 15 minutes."));
+}
+    
 }
