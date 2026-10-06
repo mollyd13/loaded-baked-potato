@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 
 import com.matador.app.entity.Cash;
 import com.matador.app.entity.Holding;
@@ -232,14 +233,11 @@ public class OrderExecutionService {
         return trade;
     }
 
-    /**
-     * Marks an order as rejected with a reason.
-     * Called when order cannot be executed despite passing validation.
-     */
+    // atomicity maintained via @Transactional
+    @Transactional(propagation = Propagation.REQUIRED)
     private void markOrderAsRejected(Order order, String reason) {
         order.setOrderStatus("REJECTED");
         orderRepository.save(order);
-        // TODO: Optionally log rejection reason to a rejection_reason column or audit table
     }
 
     /**
