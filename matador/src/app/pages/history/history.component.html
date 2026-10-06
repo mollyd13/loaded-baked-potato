@@ -140,6 +140,12 @@
           <td mat-cell *matCellDef="let order">${{(order.price * order.quantity).toFixed(2) }}</td>
         </ng-container>
 
+        <!-- Fee Column (NEW) -->
+        <ng-container matColumnDef="fee">
+          <th mat-header-cell *matHeaderCellDef>Fee</th>
+          <td mat-cell *matCellDef="let order">${{ order.fee.toFixed(2) }}</td>
+        </ng-container>
+
         <!-- Timing Column -->
         <ng-container matColumnDef="timing">
           <th mat-header-cell *matHeaderCellDef>Timing</th>
