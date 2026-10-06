@@ -97,3 +97,28 @@
     font-weight: lighter;
     color: var(--contrast-color);
 }
+
+.password-section {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+mat-card {
+    background-color: white;
+    color: var(--contrast-color);
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+mat-card-content button {
+    background-color: white;
+    color: var(--contrast-color);
+}
+
+.change-password-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}

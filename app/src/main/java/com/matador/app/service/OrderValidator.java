@@ -2,6 +2,7 @@ package com.matador.app.service;
 
 import com.matador.app.dto.OrderRequest;
 import com.matador.app.domain.ValidationResult;
+import com.matador.app.dto.OrderRequest;
 import com.matador.app.entity.UserProfile;
 import com.matador.app.service.validators.FundsValidator;
 import com.matador.app.service.validators.HoldingsValidator;
