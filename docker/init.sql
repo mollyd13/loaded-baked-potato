@@ -65,10 +65,8 @@ CREATE TABLE IF NOT EXISTS app."order" (
 	ticker TEXT NOT NULL, -- aapl/btc/eurusd
 	asset_type TEXT NOT NULL, -- equity/crypto/fx
 	action_type TEXT NOT NULL, -- buy/sell
-	order_type TEXT NOT NULL, -- market/limit
 	qty INTEGER NOT NULL, -- for forex: qty of base currency
 	price NUMERIC(38,2) NOT NULL,
-	timing TEXT NOT NULL, -- day/gtc
 	order_status TEXT NOT NULL,
 	submitted_at TIMESTAMP NOT NULL,
 	currency TEXT NOT NULL -- for forex: quote currency
