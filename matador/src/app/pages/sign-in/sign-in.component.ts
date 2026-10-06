@@ -39,7 +39,9 @@ export class SignInComponent {
 
   onSubmit(): void {
     this.submitted = true;
-    this.errorMessage = '';
+    this.errorMessage = err.status === 401 ? 'Invalid email or password.'
+  : err.status === 423 ? 'Account locked after 5 failed attempts. Try again in 15 minutes.'
+  : 'Sign in failed. Please try again.';
     if (this.form.invalid) {
       return;
     }
