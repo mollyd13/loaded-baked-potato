@@ -7,7 +7,7 @@ public record HoldingResponse(
     Integer holdingId,
     String ticker,
     String assetType,
-    Integer quantity,
+    BigDecimal quantity,
     String currency,
     BigDecimal averagePrice
 ) {

@@ -38,20 +38,20 @@ public class HoldingService {
 
     @Transactional
     public Holding createHolding(UserProfile userProfile, String ticker, String assetType,
-                                 Integer quantity, String currency, BigDecimal price) {
+                                 BigDecimal quantity, String currency, BigDecimal price) {
         Holding holding = new Holding(userProfile, ticker, assetType, quantity, currency, price);
         return holdingRepository.save(holding);
     }
 
     @Transactional
-    public Holding updateHoldingOnBuy(Holding holding, Integer quantity, BigDecimal price) {
-        Integer oldQuantity = holding.getQuantity();
+    public Holding updateHoldingOnBuy(Holding holding, BigDecimal quantity, BigDecimal price) {
+        BigDecimal oldQuantity = holding.getQuantity();
         BigDecimal oldAvgPrice = holding.getAveragePrice();
         
         BigDecimal oldCost = oldAvgPrice.multiply(new BigDecimal(oldQuantity));
         BigDecimal newCost = price.multiply(new BigDecimal(quantity));
         BigDecimal totalCost = oldCost.add(newCost);
-        Integer totalQuantity = oldQuantity + quantity;
+        BigDecimal totalQuantity = oldQuantity + quantity;
         BigDecimal newAvgPrice = totalCost.divide(new BigDecimal(totalQuantity), BigDecimal.ROUND_HALF_UP);
         
         holding.setQuantity(totalQuantity);
@@ -61,8 +61,8 @@ public class HoldingService {
     }
 
     @Transactional
-    public Holding updateHoldingOnSell(Holding holding, Integer quantity) {
-        Integer remainingQuantity = holding.getQuantity() - quantity;
+    public Holding updateHoldingOnSell(Holding holding, BigDecimal quantity) {
+        BigDecimal remainingQuantity = holding.getQuantity() - quantity;
         
         if (remainingQuantity <= 0) {
             holdingRepository.delete(holding);
@@ -83,7 +83,7 @@ public class HoldingService {
         holdingRepository.delete(holding);
     }
 
-    public boolean hasSufficientHoldings(UserProfile userProfile, String ticker, Integer quantity) {
+    public boolean hasSufficientHoldings(UserProfile userProfile, String ticker, BigDecimal quantity) {
         Optional<Holding> holding = holdingRepository.findByUserProfileAndTicker(userProfile, ticker);
         return holding.isPresent() && holding.get().getQuantity() >= quantity;
     }
