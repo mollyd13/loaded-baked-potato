@@ -1,5 +1,13 @@
 package com.matador.app.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
+
 import com.matador.app.entity.Cash;
 import com.matador.app.entity.Holding;
 import com.matador.app.entity.Order;
@@ -9,13 +17,7 @@ import com.matador.app.repository.CashRepository;
 import com.matador.app.repository.OrderRepository;
 import com.matador.app.repository.TradeRepository;
 import com.matador.app.repository.UserProfileRepository;
-import com.matador.app.service.HoldingService;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Optional;
+import com.matador.app.service.validators.MarketHoursValidator;
 
 /**
  * Processes pending orders and executes trades.
@@ -41,22 +43,26 @@ public class OrderExecutionService {
     private final OrderRepository orderRepository;
     private final TradeRepository tradeRepository;
     private final CashRepository cashRepository;
-    private final UserProfileRepository userProfileRepository;
     private final FeeCalculator feeCalculator;
     private final HoldingService holdingService;
+    private final PricingService pricingService;
+    private final MarketHoursValidator marketHoursValidator;
 
     public OrderExecutionService(OrderRepository orderRepository,
                                  TradeRepository tradeRepository,
                                  CashRepository cashRepository,
                                  UserProfileRepository userProfileRepository,
                                  FeeCalculator feeCalculator,
-                                 HoldingService holdingService) {
+                                 HoldingService holdingService,
+                                 PricingService pricingService,
+                                 MarketHoursValidator marketHoursValidator) {
         this.orderRepository = orderRepository;
         this.tradeRepository = tradeRepository;
         this.cashRepository = cashRepository;
-        this.userProfileRepository = userProfileRepository;
         this.feeCalculator = feeCalculator;
         this.holdingService = holdingService;
+        this.pricingService = pricingService;
+        this.marketHoursValidator = marketHoursValidator;
     }
 
     /**
@@ -67,7 +73,7 @@ public class OrderExecutionService {
     public Trade executeOrder(Integer orderId) {
         Optional<Order> order = orderRepository.findByIdForUpdate(orderId);
         if (order.isEmpty() || !"PENDING".equals(order.get().getOrderStatus())) {
-            return null; // already FILLED or REJECTED: duplicate, ignore it
+            return null; // DNE or already FILLED or REJECTED
         }
         return executeTrade(order.get());
     }
@@ -81,17 +87,16 @@ public class OrderExecutionService {
      */
     @Transactional
     public Trade executeTrade(Order order) {
-        // TODO: Implementation notes
         // 1. Verify order status is PENDING
         if (!order.getOrderStatus().equals("PENDING")) {
             throw new IllegalStateException("Order must be PENDING to execute. Status: " + order.getOrderStatus());
         }
 
         // 2. Check if market is open for this asset type
-        // (Use MarketHoursValidator or similar logic)
-        // if (!isMarketOpen(order.getAssetType())) {
-        //     return null; // Skip execution, market closed
-        // }
+        if (!marketHoursValidator.isMarketOpen(order.getAssetType())) {
+            markOrderAsRejected(order, "Market is closed for " + order.getAssetType());
+            return null;
+        }
 
         // 3. Get user and their cash account
         UserProfile user = order.getUserProfile();
@@ -101,17 +106,20 @@ public class OrderExecutionService {
             return null;
         }
 
-        // 4. Calculate order cost and actual fee
-        BigDecimal orderCost = order.getPrice().multiply(new BigDecimal(order.getQuantity()));
+        // 4. Determine execution price and calculate actual fee
+        BigDecimal executionPrice = pricingService.getCurrentPrice(order.getTicker());
+
+        BigDecimal orderCost = executionPrice.multiply(new BigDecimal(order.getQuantity()));
         BigDecimal actualFee = feeCalculator.calculateFee(orderCost, order.getAssetType());
         BigDecimal totalCost;
 
         // 5. Execute based on order action (BUY or SELL)
+        // Execution functions ensures the holdings, cash balance, and trade record are updated together
         if (order.getActionType().equalsIgnoreCase("BUY")) {
             totalCost = orderCost.add(actualFee);
-            return executeBuyTrade(order, user, cashAccount.get(), actualFee, totalCost);
+            return executeBuyTrade(order, user, cashAccount.get(), executionPrice, actualFee, totalCost);
         } else if (order.getActionType().equalsIgnoreCase("SELL")) {
-            return executeSellTrade(order, user, actualFee);
+            return executeSellTrade(order, user, executionPrice, actualFee);
         } else {
             markOrderAsRejected(order, "Invalid action type: " + order.getActionType());
             return null;
@@ -125,15 +133,14 @@ public class OrderExecutionService {
      * - Creates Trade record with actual fee
      */
     private Trade executeBuyTrade(Order order, UserProfile user, Cash cashAccount,
-                                  BigDecimal actualFee, BigDecimal totalCost) {
-        // TODO: Full implementation
+                                  BigDecimal executionPrice, BigDecimal actualFee, BigDecimal totalCost) {
         // 1. Verify sufficient funds (should have been validated)
         if (cashAccount.getBalance().compareTo(totalCost) < 0) {
             markOrderAsRejected(order, "Insufficient funds at execution time");
             return null;
         }
 
-        // 2. Create Trade entity
+        // 2. Create Trade entity (use executionPrice which may differ from order.getPrice() for MARKET orders)
         Trade trade = new Trade(
             order,
             user,
@@ -141,7 +148,7 @@ public class OrderExecutionService {
             order.getAssetType(),
             order.getActionType(),
             order.getQuantity(),
-            order.getPrice(),
+            executionPrice,
             order.getCurrency(),
             actualFee,
             LocalDateTime.now()
@@ -156,10 +163,10 @@ public class OrderExecutionService {
         // - If new holding, create it
         Optional<Holding> existingHolding = holdingService.getHoldingByTicker(user, order.getTicker());
         if (existingHolding.isPresent()) {
-            holdingService.updateHoldingOnBuy(existingHolding.get(), order.getQuantity(), order.getPrice());
+            holdingService.updateHoldingOnBuy(existingHolding.get(), order.getQuantity(), executionPrice);
         } else {
             holdingService.createHolding(user, order.getTicker(), order.getAssetType(), 
-                                        order.getQuantity(), order.getCurrency(), order.getPrice());
+                                        order.getQuantity(), order.getCurrency(), executionPrice);
         }
         
         // 5. Save trade
@@ -178,8 +185,7 @@ public class OrderExecutionService {
      * - Credits cash account by (proceeds - fee)
      * - Creates Trade record with actual fee
      */
-    private Trade executeSellTrade(Order order, UserProfile user, BigDecimal actualFee) {
-        // TODO: Full implementation
+    private Trade executeSellTrade(Order order, UserProfile user, BigDecimal executionPrice, BigDecimal actualFee) {
         // 1. Verify user owns sufficient shares (should have been validated)
         Optional<Holding> holding = holdingService.getHoldingByTicker(user, order.getTicker());
         if (holding.isEmpty() || holding.get().getQuantity() < order.getQuantity()) {
@@ -187,7 +193,7 @@ public class OrderExecutionService {
             return null;
         }
 
-        // 2. Create Trade entity
+        // 2. Create Trade entity (use executionPrice which may differ from order.getPrice() for MARKET orders)
         Trade trade = new Trade(
             order,
             user,
@@ -195,14 +201,14 @@ public class OrderExecutionService {
             order.getAssetType(),
             order.getActionType(),
             order.getQuantity(),
-            order.getPrice(),
+            executionPrice,
             order.getCurrency(),
             actualFee,
             LocalDateTime.now()
         );
 
         // 3. Calculate proceeds (price - fee, fee is deducted from sale proceeds)
-        BigDecimal grossProceeds = order.getPrice().multiply(new BigDecimal(order.getQuantity()));
+        BigDecimal grossProceeds = executionPrice.multiply(new BigDecimal(order.getQuantity()));
         BigDecimal netProceeds = grossProceeds.subtract(actualFee);
 
         // 4. Update cash balance (credit with net proceeds)
@@ -228,14 +234,11 @@ public class OrderExecutionService {
         return trade;
     }
 
-    /**
-     * Marks an order as rejected with a reason.
-     * Called when order cannot be executed despite passing validation.
-     */
+    // atomicity maintained via @Transactional
+    @Transactional(propagation = Propagation.REQUIRED)
     private void markOrderAsRejected(Order order, String reason) {
         order.setOrderStatus("REJECTED");
         orderRepository.save(order);
-        // TODO: Optionally log rejection reason to a rejection_reason column or audit table
     }
 
     /**

@@ -27,17 +27,11 @@ public class Order {
     @Column(name = "action_type", nullable = false)
     private String actionType;
     
-    @Column(name = "order_type", nullable = false)
-    private String orderType;
-    
     @Column(name = "qty", nullable = false)
     private Integer quantity;
     
     @Column(name = "price", nullable = false, precision = 38, scale = 2)
     private BigDecimal price;
-    
-    @Column(name = "timing", nullable = false)
-    private String timing;
     
     @Column(name = "order_status", nullable = false)
     private String orderStatus;
@@ -57,16 +51,14 @@ public class Order {
     }
     
     public Order(UserProfile userProfile, String ticker, String assetType, String actionType,
-                 String orderType, Integer quantity, BigDecimal price, String timing,
-                 String orderStatus, LocalDateTime submittedAt, String currency) {
+                Integer quantity, BigDecimal price,
+                String orderStatus, LocalDateTime submittedAt, String currency) {
         this.userProfile = userProfile;
         this.ticker = ticker;
         this.assetType = assetType;
         this.actionType = actionType;
-        this.orderType = orderType;
         this.quantity = quantity;
         this.price = price;
-        this.timing = timing;
         this.orderStatus = orderStatus;
         this.submittedAt = submittedAt;
         this.currency = currency;
@@ -113,14 +105,6 @@ public class Order {
         this.actionType = actionType;
     }
     
-    public String getOrderType() {
-        return orderType;
-    }
-    
-    public void setOrderType(String orderType) {
-        this.orderType = orderType;
-    }
-    
     public Integer getQuantity() {
         return quantity;
     }
@@ -135,14 +119,6 @@ public class Order {
     
     public void setPrice(BigDecimal price) {
         this.price = price;
-    }
-    
-    public String getTiming() {
-        return timing;
-    }
-    
-    public void setTiming(String timing) {
-        this.timing = timing;
     }
     
     public String getOrderStatus() {

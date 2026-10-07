@@ -6,6 +6,7 @@ import com.matador.app.entity.Cash;
 import com.matador.app.entity.UserProfile;
 import com.matador.app.repository.CashRepository;
 import com.matador.app.service.FeeCalculator;
+import com.matador.app.service.PricingService;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -30,7 +31,7 @@ public class FundsValidator {
     private final CashRepository cashRepository;
     private final FeeCalculator feeCalculator;
 
-    public FundsValidator(CashRepository cashRepository, FeeCalculator feeCalculator) {
+    public FundsValidator(CashRepository cashRepository, FeeCalculator feeCalculator, PricingService pricingService) {
         this.cashRepository = cashRepository;
         this.feeCalculator = feeCalculator;
     }
@@ -38,7 +39,7 @@ public class FundsValidator {
     /**
      * Validates that user has sufficient funds for a BUY order
      * Calculation: requiredFunds = (quantity × price) + (order_cost × asset_type_fee_rate)
-     * 
+     *
      * Fee rates:
      * - EQUITY: 0%
      * - CRYPTO: 0.35%
@@ -60,8 +61,10 @@ public class FundsValidator {
 
         Cash account = cashAccount.get();
 
+        BigDecimal price = request.price();
+
         // Calculate required funds including asset-type-specific trading fee
-        BigDecimal orderCost = request.price().multiply(new BigDecimal(request.quantity()));
+        BigDecimal orderCost = price.multiply(new BigDecimal(request.quantity()));
         BigDecimal estimatedFee = feeCalculator.calculateFee(orderCost, request.assetType());
         BigDecimal requiredFunds = orderCost.add(estimatedFee);
 
