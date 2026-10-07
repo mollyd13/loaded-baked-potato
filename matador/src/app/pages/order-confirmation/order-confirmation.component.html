@@ -1,0 +1,13 @@
+<div class="order-confirmation">
+    <mat-card class="detail-card">
+      <div class="card-header">
+        <h3>Order Confirmation</h3>
+        <span class="pill"></span>
+      </div>
+
+      <div class="detail-row">
+        <span>Execution Price</span>
+        <span class="detail-mode">{{ orderRequest?.price | currency: 'USD' }}</span>
+      </div>
+    </mat-card>
+</div>

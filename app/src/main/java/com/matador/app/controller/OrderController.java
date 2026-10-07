@@ -16,7 +16,7 @@ import com.matador.app.service.OrderExecutionService;
 import java.math.BigDecimal;
 
 @RestController
-@RequestMapping("/orders")
+@RequestMapping("/api/orders")
 public class OrderController {
 
     private final SubmitOrder submitOrderService;

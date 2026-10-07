@@ -13,6 +13,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { PlaceOrderService } from '../../services/place-order.service';
 import { OrderRequest } from '../../models/order-request.model';
+import { OrderResponse } from '../../models/order-response.model';
 
 /** Flat per-order commission, in the account's currency. */
 const SYSTEM_FEE = 2.5;
@@ -175,24 +176,28 @@ export class TradeComponent implements OnInit {
       return;
     }
     const orderRequest: OrderRequest = {
-      user_id: 1, // Replace with actual user ID
       ticker: this.data?.data.symbol ?? 'N/A',
-      asset_type: 'EQUITY', // Replace with actual asset type
-      action_type: this.orderForm.value.action,
-      order_type: this.orderTypeLabel.toUpperCase(),
+      assetType: 'EQUITY',
+      actionType: this.orderForm.value.action,
       quantity: this.orderForm.value.quantity,
       price: this.executionPrice,
-      timing: this.orderForm.value.timing, // Replace with actual timing if needed
-      currency: 'USD' // Replace with actual currency if needed
+      currency: 'USD'
     };
-    this.placeOrderService.placeOrder(orderRequest);
-    this.router.navigate(['/order-confirmation'],
-      {
-        queryParams: {
-          orderRequest: JSON.stringify(orderRequest)
-        }
+    
+    this.placeOrderService.placeOrder(orderRequest).subscribe({
+      next: (orderResponse: OrderResponse) => {
+        console.log('Order placed successfully:', orderResponse);
+        this.router.navigate(['/order-confirmation'], {
+          queryParams: {
+            orderResponse: JSON.stringify(orderResponse)
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Order submission failed:', err);
+        this.errorMessage = err.error?.message || 'Failed to submit order. Please try again.';
       }
-    );
+    });
   }
 
   abortOperation(): void {

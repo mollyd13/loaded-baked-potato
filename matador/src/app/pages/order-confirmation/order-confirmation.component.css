@@ -1,0 +1,95 @@
+.order-confirmation {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 20px;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+/* Numeric values share the terminal-style monospace face. */
+.detail-row > span:last-child,
+.detail-total-value {
+  font-family: "Roboto Mono", "Courier New", monospace;
+  font-weight: 600;
+}
+
+/* Label on the left, value on the right. */
+.card-header,
+.detail-row,
+.detail-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.trade-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.detail-card {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 20px 24px;
+}
+
+.card-header {
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.pill {
+  padding: 4px 10px;
+  background: #0000000d;
+  color: var(--text-color);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Detail rows */
+
+.detail-row {
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.detail-row > span:last-child {
+  text-align: right;
+}
+
+.detail-total {
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px solid #0000001a;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.detail-total-value {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+
+
+@media (max-width: 1100px) {
+  .order-confirmation {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
