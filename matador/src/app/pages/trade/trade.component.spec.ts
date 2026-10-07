@@ -58,67 +58,31 @@ describe('TradeComponent', () => {
   it('should default to a 10 share buy of the quoted symbol', () => {
     expect(component.orderForm.value.action).toBe('BUY');
     expect(component.orderForm.value.quantity).toBe(10);
-    expect(component.orderForm.value.limitPrice).toBeNull();
     expect(component.data?.data.symbol).toBe('NVDA');
   });
 
-  describe('cost calculation', () => {
+  describe('cost and quantitycalculation', () => {
     it('should price a market order off the live quote plus the system fee', () => {
       expect(component.executionPrice).toBe(485.20);
       expect(component.subtotal).toBeCloseTo(4852.00, 2);
       expect(component.estimatedTotal).toBeCloseTo(4854.50, 2);
     });
 
-    it('should price off the limit price once one is entered', () => {
-      component.orderForm.patchValue({ limitPrice: 480 });
-
-      expect(component.executionPrice).toBe(480);
-      expect(component.estimatedTotal).toBeCloseTo(4802.50, 2);
-      expect(component.orderTypeLabel).toBe('Limit');
-    });
-
-    it('should ignore a zero or negative limit price', () => {
-      component.orderForm.patchValue({ limitPrice: 0 });
-      expect(component.executionPrice).toBe(485.20);
-
-      component.orderForm.patchValue({ limitPrice: -25 });
-      expect(component.executionPrice).toBe(485.20);
-      expect(component.orderTypeLabel).toBe('Market');
-    });
-
     it('should track quantity changes in the estimated total', () => {
       component.orderForm.patchValue({ quantity: 1 });
       expect(component.estimatedTotal).toBeCloseTo(487.70, 2);
     });
-  });
 
-  describe('quantity stepper', () => {
-    it('should increment and decrement by one share', () => {
-      component.incrementQuantity();
-      expect(component.orderForm.value.quantity).toBe(11);
-
-      component.decrementQuantity();
-      expect(component.orderForm.value.quantity).toBe(10);
+    it('should update the quantity field when the price field changes', () => {
+      component.orderForm.patchValue({ price: 970.40 });
+      component.onPriceChange();
+      expect(component.orderForm.value.quantity).toBeCloseTo(2, 2);
     });
 
-    it('should not decrement below a single share', () => {
-      component.orderForm.patchValue({ quantity: 1 });
-      component.decrementQuantity();
-      expect(component.orderForm.value.quantity).toBe(1);
-    });
-
-    it('should clamp typed input to whole shares with minimum of 1', () => {
-      component.onQuantityChange('25');
-      expect(component.orderForm.value.quantity).toBe(25);
-
-      component.onQuantityChange(12.9);
-      expect(component.orderForm.value.quantity).toBe(12);
-
-      component.onQuantityChange(-4);
-      expect(component.orderForm.value.quantity).toBe(1);
-
-      component.onQuantityChange('abc');
-      expect(component.orderForm.value.quantity).toBe(1);
+    it('should update the price field when the quantity field changes', () => {
+      component.orderForm.patchValue({ quantity: 2 });
+      component.onQuantityChange();
+      expect(component.orderForm.value.price).toBeCloseTo(970.40, 2);
     });
   });
 
@@ -130,12 +94,6 @@ describe('TradeComponent', () => {
     it('should show transaction mode for SELL', () => {
       component.orderForm.patchValue({ action: 'SELL' });
       expect(component.transactionMode).toBe('INSTANT SELL (NVDA)');
-    });
-
-    it('should update order type label when action changes', () => {
-      expect(component.orderTypeLabel).toBe('Market');
-      component.orderForm.patchValue({ limitPrice: 480 });
-      expect(component.orderTypeLabel).toBe('Limit');
     });
   });
 
@@ -196,42 +154,16 @@ describe('TradeComponent', () => {
     });
   });
 
-  describe('limit price adjustment', () => {
-    it('should increment limit price by 0.01', () => {
-      component.orderForm.patchValue({ limitPrice: 480.00 });
-      component.incrementLimit();
-      expect(component.orderForm.value.limitPrice).toBe(480.01);
-    });
-
-    it('should decrement limit price by 0.01', () => {
-      component.orderForm.patchValue({ limitPrice: 480.50 });
-      component.decrementLimit();
-      expect(component.orderForm.value.limitPrice).toBeCloseTo(480.49, 2);
-    });
-
-    it('should not decrement limit price below 0', () => {
-      component.orderForm.patchValue({ limitPrice: 0.005 });
-      component.decrementLimit();
-      expect(component.orderForm.value.limitPrice).toBeLessThanOrEqual(0);
-    });
-  });
-
-  describe('fee calculation', () => {
-    it('should expose the system fee', () => {
-      expect(component.fee).toBe(2.5);
-    });
-  });
 
   describe('abort operation', () => {
     it('should reset form to defaults', () => {
       component.orderForm.patchValue({
         quantity: 50,
-        limitPrice: 500,
         action: 'SELL'
       });
       component.abortOperation();
       expect(component.orderForm.value.quantity).toBe(10);
-      expect(component.orderForm.value.limitPrice).toBeNull();
+      expect(component.orderForm.value.price).toBeCloseTo(485.20*10, 2);
       expect(component.orderForm.value.action).toBe('BUY');
     });
   });

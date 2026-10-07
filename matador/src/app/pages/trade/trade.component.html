@@ -60,12 +60,6 @@
         <mat-card class="form-card">
           <div class="card-header">
             <h3>Order Form</h3>
-            <div class="card-header-meta">
-              <mat-select class="pill timing-select" formControlName="timing">
-                <mat-option value="DAY">DAY</mat-option>
-                <mat-option value="GTC">GTC</mat-option>
-              </mat-select>
-            </div>
           </div>
 
         <div class="ticker-search">
@@ -116,26 +110,18 @@
         </div>
 
         <div class="field-label-container">
-        <label class="field-label" for="share-quantity">Share Quantity</label>
+        <label class="field-label" for="share-quantity">Quantity</label>
         </div>
-        <div class="field stepper-field">
-          <input formControlName="quantity" id="share-quantity" type="number" min="1" >
-          <div class="stepper-buttons">
-            <button type="button" aria-label="Decrease quantity" (click)="decrementQuantity()">&minus;</button>
-            <button type="button" aria-label="Increase quantity" (click)="incrementQuantity()">+</button>
-          </div>
+        <div class="field">
+          <input formControlName="quantity" id="share-quantity" type="number" min="0" (input)="onQuantityChange()">
         </div>
 
-      <label class="field-label" for="limit-price">Limit Price (Optional)</label>
-        <div class="field stepper-field">
-          <input formControlName="limitPrice" id="limit-price" type="number" min="0" >
-          <span class="order-type-indicator">{{ orderTypeLabel }}</span>
-          <div class="stepper-buttons">
-            <button type="button" aria-label="Decrease limit" (click)="decrementLimit()">&minus;</button>
-            <button type="button" aria-label="Increase limit" (click)="incrementLimit()">+</button>
-          </div>
+        <div class="field-label-container">
+        <label class="field-label" for="price">Price</label>
         </div>
-
+        <div class="field">
+          <input formControlName="price" id="price" type="number" min="0" (input)="onPriceChange()">
+        </div>
 
         <div class="cost-summary">
           <div class="cost-row total">
