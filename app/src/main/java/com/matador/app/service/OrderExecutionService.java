@@ -94,7 +94,8 @@ public class OrderExecutionService {
 
         // 2. Check if market is open for this asset type
         if (!marketHoursValidator.isMarketOpen(order.getAssetType())) {
-            return null; // Skip execution, market closed
+            markOrderAsRejected(order, "Market is closed for " + order.getAssetType());
+            return null;
         }
 
         // 3. Get user and their cash account
