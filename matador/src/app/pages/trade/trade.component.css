@@ -443,3 +443,28 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Chart range toggle */
+
+.range-toggle {
+  display: flex;
+  gap: 4px;
+  margin-top: 12px;
+}
+
+.range-option {
+  padding: 4px 10px;
+  border: 1px solid var(--secondary-color);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-color);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.range-option.selected {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--light-text-color);
+}

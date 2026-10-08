@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TradeComponent } from './trade.component';
-import { ApiService, StockQuote } from '../../api.service';
+import { ApiService, StockCandles, StockQuote } from '../../api.service';
 import { PlaceOrderService } from '../../services/place-order.service';
 import { HttpResponse } from '@angular/common/http';
 import { of } from 'rxjs';
@@ -33,8 +33,23 @@ describe('TradeComponent', () => {
     statusText: 'OK'
   });
 
+  const mockCandles = new HttpResponse<StockCandles>({
+    body: {
+      data: {
+        symbol: 'NVDA',
+        interval: '1d',
+        currency: 'USD',
+        candles: [100, 110, 105, 120].map((close) => (
+          { date: '2026-10-01', open: close, high: close, low: close, close, volume: 1, synthetic: false }
+        ))
+      }
+    },
+    status: 200,
+    statusText: 'OK'
+  });
+
   beforeEach(async () => {
-    mockApiService = jasmine.createSpyObj('ApiService', ['getStockQuote']);
+    mockApiService = jasmine.createSpyObj('ApiService', ['getStockQuote', 'getStockCandles']);
     mockPlaceOrderService = jasmine.createSpyObj('PlaceOrderService', ['placeOrder']);
 
     await TestBed.configureTestingModule({
@@ -46,6 +61,7 @@ describe('TradeComponent', () => {
     }).compileComponents();
 
     mockApiService.getStockQuote.and.returnValue(of(mockHttpResponse));
+    mockApiService.getStockCandles.and.returnValue(of(mockCandles));
     fixture = TestBed.createComponent(TradeComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -59,6 +75,44 @@ describe('TradeComponent', () => {
     expect(component.orderForm.value.action).toBe('BUY');
     expect(component.orderForm.value.quantity).toBe(10);
     expect(component.data?.data.symbol).toBe('NVDA');
+  });
+
+  describe('price history chart', () => {
+    it('should load daily closes for the default 1M range', () => {
+      expect(component.history).toEqual([100, 110, 105, 120]);
+      const args = mockApiService.getStockCandles.calls.mostRecent().args;
+      expect(args[0]).toBe('AAPL'); // the ticker typed in the form
+      expect(args[3]).toBe('1d');
+      const days = (new Date(args[2]).getTime() - new Date(args[1]).getTime()) / 86400000;
+      expect(Math.round(days)).toBe(30);
+    });
+
+    it('should scale closes into polyline points within the chart box', () => {
+      const points = component.sparklinePoints.split(' ').map((p) => p.split(',').map(Number));
+      expect(points.length).toBe(4);
+      expect(points[0][0]).toBe(0);
+      expect(points[3][0]).toBe(300);
+      expect(points[3][1]).toBe(0);   // highest close sits at the top
+      expect(points[0][1]).toBe(48);  // lowest close sits at the bottom
+    });
+
+    it('should refetch when the range changes', () => {
+      component.setChartRange(component.chartRanges[0]);
+      const args = mockApiService.getStockCandles.calls.mostRecent().args;
+      const days = (new Date(args[2]).getTime() - new Date(args[1]).getTime()) / 86400000;
+      expect(Math.round(days)).toBe(7);
+      expect(component.selectedRange.label).toBe('1W');
+    });
+
+    it('should render the chart only when there is history', () => {
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('svg.sparkline')).toBeTruthy();
+
+      component.history = [];
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('svg.sparkline')).toBeNull();
+      expect(component.sparklinePoints).toBe('');
+    });
   });
 
   describe('cost and quantitycalculation', () => {
