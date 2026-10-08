@@ -41,7 +41,7 @@ public class OrderController {
             Order savedOrder = submitOrderService.submit(request);
             
             BigDecimal submissionPrice = request.price();
-            BigDecimal orderCost = submissionPrice.multiply(new BigDecimal(savedOrder.getQuantity()));
+            BigDecimal orderCost = submissionPrice.multiply(savedOrder.getQuantity());
             BigDecimal estimatedFee = feeCalculator.calculateFee(orderCost, savedOrder.getAssetType());
             
             // Attempt to execute trade immediately

@@ -7,7 +7,7 @@ public record OrderResponse(
     Integer orderId,
     String actionType,         
     String ticker,
-    Integer quantity,
+    BigDecimal quantity,
     BigDecimal price,
     BigDecimal estimatedFee,  // should be calculated like on frontend submission form, and not saved in DB
     String orderStatus        // PENDING if market closed, FILLED if executed, REJECTED if execution failed
@@ -16,7 +16,7 @@ public record OrderResponse(
             Integer orderId,
             String actionType,
             String ticker,
-            Integer quantity,
+            BigDecimal quantity,
             BigDecimal price,
             BigDecimal estimatedFee) {
         
@@ -40,7 +40,7 @@ public record OrderResponse(
             Integer orderId,
             String actionType,
             String ticker,
-            Integer quantity,
+            BigDecimal quantity,
             BigDecimal price,
             BigDecimal fee,
             String orderStatus) {

@@ -109,7 +109,7 @@ public class OrderExecutionService {
         // 4. Determine execution price and calculate actual fee
         BigDecimal executionPrice = pricingService.getCurrentPrice(order.getTicker());
 
-        BigDecimal orderCost = executionPrice.multiply(new BigDecimal(order.getQuantity()));
+        BigDecimal orderCost = executionPrice.multiply(order.getQuantity());
         BigDecimal actualFee = feeCalculator.calculateFee(orderCost, order.getAssetType());
         BigDecimal totalCost;
 
@@ -135,7 +135,7 @@ public class OrderExecutionService {
     private Trade executeBuyTrade(Order order, UserProfile user, Cash cashAccount,
                                   BigDecimal executionPrice, BigDecimal actualFee, BigDecimal totalCost) {
         // 1. Verify sufficient funds (should have been validated)
-        if (cashAccount.getBalance().compareTo(totalCost) < 0) {
+        if (totalCost != null && cashAccount.getBalance().compareTo(totalCost) < 0) {
             markOrderAsRejected(order, "Insufficient funds at execution time");
             return null;
         }
@@ -188,7 +188,7 @@ public class OrderExecutionService {
     private Trade executeSellTrade(Order order, UserProfile user, BigDecimal executionPrice, BigDecimal actualFee) {
         // 1. Verify user owns sufficient shares (should have been validated)
         Optional<Holding> holding = holdingService.getHoldingByTicker(user, order.getTicker());
-        if (holding.isEmpty() || holding.get().getQuantity() < order.getQuantity()) {
+        if (holding.isEmpty() || holding.get().getQuantity().compareTo(order.getQuantity()) < 0) {
             markOrderAsRejected(order, "Insufficient holdings at execution time");
             return null;
         }
@@ -208,7 +208,7 @@ public class OrderExecutionService {
         );
 
         // 3. Calculate proceeds (price - fee, fee is deducted from sale proceeds)
-        BigDecimal grossProceeds = executionPrice.multiply(new BigDecimal(order.getQuantity()));
+        BigDecimal grossProceeds = executionPrice.multiply(order.getQuantity());
         BigDecimal netProceeds = grossProceeds.subtract(actualFee);
 
         // 4. Update cash balance (credit with net proceeds)

@@ -31,7 +31,7 @@ public class Trade {
     private String actionType;
     
     @Column(name = "qty", nullable = false)
-    private Integer quantity;
+    private BigDecimal quantity;
     
     @Column(name = "price", nullable = false, precision = 38, scale = 2)
     private BigDecimal price;
@@ -50,7 +50,7 @@ public class Trade {
     }
     
     public Trade(Order order, UserProfile userProfile, String ticker, String assetType,
-                 String actionType, Integer quantity, BigDecimal price, String currency,
+                 String actionType, BigDecimal quantity, BigDecimal price, String currency,
                  BigDecimal fee, LocalDateTime executedAt) {
         this.order = order;
         this.userProfile = userProfile;
@@ -113,11 +113,11 @@ public class Trade {
         this.actionType = actionType;
     }
     
-    public Integer getQuantity() {
+    public BigDecimal getQuantity() {
         return quantity;
     }
     
-    public void setQuantity(Integer quantity) {
+    public void setQuantity(BigDecimal quantity) {
         this.quantity = quantity;
     }
     
