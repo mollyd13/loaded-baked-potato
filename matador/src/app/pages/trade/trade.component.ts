@@ -21,6 +21,17 @@ const SYSTEM_FEE = 2.5;
 /** Day change beyond this magnitude surfaces the volatility warning. */
 const VOLATILITY_THRESHOLD_PCT = 2;
 
+/** Selectable chart ranges, in days of daily closes (see Quote.history in models/quote.model.ts). */
+export const CHART_RANGES = [
+  { label: '1W', days: 7 },
+  { label: '1M', days: 30 },
+  { label: '3M', days: 90 },
+  { label: '1Y', days: 365 },
+] as const;
+
+const CHART_WIDTH = 300;
+const CHART_HEIGHT = 48;
+
 @Component({
   selector: 'app-trade',
   standalone: true,
@@ -33,6 +44,12 @@ export class TradeComponent implements OnInit {
   errorMessage: string | null = null;
 
   data: StockQuote | null = null;
+
+  /** Daily closing prices, oldest first; drives the sparkline (Quote.history). */
+  history: number[] = [];
+
+  readonly chartRanges = CHART_RANGES;
+  selectedRange: (typeof CHART_RANGES)[number] = CHART_RANGES[1];
 
   ngOnInit(): void {
     // Load initial ticker on component init
@@ -59,6 +76,7 @@ export class TradeComponent implements OnInit {
         if (response.status === 200 && response.body) {
           this.data = response.body;
           console.log('Data loaded:', this.data);
+          this.loadPriceHistory(upperTicker);
           this.orderForm.patchValue({ price: (this.executionPrice * this.orderForm.value.quantity).toFixed(2) });
         }
         else {
@@ -78,6 +96,43 @@ export class TradeComponent implements OnInit {
         console.error(err);
       }
     });
+  }
+
+  setChartRange(range: (typeof CHART_RANGES)[number]): void {
+    this.selectedRange = range;
+    const symbol = this.data?.data.symbol;
+    if (symbol) {
+      this.loadPriceHistory(symbol);
+    }
+  }
+
+  /** Fetches daily candles for the selected range and keeps the closes for the chart. */
+  loadPriceHistory(symbol: string): void {
+    const to = new Date();
+    const from = new Date(to.getTime() - this.selectedRange.days * 24 * 60 * 60 * 1000);
+    const iso = (d: Date) => d.toISOString().slice(0, 10);
+
+    this.history = [];
+    this.apiService.getStockCandles(symbol, iso(from), iso(to), '1d').subscribe({
+      next: (response) => {
+        const candles = response.body?.data.candles ?? [];
+        this.history = candles.map((c) => c.close);
+      },
+      error: (err) => console.error('Price history unavailable:', err)
+    });
+  }
+
+  /** SVG polyline points scaled to the chart box; empty until there are two closes. */
+  get sparklinePoints(): string {
+    if (this.history.length < 2) {
+      return '';
+    }
+    const min = Math.min(...this.history);
+    const range = Math.max(...this.history) - min || 1;
+    const step = CHART_WIDTH / (this.history.length - 1);
+    return this.history
+      .map((price, i) => `${(i * step).toFixed(1)},${(CHART_HEIGHT - ((price - min) / range) * CHART_HEIGHT).toFixed(1)}`)
+      .join(' ');
   }
 
   orderForm: FormGroup;
