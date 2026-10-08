@@ -28,7 +28,7 @@ public class Order {
     private String actionType;
     
     @Column(name = "qty", nullable = false)
-    private Integer quantity;
+    private BigDecimal quantity;
     
     @Column(name = "price", nullable = false, precision = 38, scale = 2)
     private BigDecimal price;
@@ -51,7 +51,7 @@ public class Order {
     }
     
     public Order(UserProfile userProfile, String ticker, String assetType, String actionType,
-                Integer quantity, BigDecimal price,
+                BigDecimal quantity, BigDecimal price,
                 String orderStatus, LocalDateTime submittedAt, String currency) {
         this.userProfile = userProfile;
         this.ticker = ticker;
@@ -105,11 +105,11 @@ public class Order {
         this.actionType = actionType;
     }
     
-    public Integer getQuantity() {
+    public BigDecimal getQuantity() {
         return quantity;
     }
     
-    public void setQuantity(Integer quantity) {
+    public void setQuantity(BigDecimal quantity) {
         this.quantity = quantity;
     }
     

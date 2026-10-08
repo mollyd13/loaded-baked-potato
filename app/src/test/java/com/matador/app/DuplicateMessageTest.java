@@ -34,7 +34,7 @@ class DuplicateMessageTest {
 
         UserProfile user = new UserProfile();
         Cash cash = new Cash(user, "USD", new BigDecimal("10000.00"));
-        Order order = new Order(user, "AAPL", "EQUITY", "BUY", 10,
+        Order order = new Order(user, "AAPL", "EQUITY", "BUY", new BigDecimal("10"),
             new BigDecimal("150.00"), "PENDING", LocalDateTime.now(), "USD");
 
         when(orderRepo.findByIdForUpdate(42)).thenReturn(Optional.of(order));
