@@ -91,45 +91,34 @@ export class TradeComponent implements OnInit {
     });
   }
 
-
-  /** Real-time validation: prevents user from typing more than 4 decimal places. */
-  onQuantityInput(value: unknown): void {
-    const stringValue = String(value);
-    
-    if (stringValue.includes('.')) {
-      const decimalParts = stringValue.split('.');
-      if (decimalParts[1] && decimalParts[1].length > 4) {
-        // User typed more than 4 decimals - truncate immediately
-        const truncated = decimalParts[0] + '.' + decimalParts[1].substring(0, 4);
-        this.orderForm.patchValue({ quantity: parseFloat(truncated) }, { emitEvent: false });
-        return;
-      }
-    }
+  /** Called on input - recalculates price from quantity */
+  onQuantityInput(): void {
+    const calculatedPrice = this.subtotal;
+    const truncatedPrice = Math.floor(calculatedPrice * 100) / 100;
+    this.orderForm.patchValue({ price: truncatedPrice }, { emitEvent: false });
   }
 
-  /** Validates quantity as a decimal with max 4 decimal places (NUMERIC(38,4) support). */
-  onQuantityChange(value: unknown): void {
-    const stringValue = String(value);
-    const parsed = parseFloat(stringValue);
-    
-    // Check if input has more than 4 decimal places
-    if (stringValue.includes('.')) {
-      const decimalParts = stringValue.split('.');
-      if (decimalParts[1] && decimalParts[1].length > 4) {
-        // Truncate to 4 decimal places
-        const truncated = Math.floor(parsed * 10000) / 10000;
-        this.orderForm.patchValue({ quantity: truncated });
-        return;
-      }
-    }
-    
-    if (!Number.isFinite(parsed) || parsed < 1) {
-      this.orderForm.patchValue({ quantity: 1 });
-      return;
-    }
-    // Round to 4 decimal places to match NUMERIC(38,4)
-    const rounded = Math.round(parsed * 10000) / 10000;
-    this.orderForm.patchValue({ quantity: rounded });
+  /** Called on change - rounds quantity to 4 decimal places */
+  onQuantityChange(): void {
+    const quantity = Number(this.orderForm.value.quantity);
+    const rounded = Math.round(quantity * 10000) / 10000;
+    this.orderForm.patchValue({ quantity: rounded }, { emitEvent: false });
+    this.onQuantityInput(); // recalculate price based on the new quantity
+  }
+
+  /** Called on input - recalculates quantity from price */
+  onPriceInput(): void {
+    const calculatedQuantity = this.orderForm.value.price / this.executionPrice;
+    const truncatedQuantity = Math.floor(calculatedQuantity * 10000) / 10000;
+    this.orderForm.patchValue({ quantity: truncatedQuantity }, { emitEvent: false });
+  }
+
+  /** Called on change - rounds price to 2 decimal places */
+  onPriceChange(): void {
+    const price = Number(this.orderForm.value.price);
+    const rounded = Math.round(price * 100) / 100;
+    this.orderForm.patchValue({ price: rounded }, { emitEvent: false });
+    this.onPriceInput(); // recalculate quantity based on the new price
   }
 
   /** The limit price when one is set, otherwise the live quote. */
