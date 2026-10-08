@@ -59,7 +59,7 @@ export class TradeComponent implements OnInit {
         if (response.status === 200 && response.body) {
           this.data = response.body;
           console.log('Data loaded:', this.data);
-          this.initFormValues();
+          this.orderForm.patchValue({ price: (this.executionPrice * this.orderForm.value.quantity).toFixed(2) });
         }
         else {
           this.errorMessage = `Unexpected server response: ${response.status}`;
@@ -88,45 +88,44 @@ export class TradeComponent implements OnInit {
       ticker: ['AAPL'],
       action: ["BUY"],
       quantity: [10],
-      price: null
+      price: [0],
+      timing: ['GTC'],
     });
   }
 
-  private initFormValues(): void {
-    this.orderForm.patchValue({ price: (this.orderForm.value.quantity * this.executionPrice).toFixed(2) });
-     this.orderForm = this.fb.group({
-      ticker: this.data?.data.symbol ?? 'N/A',
-      action: ["BUY"],
-      quantity: 10,
-      price: (this.executionPrice * 10.0).toFixed(2)
-    });
+  /** Called on input - recalculates price from quantity */
+  onQuantityInput(): void {
+    const calculatedPrice = this.subtotal;
+    const truncatedPrice = Math.floor(calculatedPrice * 100) / 100;
+    this.orderForm.patchValue({ price: truncatedPrice }, { emitEvent: false });
   }
 
-  fetchUserBalance(): void {
-    // Mock implementation for fetching user balance
-    const user_id = this.authService.currentUser()?.userId; 
-    this.cashService.getBalance(user_id ?? 0).subscribe({
-      next: (response) => {
-        this.availableBalance = response.balance;
-      },
-      error: (err) => {
-        console.error('Failed to fetch user balance:', err);
-      }
-    });
-  }
-
-
-  /** Change price and quantity as each field is updated */
+  /** Called on change - rounds quantity to 4 decimal places */
   onQuantityChange(): void {
-    this.orderForm.patchValue({ price: this.subtotal.toFixed(2)});
+    const quantity = Number(this.orderForm.value.quantity);
+    const rounded = Math.round(quantity * 10000) / 10000;
+    this.orderForm.patchValue({ quantity: rounded }, { emitEvent: false });
+    this.onQuantityInput(); // recalculate price based on the new quantity
   }
 
+  /** Called on input - recalculates quantity from price */
+  onPriceInput(): void {
+    const calculatedQuantity = this.orderForm.value.price / this.executionPrice;
+    const truncatedQuantity = Math.floor(calculatedQuantity * 10000) / 10000;
+    this.orderForm.patchValue({ quantity: truncatedQuantity }, { emitEvent: false });
+  }
+
+  /** Called on change - rounds price to 2 decimal places */
   onPriceChange(): void {
-    this.orderForm.patchValue({ quantity: (this.orderForm.value.price / this.executionPrice).toFixed(2) });
+    const price = Number(this.orderForm.value.price);
+    const rounded = Math.round(price * 100) / 100;
+    this.orderForm.patchValue({ price: rounded }, { emitEvent: false });
+    this.onPriceInput(); // recalculate quantity based on the new price
   }
 
+  /** The limit price when one is set, otherwise the live quote. */
   get executionPrice(): number {
-    return (Number(this.data?.data.price.toFixed(2)) ?? 0);
+    return Number((this.data?.data.price.toFixed(2) ?? 0));
   }
 
   get subtotal(): number {
@@ -179,6 +178,7 @@ export class TradeComponent implements OnInit {
 
   abortOperation(): void {
     this.orderForm.patchValue({ quantity: 10 });
+    this.orderForm.patchValue({ price: (this.executionPrice * 10).toFixed(2) });
     this.orderForm.patchValue({ action: 'BUY' });
     this.orderForm.patchValue({ price: (this.executionPrice * 10.0).toFixed(2) });
   }
