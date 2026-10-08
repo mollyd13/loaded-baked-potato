@@ -181,7 +181,7 @@ export class TradeComponent implements OnInit {
       actionType: this.orderForm.value.action,
       quantity: this.orderForm.value.quantity,
       price: this.executionPrice,
-      currency: 'USD'
+      currency: this.data?.data.currency ?? 'USD'
     };
     
     this.placeOrderService.placeOrder(orderRequest).subscribe({
@@ -194,8 +194,28 @@ export class TradeComponent implements OnInit {
         });
       },
       error: (err) => {
-        console.error('Order submission failed:', err);
-        this.errorMessage = err.error?.message || 'Failed to submit order. Please try again.';
+        console.error('Order submission error:', err);
+        console.error('Error structure:', { 
+          status: err.status, 
+          statusText: err.statusText, 
+          error: err.error,
+          message: err.message 
+        });
+        
+        let errorMessage = 'Failed to submit order. Please try again.';
+        
+        // Check if error.error has the actual response text
+        if (typeof err.error === 'string' && err.error.trim()) {
+          errorMessage = err.error;
+        } else if (err.error?.message) {
+          errorMessage = err.error.message;
+        } else if (err.statusText) {
+          errorMessage = err.statusText;
+        } else if (err.message) {
+          errorMessage = err.message;
+        }
+        
+        this.errorMessage = errorMessage;
       }
     });
   }
