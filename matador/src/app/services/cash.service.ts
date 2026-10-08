@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { Cash } from '../models/cash.model';
 
 interface BalanceResponse {
+  currency: string;
   balance: number;
 }
 @Injectable({
@@ -15,7 +16,7 @@ export class CashService {
 
   constructor(private http: HttpClient) { }
 
-  getBalance(userId: number): Observable<BalanceResponse> {
-    return this.http.get<BalanceResponse>(`api/cash/${userId}`);
+  getBalance(currency: string): Observable<BalanceResponse> {
+    return this.http.get<BalanceResponse>(`/api/cash/${currency}`);
   }
 }

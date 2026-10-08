@@ -36,11 +36,11 @@ export class TradeComponent implements OnInit {
   
   orderForm: FormGroup;
   availableBalance: number;
+  currency: string;
 
   ngOnInit(): void {
     // Load initial ticker and calculate initial price on component init
     this.loadStockQuote();
-    this.fetchUserBalance();
   }
 
   loadStockQuote(): void {
@@ -63,7 +63,9 @@ export class TradeComponent implements OnInit {
         if (response.status === 200 && response.body) {
           this.data = response.body;
           console.log('Data loaded:', this.data);
-          this.orderForm.patchValue({ price: (this.executionPrice * this.orderForm.value.quantity).toFixed(2) });
+          this.initCurrency();
+          this.initPrice();
+          this.fetchUserBalance();
         }
         else {
           this.errorMessage = `Unexpected server response: ${response.status}`;
@@ -93,6 +95,15 @@ export class TradeComponent implements OnInit {
       timing: ['GTC'],
     });
     this.availableBalance = 0;
+    this.currency = '';
+  }
+
+  initCurrency(): void {
+    this.currency = this.data?.data.currency ?? '';
+  }
+
+  initPrice(): void {
+    this.orderForm.patchValue({ price: (this.executionPrice * this.orderForm.value.quantity).toFixed(2) });
   }
 
   /** Called on input - recalculates price from quantity */
@@ -126,8 +137,7 @@ export class TradeComponent implements OnInit {
   }
 
   fetchUserBalance(): void {
-    const user_id = this.authService.currentUser()?.userId; 
-    this.cashService.getBalance(user_id ?? 0).subscribe({
+    this.cashService.getBalance(this.currency).subscribe({
       next: (response) => {
         this.availableBalance = response.balance;
         console.log('Fetched user balance:', this.availableBalance);
