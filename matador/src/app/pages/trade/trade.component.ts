@@ -92,14 +92,44 @@ export class TradeComponent implements OnInit {
   }
 
 
-  /** Clamps whatever the user typed into [1, Infinity] as a whole number. */
+  /** Real-time validation: prevents user from typing more than 4 decimal places. */
+  onQuantityInput(value: unknown): void {
+    const stringValue = String(value);
+    
+    if (stringValue.includes('.')) {
+      const decimalParts = stringValue.split('.');
+      if (decimalParts[1] && decimalParts[1].length > 4) {
+        // User typed more than 4 decimals - truncate immediately
+        const truncated = decimalParts[0] + '.' + decimalParts[1].substring(0, 4);
+        this.orderForm.patchValue({ quantity: parseFloat(truncated) }, { emitEvent: false });
+        return;
+      }
+    }
+  }
+
+  /** Validates quantity as a decimal with max 4 decimal places (NUMERIC(38,4) support). */
   onQuantityChange(value: unknown): void {
-    const parsed = Math.floor(Number(value));
+    const stringValue = String(value);
+    const parsed = parseFloat(stringValue);
+    
+    // Check if input has more than 4 decimal places
+    if (stringValue.includes('.')) {
+      const decimalParts = stringValue.split('.');
+      if (decimalParts[1] && decimalParts[1].length > 4) {
+        // Truncate to 4 decimal places
+        const truncated = Math.floor(parsed * 10000) / 10000;
+        this.orderForm.patchValue({ quantity: truncated });
+        return;
+      }
+    }
+    
     if (!Number.isFinite(parsed) || parsed < 1) {
       this.orderForm.patchValue({ quantity: 1 });
       return;
     }
-    this.orderForm.patchValue({ quantity: parsed });
+    // Round to 4 decimal places to match NUMERIC(38,4)
+    const rounded = Math.round(parsed * 10000) / 10000;
+    this.orderForm.patchValue({ quantity: rounded });
   }
 
   /** The limit price when one is set, otherwise the live quote. */
@@ -137,7 +167,7 @@ export class TradeComponent implements OnInit {
   }
 
   get canTransmit(): boolean {
-    return this.orderForm.value.quantity > 0 && !this.exceedsBalance;
+    return this.orderForm.value.quantity >= 1 && !this.exceedsBalance;
   }
 
   get fee(): number {

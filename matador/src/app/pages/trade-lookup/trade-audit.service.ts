@@ -34,7 +34,7 @@ export interface TradeRecord {
   instrument: string;
   assetClass: string;
   side: TradeSide;
-  quantity: number;
+  quantity: number;  // Supports NUMERIC(38,4) - up to 4 decimal places from backend
   orderType: 'Market' | 'Limit';
   limitPrice: number | null;
   currency: string;
