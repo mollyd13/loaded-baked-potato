@@ -12,6 +12,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { PlaceOrderService } from '../../services/place-order.service';
 import { OrderRequest } from '../../models/order-request.model';
+import { CashService } from '../../services/cash.service';
+import { AuthService } from '../../services/auth.service';
 
 /** Flat per-order commission, in the account's currency. */
 const SYSTEM_FEE = 2.5;
@@ -33,7 +35,7 @@ export class TradeComponent implements OnInit {
   data: StockQuote | null = null;
 
   ngOnInit(): void {
-    // Load initial ticker on component init
+    // Load initial ticker and calculate initial price on component init
     this.loadStockQuote();
   }
 
@@ -57,6 +59,7 @@ export class TradeComponent implements OnInit {
         if (response.status === 200 && response.body) {
           this.data = response.body;
           console.log('Data loaded:', this.data);
+          this.initFormValues();
         }
         else {
           this.errorMessage = `Unexpected server response: ${response.status}`;
@@ -80,35 +83,50 @@ export class TradeComponent implements OnInit {
   orderForm: FormGroup;
   availableBalance = 10000; // Mock available balance
 
-  constructor(private placeOrderService: PlaceOrderService, private fb : FormBuilder) {
+  constructor(private placeOrderService: PlaceOrderService, private fb : FormBuilder, private cashService: CashService, private authService: AuthService) {
     this.orderForm = this.fb.group({
       ticker: ['AAPL'],
       action: ["BUY"],
       quantity: [10],
-      limitPrice: [null],
-      orderType: ['Market'],
-      timing: ['GTC'],
+      price: null
+    });
+  }
+
+  private initFormValues(): void {
+    this.orderForm.patchValue({ price: (this.orderForm.value.quantity * this.executionPrice).toFixed(2) });
+     this.orderForm = this.fb.group({
+      ticker: this.data?.data.symbol ?? 'N/A',
+      action: ["BUY"],
+      quantity: 10,
+      price: (this.executionPrice * 10.0).toFixed(2)
+    });
+  }
+
+  fetchUserBalance(): void {
+    // Mock implementation for fetching user balance
+    const user_id = this.authService.currentUser()?.userId; 
+    this.cashService.getBalance(user_id ?? 0).subscribe({
+      next: (response) => {
+        this.availableBalance = response.balance;
+      },
+      error: (err) => {
+        console.error('Failed to fetch user balance:', err);
+      }
     });
   }
 
 
-  /** Clamps whatever the user typed into [1, Infinity] as a whole number. */
-  onQuantityChange(value: unknown): void {
-    const parsed = Math.floor(Number(value));
-    if (!Number.isFinite(parsed) || parsed < 1) {
-      this.orderForm.patchValue({ quantity: 1 });
-      return;
-    }
-    this.orderForm.patchValue({ quantity: parsed });
+  /** Change price and quantity as each field is updated */
+  onQuantityChange(): void {
+    this.orderForm.patchValue({ price: this.subtotal.toFixed(2)});
   }
 
-  /** The limit price when one is set, otherwise the live quote. */
+  onPriceChange(): void {
+    this.orderForm.patchValue({ quantity: (this.orderForm.value.price / this.executionPrice).toFixed(2) });
+  }
+
   get executionPrice(): number {
-    return this.orderForm.value.limitPrice && this.orderForm.value.limitPrice > 0 ? this.orderForm.value.limitPrice : (this.data?.data.price ?? 0);
-  }
-
-  get orderTypeLabel(): string {
-    return this.orderForm.value.limitPrice && this.orderForm.value.limitPrice > 0 ? 'Limit' : 'Market';
+    return (Number(this.data?.data.price.toFixed(2)) ?? 0);
   }
 
   get subtotal(): number {
@@ -144,44 +162,16 @@ export class TradeComponent implements OnInit {
     return SYSTEM_FEE;
   }
 
-
-  decrementQuantity(): void {
-    const currentQuantity = this.orderForm.value.quantity;
-    if (currentQuantity > 1) {
-      this.orderForm.patchValue({ quantity: currentQuantity - 1 });
-    }
-  }
-
-  incrementQuantity(): void {
-    const currentQuantity = this.orderForm.value.quantity;
-    this.orderForm.patchValue({ quantity: currentQuantity + 1 });
-  }
-
-  decrementLimit(): void {
-    const currentLimit = this.orderForm.value.limitPrice;
-    if (currentLimit > 0) {
-      this.orderForm.patchValue({ limitPrice: Number((currentLimit - .01).toFixed(2)) });
-    }
-  }
-
-  incrementLimit(): void {
-    const currentLimit = this.orderForm.value.limitPrice;
-    this.orderForm.patchValue({ limitPrice: Number((currentLimit + .01).toFixed(2)) });
-  }
-
   transmitOrder(): void {
     if (!this.canTransmit) {
       return;
     }
     const orderRequest: OrderRequest = {
-      user_id: 1, // Replace with actual user ID
       ticker: this.data?.data.symbol ?? 'N/A',
       asset_type: 'EQUITY', // Replace with actual asset type
       action_type: this.orderForm.value.action,
-      order_type: this.orderTypeLabel.toUpperCase(),
       quantity: this.orderForm.value.quantity,
       price: this.executionPrice,
-      timing: this.orderForm.value.timing, // Replace with actual timing if needed
       currency: 'USD' // Replace with actual currency if needed
     };
     this.placeOrderService.placeOrder(orderRequest);
@@ -189,8 +179,8 @@ export class TradeComponent implements OnInit {
 
   abortOperation(): void {
     this.orderForm.patchValue({ quantity: 10 });
-    this.orderForm.patchValue({ limitPrice: null });
     this.orderForm.patchValue({ action: 'BUY' });
+    this.orderForm.patchValue({ price: (this.executionPrice * 10.0).toFixed(2) });
   }
 
   saveTemplate(): void {
