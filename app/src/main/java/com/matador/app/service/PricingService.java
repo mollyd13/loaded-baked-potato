@@ -17,7 +17,7 @@ public class PricingService {
 
     private final RestTemplate restTemplate;
 
-    @Value("${pricing.api.url:https://y4t9nq2bqf.execute-api.eu-west-2.amazonaws.com/v1/quotes")
+    @Value("${pricing.api.url:https://y4t9nq2bqf.execute-api.eu-west-2.amazonaws.com/v1/quotes}")
     private String pricingApiUrl;
 
     @Value("${pricing.api.key:}")

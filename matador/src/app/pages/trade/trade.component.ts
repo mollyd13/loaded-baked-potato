@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,6 +13,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { PlaceOrderService } from '../../services/place-order.service';
 import { OrderRequest } from '../../models/order-request.model';
+import { OrderResponse } from '../../models/order-response.model';
 
 /** Flat per-order commission, in the account's currency. */
 const SYSTEM_FEE = 2.5;
@@ -81,7 +83,7 @@ export class TradeComponent implements OnInit {
   orderForm: FormGroup;
   availableBalance = 10000; // Mock available balance
 
-  constructor(private placeOrderService: PlaceOrderService, private fb : FormBuilder) {
+  constructor(private placeOrderService: PlaceOrderService, private fb : FormBuilder, private router: Router) {
     this.orderForm = this.fb.group({
       ticker: ['AAPL'],
       action: ["BUY"],
@@ -165,13 +167,27 @@ export class TradeComponent implements OnInit {
     }
     const orderRequest: OrderRequest = {
       ticker: this.data?.data.symbol ?? 'N/A',
-      asset_type: 'EQUITY', // Replace with actual asset type
-      action_type: this.orderForm.value.action,
+      assetType: 'EQUITY',
+      actionType: this.orderForm.value.action,
       quantity: this.orderForm.value.quantity,
       price: this.executionPrice,
-      currency: 'USD' // Replace with actual currency if needed
+      currency: 'USD'
     };
-    this.placeOrderService.placeOrder(orderRequest);
+    
+    this.placeOrderService.placeOrder(orderRequest).subscribe({
+      next: (orderResponse: OrderResponse) => {
+        console.log('Order placed successfully:', orderResponse);
+        this.router.navigate(['/order-confirmation'], {
+          queryParams: {
+            orderResponse: JSON.stringify(orderResponse)
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Order submission failed:', err);
+        this.errorMessage = err.error?.message || 'Failed to submit order. Please try again.';
+      }
+    });
   }
 
   abortOperation(): void {

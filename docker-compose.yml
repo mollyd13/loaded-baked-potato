@@ -10,6 +10,7 @@ services:
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SERVER_PORT: ${SERVER_PORT}
+      PRICING_API_KEY: ${PRICING_API_KEY}
     depends_on:
       primary:
         condition: service_healthy

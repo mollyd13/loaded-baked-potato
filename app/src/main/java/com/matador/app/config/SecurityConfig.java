@@ -1,5 +1,6 @@
 package com.matador.app.config;
 
+import org.springframework.http.HttpMethod;
 import com.matador.app.security.UserProfileDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,6 +30,7 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/csrf").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/orders").authenticated()
                 .anyRequest().authenticated()
             )
             // Server-side sessions: the security context lives in the HttpSession
