@@ -4,11 +4,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.matador.app.service.CashService;
-import com.matador.app.entity.Cash;
+import com.matador.app.dto.CashResponse;
 import org.springframework.http.ResponseEntity;
 
 @RestController
-@RequestMapping("/cash")
+@RequestMapping("/api/cash")
 public class CashController {
 
     private CashService cashService;
@@ -17,9 +17,9 @@ public class CashController {
         this.cashService = cashService;
     }
 
-    // Endpoint to get cash details by ID
-    @GetMapping("/{id}")
-    public ResponseEntity<Cash> getCash(@PathVariable("id") Integer id) {
-        return ResponseEntity.ok(cashService.getCash(id));
+    // Endpoint to get cash details by currency
+    @GetMapping("/{currency}")
+    public ResponseEntity<CashResponse> getCash(@PathVariable("currency") String currency) {
+        return ResponseEntity.ok(cashService.getCash(currency));
     }
 }
