@@ -144,6 +144,7 @@ export class TradeComponent implements OnInit {
       },
       error: (err) => {
         console.error('Failed to fetch user balance:', err);
+        this.availableBalance = 0;
       }
     });
   }
