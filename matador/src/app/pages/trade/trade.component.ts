@@ -33,10 +33,14 @@ export class TradeComponent implements OnInit {
   errorMessage: string | null = null;
 
   data: StockQuote | null = null;
+  
+  orderForm: FormGroup;
+  availableBalance: number;
 
   ngOnInit(): void {
     // Load initial ticker and calculate initial price on component init
     this.loadStockQuote();
+    this.fetchUserBalance();
   }
 
   loadStockQuote(): void {
@@ -80,9 +84,6 @@ export class TradeComponent implements OnInit {
     });
   }
 
-  orderForm: FormGroup;
-  availableBalance = 10000; // Mock available balance
-
   constructor(private placeOrderService: PlaceOrderService, private fb : FormBuilder, private cashService: CashService, private authService: AuthService) {
     this.orderForm = this.fb.group({
       ticker: ['AAPL'],
@@ -91,6 +92,7 @@ export class TradeComponent implements OnInit {
       price: [0],
       timing: ['GTC'],
     });
+    this.availableBalance = 0;
   }
 
   /** Called on input - recalculates price from quantity */
@@ -121,6 +123,19 @@ export class TradeComponent implements OnInit {
     const rounded = Math.round(price * 100) / 100;
     this.orderForm.patchValue({ price: rounded }, { emitEvent: false });
     this.onPriceInput(); // recalculate quantity based on the new price
+  }
+
+  fetchUserBalance(): void {
+    const user_id = this.authService.currentUser()?.userId; 
+    this.cashService.getBalance(user_id ?? 0).subscribe({
+      next: (response) => {
+        this.availableBalance = response.balance;
+        console.log('Fetched user balance:', this.availableBalance);
+      },
+      error: (err) => {
+        console.error('Failed to fetch user balance:', err);
+      }
+    });
   }
 
   /** The limit price when one is set, otherwise the live quote. */
