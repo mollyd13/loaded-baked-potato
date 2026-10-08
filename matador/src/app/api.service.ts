@@ -55,6 +55,7 @@ export interface StockCandle {
     high: number;
     low: number;
     close: number;
+    adjclose?: number;
     volume: number;
     synthetic: boolean;
 }
@@ -63,9 +64,7 @@ export interface StockCandlesData {
     symbol: string;
     interval: string;
     currency: string;
-    candles: Array<{
-        candle: StockCandle;
-    }>;
+    candles: StockCandle[];
 }
 
 export interface StockCandles {
