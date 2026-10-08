@@ -1,4 +1,5 @@
 package com.matador.app.controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,7 +18,7 @@ public class CashController {
     }
 
     // Endpoint to get cash details by ID
-    @RequestMapping("/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Cash> getCash(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(cashService.getCash(id));
     }
