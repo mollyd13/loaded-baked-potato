@@ -10,19 +10,14 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 /**
- * Validates market hours based on asset type and order timing.
+ * Validates market hours for market orders based on asset type.
  * Enforces trading hour restrictions for different asset classes:
  * 
  * - EQUITY: 9:30 AM - 4:00 PM ET (Mon-Fri)
- *   - DAY orders rejected outside regular hours
- *   - GTC orders allowed anytime (execute at market open)
- *   - Weekend orders rejected
  * 
  * - CRYPTO: 24/7 trading (no restrictions)
  * 
  * - FX: Sunday 5:00 PM ET - Friday 5:00 PM ET
- *   - Closed Friday 5:00 PM ET - Sunday 5:00 PM ET
- *   - Same restrictions for DAY/GTC orders
  */
 @Component
 public class MarketHoursValidator {
@@ -46,6 +41,53 @@ public class MarketHoursValidator {
     }
 
     /**
+     * Checks if the market is open for a given asset type (for trade execution).
+     * 
+     * @param assetType the asset type (EQUITY, CRYPTO, FX)
+     * @return true if market is open for trading, false otherwise
+     */
+    public boolean isMarketOpen(String assetType) {
+        String type = assetType.toUpperCase();
+        
+        return switch (type) {
+            case "CRYPTO" -> true; // Always open
+            case "EQUITY" -> isMarketOpenEquity();
+            case "FX" -> isMarketOpenFX();
+            default -> false;
+        };
+    }
+
+    /**
+     * Checks if equity markets are open (9:30 AM - 4:00 PM ET, Monday-Friday)
+     */
+    private boolean isMarketOpenEquity() {
+        ZonedDateTime nowET = ZonedDateTime.now(ET_ZONE);
+        LocalTime currentTime = nowET.toLocalTime();
+        DayOfWeek dayOfWeek = nowET.getDayOfWeek();
+
+        boolean isWeekday = dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY;
+        LocalTime marketOpen = LocalTime.of(9, 30);
+        LocalTime marketClose = LocalTime.of(16, 0);
+        
+        boolean isWithinRegularHours = (currentTime.isAfter(marketOpen) || currentTime.equals(marketOpen)) &&
+                                       (currentTime.isBefore(marketClose) || currentTime.equals(marketClose));
+
+        return isWeekday && isWithinRegularHours;
+    }
+
+    /**
+     * Checks if FX markets are open (Sunday 5:00 PM ET - Friday 5:00 PM ET)
+     */
+    private boolean isMarketOpenFX() {
+        ZonedDateTime nowET = ZonedDateTime.now(ET_ZONE);
+        LocalTime currentTime = nowET.toLocalTime();
+        DayOfWeek dayOfWeek = nowET.getDayOfWeek();
+        LocalTime sessionBoundary = LocalTime.of(17, 0);
+
+        return isMarketOpenFXHelper(dayOfWeek, currentTime, sessionBoundary);
+    }
+
+    /**
      * Crypto trades 24/7, no market hours restriction
      */
     private ValidationResult validateCryptoHours(OrderRequest request) {
@@ -54,63 +96,35 @@ public class MarketHoursValidator {
 
     /**
      * Validates equity market hours: 9:30 AM - 4:00 PM ET, Monday-Friday
-     * DAY orders rejected outside regular hours; GTC allowed anytime (execute at market open)
      */
     private ValidationResult validateEquityHours(OrderRequest request) {
-        ZonedDateTime nowET = ZonedDateTime.now(ET_ZONE);
-        LocalTime currentTime = nowET.toLocalTime();
-        DayOfWeek dayOfWeek = nowET.getDayOfWeek();
-        String timing = request.timing().toUpperCase();
-
-        boolean isWeekday = dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY;
-        
-        // Reject DAY orders on weekends; allow GTC orders (they execute at market open)
-        if (!isWeekday && timing.equals("DAY")) {
+        if (!isMarketOpenEquity()) {
+            ZonedDateTime nowET = ZonedDateTime.now(ET_ZONE);
+            LocalTime currentTime = nowET.toLocalTime();
+            DayOfWeek dayOfWeek = nowET.getDayOfWeek();
             return ValidationResult.invalid(
-                String.format("Equity markets are closed on %s. DAY orders cannot be placed on weekends. " +
-                    "Please use GTC (good-til-canceled) timing for weekend orders, which will execute when markets reopen Monday.",
-                    dayOfWeek)
+                String.format("Equity markets are closed (current time: %s ET on %s). Regular hours: 9:30 AM - 4:00 PM ET, Monday-Friday. " +
+                    "Market orders can only be placed during market hours.",
+                    currentTime, dayOfWeek)
             );
         }
-
-        // Check regular trading hours (9:30 AM - 4:00 PM ET)
-        LocalTime marketOpen = LocalTime.of(9, 30);
-        LocalTime marketClose = LocalTime.of(16, 0);
-        boolean isWithinRegularHours = (currentTime.isAfter(marketOpen) || currentTime.equals(marketOpen)) &&
-                                       (currentTime.isBefore(marketClose) || currentTime.equals(marketClose));
-
-        if (!isWithinRegularHours && timing.equals("DAY")) {
-            return ValidationResult.invalid(
-                String.format("Equity markets are closed (current time: %s ET). Regular hours: 9:30 AM - 4:00 PM ET, Monday-Friday. " +
-                    "Please place your order during market hours or use GTC timing for after-hours execution.",
-                    currentTime)
-            );
-        }
-
-        // GTC orders can be placed anytime, they'll execute when market opens
         return ValidationResult.valid();
     }
 
     /**
      * Validates FX market hours: Sunday 5:00 PM ET - Friday 5:00 PM ET
-     * Closed: Friday 5:00 PM ET - Sunday 5:00 PM ET
      */
     private ValidationResult validateFXHours(OrderRequest request) {
-        ZonedDateTime nowET = ZonedDateTime.now(ET_ZONE);
-        LocalTime currentTime = nowET.toLocalTime();
-        DayOfWeek dayOfWeek = nowET.getDayOfWeek();
-        LocalTime sessionBoundary = LocalTime.of(17, 0);
-
-        boolean isMarketOpen = isMarketOpenFX(dayOfWeek, currentTime, sessionBoundary);
-
-        if (!isMarketOpen) {
+        if (!isMarketOpenFX()) {
+            ZonedDateTime nowET = ZonedDateTime.now(ET_ZONE);
+            LocalTime currentTime = nowET.toLocalTime();
+            DayOfWeek dayOfWeek = nowET.getDayOfWeek();
             return ValidationResult.invalid(
                 String.format("FX markets are closed (current time: %s ET on %s). FX session runs: Sunday 5:00 PM ET - Friday 5:00 PM ET. " +
-                    "Please wait for market to open.",
+                    "Market orders can only be placed during market hours.",
                     currentTime, dayOfWeek)
             );
         }
-
         return ValidationResult.valid();
     }
 
@@ -119,7 +133,7 @@ public class MarketHoursValidator {
      * Market is open: Sunday 5:00 PM ET through Friday 5:00 PM ET
      * Market is closed: Friday 5:00 PM ET through Sunday 5:00 PM ET
      */
-    private boolean isMarketOpenFX(DayOfWeek dayOfWeek, LocalTime currentTime, LocalTime sessionBoundary) {
+    private boolean isMarketOpenFXHelper(DayOfWeek dayOfWeek, LocalTime currentTime, LocalTime sessionBoundary) {
         return switch (dayOfWeek) {
             case MONDAY, TUESDAY, WEDNESDAY, THURSDAY -> true; // Always open
             case FRIDAY -> currentTime.isBefore(sessionBoundary); // Open until 5:00 PM ET

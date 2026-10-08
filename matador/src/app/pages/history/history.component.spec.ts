@@ -49,11 +49,10 @@ describe('HistoryComponent', () => {
   });
 
   it('should generate order summaries on init', () => {
-    expect(component.orderSummaries.length).toBe(4);
-    expect(component.orderSummaries[0].label).toBe('Total Orders');
-    expect(component.orderSummaries[1].label).toBe('Total Volume');
-    expect(component.orderSummaries[2].label).toBe('Total Commissions');
-    expect(component.orderSummaries[3].label).toBe('Avg Order Value');
+    expect(component.orderSummaries.length).toBe(3);
+    expect(component.orderSummaries[0]['label']).toBe('Total Orders');
+    expect(component.orderSummaries[1]['label']).toBe('Total Volume');
+    expect(component.orderSummaries[2]['label']).toBe('Avg Order Value');
   });
 
   describe('Filter Functionality', () => {

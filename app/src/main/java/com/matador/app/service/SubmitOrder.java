@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 
 import com.matador.app.dto.OrderRequest;
 import com.matador.app.domain.ValidationResult;
+import com.matador.app.dto.OrderRequest;
 import com.matador.app.entity.Order;
 import com.matador.app.entity.UserProfile;
 import com.matador.app.exception.OrderRejectedException;
@@ -19,7 +20,11 @@ public class SubmitOrder {
     private final OrderRepository orderRepository;
     private final UserProfileRepository userProfileRepository;
 
-    public SubmitOrder(OrderValidator orderValidator, OrderRepository orderRepository, UserProfileRepository userProfileRepository) {
+    public SubmitOrder(OrderValidator orderValidator, 
+                      OrderRepository orderRepository, 
+                      UserProfileRepository userProfileRepository,
+                      FeeCalculator feeCalculator,
+                      PricingService pricingService) {
         this.orderValidator = orderValidator;
         this.orderRepository = orderRepository; 
         this.userProfileRepository = userProfileRepository;
@@ -47,10 +52,8 @@ public class SubmitOrder {
             request.ticker(),
             request.assetType(),
             request.actionType(),
-            request.orderType(), 
             request.quantity(),
             request.price(),
-            request.timing(),
             "PENDING",
             java.time.LocalDateTime.now(),
             request.currency()
