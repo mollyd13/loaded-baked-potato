@@ -119,7 +119,7 @@
         <label class="field-label" for="share-quantity">Share Quantity</label>
         </div>
         <div class="field stepper-field">
-          <input formControlName="quantity" id="share-quantity" type="number" min="1" >
+          <input formControlName="quantity" id="share-quantity" type="number" min="1" step="1" pattern="^\d+(\.\d{1,4})?$" (input)="onQuantityInput($any($event).target.value)" (change)="onQuantityChange($any($event).target.value)" >
           <div class="stepper-buttons">
             <button type="button" aria-label="Decrease quantity" (click)="decrementQuantity()">&minus;</button>
             <button type="button" aria-label="Increase quantity" (click)="incrementQuantity()">+</button>

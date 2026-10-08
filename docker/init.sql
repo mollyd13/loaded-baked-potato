@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS app.holding (
 	user_id SERIAL NOT NULL REFERENCES app.user_profile(user_id),
 	ticker TEXT NOT NULL, -- aapl, btc
 	asset_type TEXT NOT NULL, -- equity, crypto but NOT FX
-	qty INTEGER NOT NULL, --what if fractional shares?
+	qty NUMERIC(38,4) NOT NULL,
 	currency TEXT NOT NULL,
 	avg_price NUMERIC(38,2) NOT NULL
 );
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS app."order" (
 	ticker TEXT NOT NULL, -- aapl/btc/eurusd
 	asset_type TEXT NOT NULL, -- equity/crypto/fx
 	action_type TEXT NOT NULL, -- buy/sell
-	qty INTEGER NOT NULL, -- for forex: qty of base currency
+	qty NUMERIC(38,4) NOT NULL, -- for forex: qty of base currency
 	price NUMERIC(38,2) NOT NULL,
 	order_status TEXT NOT NULL,
 	submitted_at TIMESTAMP NOT NULL,
@@ -112,7 +112,7 @@ CREATE TABLE IF NOT EXISTS app.trade (
 	ticker TEXT NOT NULL, -- aapl/btc/eurusd
 	asset_type TEXT NOT NULL, -- equity/crypto/fx
 	action_type TEXT NOT NULL, -- buy/sell
-	qty INTEGER NOT NULL, -- for forex: qty of base currency, NO PARTIAL FILLS (all or none)
+	qty NUMERIC(38,4) NOT NULL, -- for forex: qty of base currency
 	price NUMERIC(38,2) NOT NULL, -- actual execution value
 	currency TEXT NOT NULL, -- for forex: quote currency
     fee NUMERIC(38, 2) NOT NULL,

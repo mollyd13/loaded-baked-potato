@@ -64,7 +64,7 @@ public class FundsValidator {
         BigDecimal price = request.price();
 
         // Calculate required funds including asset-type-specific trading fee
-        BigDecimal orderCost = price.multiply(new BigDecimal(request.quantity()));
+        BigDecimal orderCost = price.multiply(request.quantity());
         BigDecimal estimatedFee = feeCalculator.calculateFee(orderCost, request.assetType());
         BigDecimal requiredFunds = orderCost.add(estimatedFee);
 

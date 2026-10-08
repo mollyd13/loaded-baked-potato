@@ -93,7 +93,7 @@ describe('TradeComponent', () => {
   });
 
   describe('quantity stepper', () => {
-    it('should increment and decrement by one share', () => {
+    it('should increment and decrement by 1 share', () => {
       component.incrementQuantity();
       expect(component.orderForm.value.quantity).toBe(11);
 
@@ -101,18 +101,18 @@ describe('TradeComponent', () => {
       expect(component.orderForm.value.quantity).toBe(10);
     });
 
-    it('should not decrement below a single share', () => {
+    it('should not decrement below 1', () => {
       component.orderForm.patchValue({ quantity: 1 });
       component.decrementQuantity();
       expect(component.orderForm.value.quantity).toBe(1);
     });
 
-    it('should clamp typed input to whole shares with minimum of 1', () => {
-      component.onQuantityChange('25');
-      expect(component.orderForm.value.quantity).toBe(25);
+    it('should accept decimal input via direct typing and round to 4 decimal places', () => {
+      component.onQuantityChange('25.123456');
+      expect(component.orderForm.value.quantity).toBeCloseTo(25.1235, 4);
 
-      component.onQuantityChange(12.9);
-      expect(component.orderForm.value.quantity).toBe(12);
+      component.onQuantityChange('0.5');
+      expect(component.orderForm.value.quantity).toBe(1);
 
       component.onQuantityChange(-4);
       expect(component.orderForm.value.quantity).toBe(1);

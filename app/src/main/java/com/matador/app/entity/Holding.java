@@ -23,7 +23,7 @@ public class Holding {
     private String assetType;
     
     @Column(name = "qty", nullable = false)
-    private Integer quantity;
+    private BigDecimal quantity;
     
     @Column(name = "currency", nullable = false)
     private String currency;
@@ -36,7 +36,7 @@ public class Holding {
     }
     
     public Holding(UserProfile userProfile, String ticker, String assetType, 
-                   Integer quantity, String currency, BigDecimal averagePrice) {
+                   BigDecimal quantity, String currency, BigDecimal averagePrice) {
         this.userProfile = userProfile;
         this.ticker = ticker;
         this.assetType = assetType;
@@ -78,11 +78,11 @@ public class Holding {
         this.assetType = assetType;
     }
     
-    public Integer getQuantity() {
+    public BigDecimal getQuantity() {
         return quantity;
     }
     
-    public void setQuantity(Integer quantity) {
+    public void setQuantity(BigDecimal quantity) {
         this.quantity = quantity;
     }
     

@@ -20,7 +20,7 @@ public record OrderRequest(
         String actionType,
 
         @Positive(message = "quantity must be positive")
-        Integer quantity,
+        BigDecimal quantity,
 
         @Positive(message = "price must be positive")
         BigDecimal price,
