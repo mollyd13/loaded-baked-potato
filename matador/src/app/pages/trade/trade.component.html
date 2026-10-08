@@ -113,14 +113,14 @@
         <label class="field-label" for="share-quantity">Quantity</label>
         </div>
         <div class="field">
-          <input formControlName="quantity" id="share-quantity" type="number" min="0" (input)="onQuantityChange()">
+          <input formControlName="quantity" id="share-quantity" type="number" min="0" (input)="onQuantityChange()" (change)="onQuantityConfirm()">
         </div>
 
         <div class="field-label-container">
         <label class="field-label" for="price">Price</label>
         </div>
         <div class="field">
-          <input formControlName="price" id="price" type="number" min="0" (input)="onPriceChange()">
+          <input formControlName="price" id="price" type="number" min="0" (input)="onPriceChange()" (change)="onPriceConfirm()">
         </div>
 
         <div class="cost-summary">

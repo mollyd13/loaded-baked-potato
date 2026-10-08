@@ -57,6 +57,7 @@ export class TradeComponent implements OnInit {
         if (response.status === 200 && response.body) {
           this.data = response.body;
           console.log('Data loaded:', this.data);
+          this.orderForm.patchValue({ price: (this.executionPrice * this.orderForm.value.quantity).toFixed(2) });
         }
         else {
           this.errorMessage = `Unexpected server response: ${response.status}`;
@@ -85,30 +86,37 @@ export class TradeComponent implements OnInit {
       ticker: ['AAPL'],
       action: ["BUY"],
       quantity: [10],
-      limitPrice: [null],
-      orderType: ['Market'],
+      price: [0],
       timing: ['GTC'],
     });
   }
 
 
-  /** Clamps whatever the user typed into [1, Infinity] as a whole number. */
-  onQuantityChange(value: unknown): void {
-    const parsed = Math.floor(Number(value));
-    if (!Number.isFinite(parsed) || parsed < 1) {
-      this.orderForm.patchValue({ quantity: 1 });
-      return;
-    }
-    this.orderForm.patchValue({ quantity: parsed });
+  onQuantityChange(): void {
+    const calculatedPrice = this.subtotal;
+    const truncatedPrice = Math.floor(calculatedPrice * 100) / 100;
+    this.orderForm.patchValue({ price: truncatedPrice });
   }
 
-  /** The limit price when one is set, otherwise the live quote. */
+  onPriceChange(): void {
+    const calculatedQuantity = this.orderForm.value.price / this.executionPrice;
+    const truncatedQuantity = Math.floor(calculatedQuantity * 100) / 100;
+    this.orderForm.patchValue({ quantity: truncatedQuantity });
+  }
+
+  // round quantity to two decimal places
+  onQuantityConfirm(): void {
+    this.orderForm.patchValue({ quantity: Math.round(Number(this.orderForm.value.quantity) * 100) / 100 });
+  }
+
+  // round price to two decimal places
+  onPriceConfirm(): void {
+    this.orderForm.patchValue({ price: Math.round(Number(this.orderForm.value.price) * 100) / 100 });
+  }
+
+  /** Returns the live quote price. */
   get executionPrice(): number {
-    return this.orderForm.value.limitPrice && this.orderForm.value.limitPrice > 0 ? this.orderForm.value.limitPrice : (this.data?.data.price ?? 0);
-  }
-
-  get orderTypeLabel(): string {
-    return this.orderForm.value.limitPrice && this.orderForm.value.limitPrice > 0 ? 'Limit' : 'Market';
+    return Number((this.data?.data.price.toFixed(2) ?? 0));
   }
 
   get subtotal(): number {
@@ -144,44 +152,16 @@ export class TradeComponent implements OnInit {
     return SYSTEM_FEE;
   }
 
-
-  decrementQuantity(): void {
-    const currentQuantity = this.orderForm.value.quantity;
-    if (currentQuantity > 1) {
-      this.orderForm.patchValue({ quantity: currentQuantity - 1 });
-    }
-  }
-
-  incrementQuantity(): void {
-    const currentQuantity = this.orderForm.value.quantity;
-    this.orderForm.patchValue({ quantity: currentQuantity + 1 });
-  }
-
-  decrementLimit(): void {
-    const currentLimit = this.orderForm.value.limitPrice;
-    if (currentLimit > 0) {
-      this.orderForm.patchValue({ limitPrice: Number((currentLimit - .01).toFixed(2)) });
-    }
-  }
-
-  incrementLimit(): void {
-    const currentLimit = this.orderForm.value.limitPrice;
-    this.orderForm.patchValue({ limitPrice: Number((currentLimit + .01).toFixed(2)) });
-  }
-
   transmitOrder(): void {
     if (!this.canTransmit) {
       return;
     }
     const orderRequest: OrderRequest = {
-      user_id: 1, // Replace with actual user ID
       ticker: this.data?.data.symbol ?? 'N/A',
       asset_type: 'EQUITY', // Replace with actual asset type
       action_type: this.orderForm.value.action,
-      order_type: this.orderTypeLabel.toUpperCase(),
       quantity: this.orderForm.value.quantity,
       price: this.executionPrice,
-      timing: this.orderForm.value.timing, // Replace with actual timing if needed
       currency: 'USD' // Replace with actual currency if needed
     };
     this.placeOrderService.placeOrder(orderRequest);
@@ -189,7 +169,7 @@ export class TradeComponent implements OnInit {
 
   abortOperation(): void {
     this.orderForm.patchValue({ quantity: 10 });
-    this.orderForm.patchValue({ limitPrice: null });
+    this.orderForm.patchValue({ price: (this.executionPrice * 10).toFixed(2) });
     this.orderForm.patchValue({ action: 'BUY' });
   }
 
