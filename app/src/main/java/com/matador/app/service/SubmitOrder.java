@@ -20,7 +20,11 @@ public class SubmitOrder {
     private final OrderRepository orderRepository;
     private final UserProfileRepository userProfileRepository;
 
-    public SubmitOrder(OrderValidator orderValidator, OrderRepository orderRepository, UserProfileRepository userProfileRepository) {
+    public SubmitOrder(OrderValidator orderValidator, 
+                      OrderRepository orderRepository, 
+                      UserProfileRepository userProfileRepository,
+                      FeeCalculator feeCalculator,
+                      PricingService pricingService) {
         this.orderValidator = orderValidator;
         this.orderRepository = orderRepository; 
         this.userProfileRepository = userProfileRepository;
@@ -48,10 +52,8 @@ public class SubmitOrder {
             request.ticker(),
             request.assetType(),
             request.actionType(),
-            request.orderType(), 
             request.quantity(),
             request.price(),
-            request.timing(),
             "PENDING",
             java.time.LocalDateTime.now(),
             request.currency()

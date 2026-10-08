@@ -72,17 +72,35 @@ describe('TradeComponent', () => {
       component.orderForm.patchValue({ quantity: 1 });
       expect(component.estimatedTotal).toBeCloseTo(487.70, 2);
     });
+  });
 
-    it('should update the quantity field when the price field changes', () => {
-      component.orderForm.patchValue({ price: 970.40 });
-      component.onPriceChange();
-      expect(component.orderForm.value.quantity).toBeCloseTo(2, 2);
+  describe('quantity stepper', () => {
+    it('should increment and decrement by 1 share', () => {
+      component.incrementQuantity();
+      expect(component.orderForm.value.quantity).toBe(11);
+
+      component.decrementQuantity();
+      expect(component.orderForm.value.quantity).toBe(10);
     });
 
-    it('should update the price field when the quantity field changes', () => {
-      component.orderForm.patchValue({ quantity: 2 });
-      component.onQuantityChange();
-      expect(component.orderForm.value.price).toBeCloseTo(970.40, 2);
+    it('should not decrement below 1', () => {
+      component.orderForm.patchValue({ quantity: 1 });
+      component.decrementQuantity();
+      expect(component.orderForm.value.quantity).toBe(1);
+    });
+
+    it('should accept decimal input via direct typing and round to 4 decimal places', () => {
+      component.onQuantityChange('25.123456');
+      expect(component.orderForm.value.quantity).toBeCloseTo(25.1235, 4);
+
+      component.onQuantityChange('0.5');
+      expect(component.orderForm.value.quantity).toBe(1);
+
+      component.onQuantityChange(-4);
+      expect(component.orderForm.value.quantity).toBe(1);
+
+      component.onQuantityChange('abc');
+      expect(component.orderForm.value.quantity).toBe(1);
     });
   });
 
