@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { OrderRequest } from '../../models/order-request.model';
+import { OrderResponse } from '../../models/order-response.model';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 @Component({
@@ -12,14 +12,14 @@ import { MatCardModule } from '@angular/material/card';
   styleUrl: './order-confirmation.component.css'
 })
 export class OrderConfirmationComponent implements OnInit {
-  orderRequest: OrderRequest | null = null;
+  orderResponse: OrderResponse | null = null;
 
   constructor(private route: ActivatedRoute, private router: Router) {}
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
-      if (params['orderRequest']) {
-        this.orderRequest = JSON.parse(params['orderRequest']);
+      if (params['orderResponse']) {
+        this.orderResponse = JSON.parse(params['orderResponse']);
       }
       else {
         this.router.navigate(['/']);

@@ -47,7 +47,6 @@ export const routes: Routes = [
       {
         path: 'order-confirmation',
         component: OrderConfirmationComponent,
-        canActivate: [authGuard],
       },
       {
         path: 'analytics',
