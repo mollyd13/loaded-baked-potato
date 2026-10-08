@@ -16,6 +16,6 @@ export class CashService {
   constructor(private http: HttpClient) { }
 
   getBalance(userId: number): Observable<BalanceResponse> {
-    return this.http.get<BalanceResponse>(`/cash/${userId}`);
+    return this.http.get<BalanceResponse>(`api/cash/${userId}`);
   }
 }
