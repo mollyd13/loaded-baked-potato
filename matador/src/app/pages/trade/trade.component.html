@@ -40,6 +40,30 @@
           </span>
         </div>
 
+        <div class="range-toggle" role="group" aria-label="Chart range">
+          <button
+            type="button"
+            *ngFor="let range of chartRanges"
+            class="range-option"
+            [class.selected]="range === selectedRange"
+            [attr.aria-pressed]="range === selectedRange"
+            (click)="setChartRange(range)"
+          >
+            {{ range.label }}
+          </button>
+        </div>
+
+        <svg
+          *ngIf="history.length > 1"
+          class="sparkline"
+          viewBox="0 0 300 48"
+          preserveAspectRatio="none"
+          role="img"
+          [attr.aria-label]="'Price history, ' + selectedRange.label + ', for ' + data?.data?.symbol"
+        >
+          <polyline [attr.points]="sparklinePoints"></polyline>
+        </svg>
+
         <div class="bid-ask-info">
           <div class="bid-ask-row">
             <span class="label">Bid: </span>
@@ -60,6 +84,12 @@
         <mat-card class="form-card">
           <div class="card-header">
             <h3>Order Form</h3>
+            <div class="card-header-meta">
+              <mat-select class="pill timing-select" formControlName="timing">
+                <mat-option value="DAY">DAY</mat-option>
+                <mat-option value="GTC">GTC</mat-option>
+              </mat-select>
+            </div>
           </div>
 
         <div class="ticker-search">
@@ -110,18 +140,26 @@
         </div>
 
         <div class="field-label-container">
-        <label class="field-label" for="share-quantity">Quantity</label>
+        <label class="field-label" for="share-quantity">Share Quantity</label>
         </div>
         <div class="field stepper-field">
-          <input formControlName="quantity" id="share-quantity" type="number" min="1" step="1" pattern="^\d+(\.\d{1,4})?$" (input)="onQuantityInput()" (change)="onQuantityChange()" >
+          <input formControlName="quantity" id="share-quantity" type="number" min="1" >
+          <div class="stepper-buttons">
+            <button type="button" aria-label="Decrease quantity" (click)="decrementQuantity()">&minus;</button>
+            <button type="button" aria-label="Increase quantity" (click)="incrementQuantity()">+</button>
+          </div>
         </div>
 
-        <div class="field-label-container">
-        <label class="field-label" for="price">Price</label>
+      <label class="field-label" for="limit-price">Limit Price (Optional)</label>
+        <div class="field stepper-field">
+          <input formControlName="limitPrice" id="limit-price" type="number" min="0" >
+          <span class="order-type-indicator">{{ orderTypeLabel }}</span>
+          <div class="stepper-buttons">
+            <button type="button" aria-label="Decrease limit" (click)="decrementLimit()">&minus;</button>
+            <button type="button" aria-label="Increase limit" (click)="incrementLimit()">+</button>
+          </div>
         </div>
-        <div class="field">
-          <input formControlName="price" id="price" type="number" min="0" (input)="onPriceInput()" (change)="onPriceChange()">
-        </div>
+
 
         <div class="cost-summary">
           <div class="cost-row total">
