@@ -48,11 +48,11 @@ public class HoldingService {
         BigDecimal oldQuantity = holding.getQuantity();
         BigDecimal oldAvgPrice = holding.getAveragePrice();
         
-        BigDecimal oldCost = oldAvgPrice.multiply(new BigDecimal(oldQuantity));
-        BigDecimal newCost = price.multiply(new BigDecimal(quantity));
+        BigDecimal oldCost = oldAvgPrice.multiply(oldQuantity);
+        BigDecimal newCost = price.multiply(quantity);
         BigDecimal totalCost = oldCost.add(newCost);
-        BigDecimal totalQuantity = oldQuantity + quantity;
-        BigDecimal newAvgPrice = totalCost.divide(new BigDecimal(totalQuantity), BigDecimal.ROUND_HALF_UP);
+        BigDecimal totalQuantity = oldQuantity.add(quantity);
+        BigDecimal newAvgPrice = totalCost.divide(totalQuantity, BigDecimal.ROUND_HALF_UP);
         
         holding.setQuantity(totalQuantity);
         holding.setAveragePrice(newAvgPrice);
@@ -62,9 +62,9 @@ public class HoldingService {
 
     @Transactional
     public Holding updateHoldingOnSell(Holding holding, BigDecimal quantity) {
-        BigDecimal remainingQuantity = holding.getQuantity() - quantity;
+        BigDecimal remainingQuantity = holding.getQuantity().subtract(quantity);
         
-        if (remainingQuantity <= 0) {
+        if (remainingQuantity.compareTo(BigDecimal.ZERO) <= 0) {
             holdingRepository.delete(holding);
             return null;
         }
@@ -85,6 +85,6 @@ public class HoldingService {
 
     public boolean hasSufficientHoldings(UserProfile userProfile, String ticker, BigDecimal quantity) {
         Optional<Holding> holding = holdingRepository.findByUserProfileAndTicker(userProfile, ticker);
-        return holding.isPresent() && holding.get().getQuantity() >= quantity;
+        return holding.isPresent() && holding.get().getQuantity().compareTo(quantity) >= 0;
     }
 }
