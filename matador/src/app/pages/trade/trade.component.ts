@@ -155,7 +155,7 @@ export class TradeComponent implements OnInit {
   }
 
   get canTransmit(): boolean {
-    return this.orderForm.value.quantity > 0 && !this.exceedsBalance;
+    return this.orderForm.value.quantity >= 1 && !this.exceedsBalance;
   }
 
   get fee(): number {

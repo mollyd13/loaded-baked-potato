@@ -7,6 +7,7 @@ import com.matador.app.entity.UserProfile;
 import com.matador.app.repository.HoldingRepository;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 /**
@@ -47,7 +48,7 @@ public class HoldingsValidator {
         }
 
         // Check quantity (no partial fills)
-        if (userHolding.getQuantity() < request.quantity()) {
+        if (userHolding.getQuantity().compareTo(request.quantity()) < 0) {
             return ValidationResult.invalid(
                 String.format("Insufficient holdings. You own %d shares of %s but are trying to sell %d",
                     userHolding.getQuantity(), request.ticker(), request.quantity())
