@@ -46,6 +46,7 @@ export class TradeComponent implements OnInit {
   errorMessage: string | null = null;
 
   data: StockQuote | null = null;
+  assetType: string = 'EQUITY'; // Asset type from symbols endpoint
 
   /** Daily closing prices, oldest first; drives the sparkline (Quote.history). */
   history: number[] = [];
@@ -82,6 +83,25 @@ export class TradeComponent implements OnInit {
         if (response.status === 200 && response.body) {
           this.data = response.body;
           console.log('Data loaded:', this.data);
+          this.orderForm.patchValue({ price: (this.executionPrice * this.orderForm.value.quantity).toFixed(2) });
+          
+          //fetch the asset type from the symbols endpoint
+          this.apiService.getStockRegistryInfo(upperTicker).subscribe({
+            next: (registryResponse) => {
+              if (registryResponse.status === 200 && registryResponse.body) {
+                if (registryResponse.body.data.type == 'etf') {
+                  this.assetType = 'crypto';
+                }
+                else {
+                  this.assetType = registryResponse.body.data.type;
+                }
+                console.log('Asset type loaded:', this.assetType);
+              }
+            },
+            error: (err) => {
+              console.error('Symbol info error:', err);
+            }
+          });
           this.loadPriceHistory(upperTicker);
           this.initCurrency();
           this.initPrice();
@@ -250,11 +270,11 @@ export class TradeComponent implements OnInit {
     }
     const orderRequest: OrderRequest = {
       ticker: this.data?.data.symbol ?? 'N/A',
-      assetType: 'EQUITY',
+      assetType: this.assetType,
       actionType: this.orderForm.value.action,
       quantity: this.orderForm.value.quantity,
       price: this.executionPrice,
-      currency: 'USD'
+      currency: this.data?.data.currency ?? 'USD'
     };
     
     this.placeOrderService.placeOrder(orderRequest).subscribe({
@@ -267,8 +287,28 @@ export class TradeComponent implements OnInit {
         });
       },
       error: (err) => {
-        console.error('Order submission failed:', err);
-        this.errorMessage = err.error?.message || 'Failed to submit order. Please try again.';
+        console.error('Order submission error:', err);
+        console.error('Error structure:', { 
+          status: err.status, 
+          statusText: err.statusText, 
+          error: err.error,
+          message: err.message 
+        });
+        
+        let errorMessage = 'Failed to submit order. Please try again.';
+        
+        // Check if error.error has the actual response text
+        if (typeof err.error === 'string' && err.error.trim()) {
+          errorMessage = err.error;
+        } else if (err.error?.message) {
+          errorMessage = err.error.message;
+        } else if (err.statusText) {
+          errorMessage = err.statusText;
+        } else if (err.message) {
+          errorMessage = err.message;
+        }
+        
+        this.errorMessage = errorMessage;
       }
     });
   }
