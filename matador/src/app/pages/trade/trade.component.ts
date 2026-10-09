@@ -33,6 +33,7 @@ export class TradeComponent implements OnInit {
   errorMessage: string | null = null;
 
   data: StockQuote | null = null;
+  assetType: string = 'EQUITY'; // Asset type from symbols endpoint
 
   ngOnInit(): void {
     // Load initial ticker on component init
@@ -60,6 +61,24 @@ export class TradeComponent implements OnInit {
           this.data = response.body;
           console.log('Data loaded:', this.data);
           this.orderForm.patchValue({ price: (this.executionPrice * this.orderForm.value.quantity).toFixed(2) });
+          
+          //fetch the asset type from the symbols endpoint
+          this.apiService.getStockRegistryInfo(upperTicker).subscribe({
+            next: (registryResponse) => {
+              if (registryResponse.status === 200 && registryResponse.body) {
+                if (registryResponse.body.data.type == 'etf') {
+                  this.assetType = 'crypto';
+                }
+                else {
+                  this.assetType = registryResponse.body.data.type;
+                }
+                console.log('Asset type loaded:', this.assetType);
+              }
+            },
+            error: (err) => {
+              console.error('Symbol info error:', err);
+            }
+          });
         }
         else {
           this.errorMessage = `Unexpected server response: ${response.status}`;
@@ -167,7 +186,7 @@ export class TradeComponent implements OnInit {
     }
     const orderRequest: OrderRequest = {
       ticker: this.data?.data.symbol ?? 'N/A',
-      assetType: 'EQUITY',
+      assetType: this.assetType,
       actionType: this.orderForm.value.action,
       quantity: this.orderForm.value.quantity,
       price: this.executionPrice,
