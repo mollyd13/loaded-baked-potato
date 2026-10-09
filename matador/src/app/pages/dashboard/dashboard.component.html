@@ -1,5 +1,7 @@
 <div class="dashboard">
 
+  <h2 *ngIf="auth.currentUser() as u">Welcome, {{ u.firstName }}</h2>
+
   <div class="summary-grid">
     <mat-card class="summary-card" *ngFor="let card of summaryCards">
       <span class="summary-label">{{ card.label }}</span>

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
+import { AuthService } from '../../services/auth.service';
 
 interface SummaryCard {
   label: string;
@@ -30,6 +31,10 @@ interface Holding {
   styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent {
+
+  constructor(public auth: AuthService) {}
+
+  
   summaryCards: SummaryCard[] = [
     { label: 'Total Portfolio Value', value: '$1,248,392.40', changeText: '+1.84% (+$22,510.12) Today', changePositive: true },
     { label: 'Available Cash Balance', value: '$142,390.10' },

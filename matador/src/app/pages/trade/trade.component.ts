@@ -14,12 +14,25 @@ import { MatSelectModule } from '@angular/material/select';
 import { PlaceOrderService } from '../../services/place-order.service';
 import { OrderRequest } from '../../models/order-request.model';
 import { OrderResponse } from '../../models/order-response.model';
+import { CashService } from '../../services/cash.service';
+import { AuthService } from '../../services/auth.service';
 
 /** Flat per-order commission, in the account's currency. */
 const SYSTEM_FEE = 2.5;
 
 /** Day change beyond this magnitude surfaces the volatility warning. */
 const VOLATILITY_THRESHOLD_PCT = 2;
+
+/** Selectable chart ranges, in days of daily closes (see Quote.history in models/quote.model.ts). */
+export const CHART_RANGES = [
+  { label: '1W', days: 7 },
+  { label: '1M', days: 30 },
+  { label: '3M', days: 90 },
+  { label: '1Y', days: 365 },
+] as const;
+
+const CHART_WIDTH = 300;
+const CHART_HEIGHT = 48;
 
 @Component({
   selector: 'app-trade',
@@ -35,8 +48,18 @@ export class TradeComponent implements OnInit {
   data: StockQuote | null = null;
   assetType: string = 'EQUITY'; // Asset type from symbols endpoint
 
+  /** Daily closing prices, oldest first; drives the sparkline (Quote.history). */
+  history: number[] = [];
+
+  readonly chartRanges = CHART_RANGES;
+  selectedRange: (typeof CHART_RANGES)[number] = CHART_RANGES[1];
+  
+  orderForm: FormGroup;
+  availableBalance: number;
+  currency: string;
+
   ngOnInit(): void {
-    // Load initial ticker on component init
+    // Load initial ticker and calculate initial price on component init
     this.loadStockQuote();
   }
 
@@ -79,6 +102,10 @@ export class TradeComponent implements OnInit {
               console.error('Symbol info error:', err);
             }
           });
+          this.loadPriceHistory(upperTicker);
+          this.initCurrency();
+          this.initPrice();
+          this.fetchUserBalance();
         }
         else {
           this.errorMessage = `Unexpected server response: ${response.status}`;
@@ -99,10 +126,44 @@ export class TradeComponent implements OnInit {
     });
   }
 
-  orderForm: FormGroup;
-  availableBalance = 10000; // Mock available balance
+  setChartRange(range: (typeof CHART_RANGES)[number]): void {
+    this.selectedRange = range;
+    const symbol = this.data?.data.symbol;
+    if (symbol) {
+      this.loadPriceHistory(symbol);
+    }
+  }
 
-  constructor(private placeOrderService: PlaceOrderService, private fb : FormBuilder, private router: Router) {
+  /** Fetches daily candles for the selected range and keeps the closes for the chart. */
+  loadPriceHistory(symbol: string): void {
+    const to = new Date();
+    const from = new Date(to.getTime() - this.selectedRange.days * 24 * 60 * 60 * 1000);
+    const iso = (d: Date) => d.toISOString().slice(0, 10);
+
+    this.history = [];
+    this.apiService.getStockCandles(symbol, iso(from), iso(to), '1d').subscribe({
+      next: (response) => {
+        const candles = response.body?.data.candles ?? [];
+        this.history = candles.map((c) => c.close);
+      },
+      error: (err) => console.error('Price history unavailable:', err)
+    });
+  }
+
+  /** SVG polyline points scaled to the chart box; empty until there are two closes. */
+  get sparklinePoints(): string {
+    if (this.history.length < 2) {
+      return '';
+    }
+    const min = Math.min(...this.history);
+    const range = Math.max(...this.history) - min || 1;
+    const step = CHART_WIDTH / (this.history.length - 1);
+    return this.history
+      .map((price, i) => `${(i * step).toFixed(1)},${(CHART_HEIGHT - ((price - min) / range) * CHART_HEIGHT).toFixed(1)}`)
+      .join(' ');
+  }
+
+  constructor(private placeOrderService: PlaceOrderService, private fb : FormBuilder, private cashService: CashService, private authService: AuthService, private router: Router) {
     this.orderForm = this.fb.group({
       ticker: ['AAPL'],
       action: ["BUY"],
@@ -110,6 +171,16 @@ export class TradeComponent implements OnInit {
       price: [0],
       timing: ['GTC'],
     });
+    this.availableBalance = 0;
+    this.currency = '';
+  }
+
+  initCurrency(): void {
+    this.currency = this.data?.data.currency ?? '';
+  }
+
+  initPrice(): void {
+    this.orderForm.patchValue({ price: (this.executionPrice * this.orderForm.value.quantity).toFixed(2) });
   }
 
   /** Called on input - recalculates price from quantity */
@@ -140,6 +211,19 @@ export class TradeComponent implements OnInit {
     const rounded = Math.round(price * 100) / 100;
     this.orderForm.patchValue({ price: rounded }, { emitEvent: false });
     this.onPriceInput(); // recalculate quantity based on the new price
+  }
+
+  fetchUserBalance(): void {
+    this.cashService.getBalance(this.currency).subscribe({
+      next: (response) => {
+        this.availableBalance = response.balance;
+        console.log('Fetched user balance:', this.availableBalance);
+      },
+      error: (err) => {
+        console.error('Failed to fetch user balance:', err);
+        this.availableBalance = 0;
+      }
+    });
   }
 
   /** The limit price when one is set, otherwise the live quote. */
@@ -233,6 +317,7 @@ export class TradeComponent implements OnInit {
     this.orderForm.patchValue({ quantity: 10 });
     this.orderForm.patchValue({ price: (this.executionPrice * 10).toFixed(2) });
     this.orderForm.patchValue({ action: 'BUY' });
+    this.orderForm.patchValue({ price: (this.executionPrice * 10.0).toFixed(2) });
   }
 
   saveTemplate(): void {

@@ -40,6 +40,30 @@
           </span>
         </div>
 
+        <div class="range-toggle" role="group" aria-label="Chart range">
+          <button
+            type="button"
+            *ngFor="let range of chartRanges"
+            class="range-option"
+            [class.selected]="range === selectedRange"
+            [attr.aria-pressed]="range === selectedRange"
+            (click)="setChartRange(range)"
+          >
+            {{ range.label }}
+          </button>
+        </div>
+
+        <svg
+          *ngIf="history.length > 1"
+          class="sparkline"
+          viewBox="0 0 300 48"
+          preserveAspectRatio="none"
+          role="img"
+          [attr.aria-label]="'Price history, ' + selectedRange.label + ', for ' + data?.data?.symbol"
+        >
+          <polyline [attr.points]="sparklinePoints"></polyline>
+        </svg>
+
         <div class="bid-ask-info">
           <div class="bid-ask-row">
             <span class="label">Bid: </span>
