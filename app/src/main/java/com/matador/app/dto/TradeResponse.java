@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 public record TradeResponse(
     Integer tradeId, String ticker, String assetType, String actionType,
-    Integer quantity, BigDecimal price, String currency,
+    BigDecimal quantity, BigDecimal price, String currency,
     BigDecimal fee, LocalDateTime executedAt
 ) {
     public static TradeResponse from(Trade t) {
