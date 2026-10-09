@@ -61,6 +61,16 @@ public class GlobalExceptionHandler {
                 .build());
     }
 
+    @ExceptionHandler(SecurityException.class)
+    ResponseEntity<ErrorResponse> handleSecurityException(SecurityException ex, HttpServletRequest request) {
+        return ResponseEntity
+            .status(HttpStatus.UNAUTHORIZED)
+            .body(ErrorResponse.builder(ex, HttpStatus.UNAUTHORIZED, ex.getMessage())
+                .property("timestamp", LocalDateTime.now())
+                .property("path", request.getRequestURI())
+                .build());
+    }
+
     @ExceptionHandler(Exception.class)
     ResponseEntity<ErrorResponse> handleUnexpected(Exception ex, HttpServletRequest request) {
         return ResponseEntity

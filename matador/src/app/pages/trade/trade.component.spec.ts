@@ -2,7 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TradeComponent } from './trade.component';
 import { ApiService, StockCandles, StockQuote } from '../../api.service';
 import { PlaceOrderService } from '../../services/place-order.service';
-import { HttpResponse } from '@angular/common/http';
+import { CashService } from '../../services/cash.service';
+import { HttpResponse, provideHttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 
 describe('TradeComponent', () => {
@@ -10,6 +11,7 @@ describe('TradeComponent', () => {
   let fixture: ComponentFixture<TradeComponent>;
   let mockApiService: jasmine.SpyObj<ApiService>;
   let mockPlaceOrderService: jasmine.SpyObj<PlaceOrderService>;
+  let mockCashService: jasmine.SpyObj<CashService>;
 
   const mockStockQuote: StockQuote = {
     data: {
@@ -51,17 +53,21 @@ describe('TradeComponent', () => {
   beforeEach(async () => {
     mockApiService = jasmine.createSpyObj('ApiService', ['getStockQuote', 'getStockCandles']);
     mockPlaceOrderService = jasmine.createSpyObj('PlaceOrderService', ['placeOrder']);
+    mockCashService = jasmine.createSpyObj('CashService', ['getBalance']);
 
     await TestBed.configureTestingModule({
       imports: [TradeComponent],
       providers: [
         { provide: ApiService, useValue: mockApiService },
-        { provide: PlaceOrderService, useValue: mockPlaceOrderService }
+        { provide: PlaceOrderService, useValue: mockPlaceOrderService},
+        { provide: CashService, useValue: mockCashService },
+        provideHttpClient()
       ]
     }).compileComponents();
 
     mockApiService.getStockQuote.and.returnValue(of(mockHttpResponse));
     mockApiService.getStockCandles.and.returnValue(of(mockCandles));
+    mockCashService.getBalance.and.returnValue(of({ currency: 'USD', balance: 10000 }));
     fixture = TestBed.createComponent(TradeComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

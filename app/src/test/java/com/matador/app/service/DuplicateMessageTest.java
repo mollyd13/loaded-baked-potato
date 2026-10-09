@@ -2,6 +2,8 @@ package com.matador.app.service;
 
 import com.matador.app.entity.*;
 import com.matador.app.repository.*;
+import com.matador.app.service.validators.MarketHoursValidator;
+
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -27,12 +29,12 @@ class DuplicateMessageTest {
 
         OrderExecutionService service = new OrderExecutionService(
             orderRepo, tradeRepo, cashRepo, mock(UserProfileRepository.class),
-            new FeeCalculator(), new HoldingService(holdingRepo));
+            new FeeCalculator(), new HoldingService(holdingRepo), new PricingService(null), new MarketHoursValidator());
 
         UserProfile user = new UserProfile();
         Cash cash = new Cash(user, "USD", new BigDecimal("10000.00"));
-        Order order = new Order(user, "AAPL", "EQUITY", "BUY", "MARKET", 10,
-            new BigDecimal("150.00"), "DAY", "PENDING", LocalDateTime.now(), "USD");
+        Order order = new Order(user, "AAPL", "EQUITY", "BUY", new BigDecimal("10"),
+            new BigDecimal("150.00"), "DAY", LocalDateTime.now(), "USD");
 
         when(orderRepo.findByIdForUpdate(42)).thenReturn(Optional.of(order));
         when(cashRepo.findByUserProfileAndCurrency(user, "USD")).thenReturn(Optional.of(cash));

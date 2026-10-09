@@ -14,6 +14,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { PlaceOrderService } from '../../services/place-order.service';
 import { OrderRequest } from '../../models/order-request.model';
 import { OrderResponse } from '../../models/order-response.model';
+import { CashService } from '../../services/cash.service';
+import { AuthService } from '../../services/auth.service';
 
 /** Flat per-order commission, in the account's currency. */
 const SYSTEM_FEE = 2.5;
@@ -50,9 +52,13 @@ export class TradeComponent implements OnInit {
 
   readonly chartRanges = CHART_RANGES;
   selectedRange: (typeof CHART_RANGES)[number] = CHART_RANGES[1];
+  
+  orderForm: FormGroup;
+  availableBalance: number;
+  currency: string;
 
   ngOnInit(): void {
-    // Load initial ticker on component init
+    // Load initial ticker and calculate initial price on component init
     this.loadStockQuote();
   }
 
@@ -77,7 +83,9 @@ export class TradeComponent implements OnInit {
           this.data = response.body;
           console.log('Data loaded:', this.data);
           this.loadPriceHistory(upperTicker);
-          this.orderForm.patchValue({ price: (this.executionPrice * this.orderForm.value.quantity).toFixed(2) });
+          this.initCurrency();
+          this.initPrice();
+          this.fetchUserBalance();
         }
         else {
           this.errorMessage = `Unexpected server response: ${response.status}`;
@@ -135,10 +143,7 @@ export class TradeComponent implements OnInit {
       .join(' ');
   }
 
-  orderForm: FormGroup;
-  availableBalance = 10000; // Mock available balance
-
-  constructor(private placeOrderService: PlaceOrderService, private fb : FormBuilder, private router: Router) {
+  constructor(private placeOrderService: PlaceOrderService, private fb : FormBuilder, private cashService: CashService, private authService: AuthService, private router: Router) {
     this.orderForm = this.fb.group({
       ticker: ['AAPL'],
       action: ["BUY"],
@@ -146,6 +151,16 @@ export class TradeComponent implements OnInit {
       price: [0],
       timing: ['GTC'],
     });
+    this.availableBalance = 0;
+    this.currency = '';
+  }
+
+  initCurrency(): void {
+    this.currency = this.data?.data.currency ?? '';
+  }
+
+  initPrice(): void {
+    this.orderForm.patchValue({ price: (this.executionPrice * this.orderForm.value.quantity).toFixed(2) });
   }
 
   /** Called on input - recalculates price from quantity */
@@ -176,6 +191,19 @@ export class TradeComponent implements OnInit {
     const rounded = Math.round(price * 100) / 100;
     this.orderForm.patchValue({ price: rounded }, { emitEvent: false });
     this.onPriceInput(); // recalculate quantity based on the new price
+  }
+
+  fetchUserBalance(): void {
+    this.cashService.getBalance(this.currency).subscribe({
+      next: (response) => {
+        this.availableBalance = response.balance;
+        console.log('Fetched user balance:', this.availableBalance);
+      },
+      error: (err) => {
+        console.error('Failed to fetch user balance:', err);
+        this.availableBalance = 0;
+      }
+    });
   }
 
   /** The limit price when one is set, otherwise the live quote. */
@@ -249,6 +277,7 @@ export class TradeComponent implements OnInit {
     this.orderForm.patchValue({ quantity: 10 });
     this.orderForm.patchValue({ price: (this.executionPrice * 10).toFixed(2) });
     this.orderForm.patchValue({ action: 'BUY' });
+    this.orderForm.patchValue({ price: (this.executionPrice * 10.0).toFixed(2) });
   }
 
   saveTemplate(): void {
