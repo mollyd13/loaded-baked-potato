@@ -10,23 +10,8 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
-interface Order {
-  id: string;
-  timestamp: Date;
-  instrument: string;
-  symbol: string;
-  assetType: string;
-  actionType: 'BUY' | 'SELL';
-  orderType: string;
-  quantity: number;
-  price: number;
-  fee: number;
-
-  timing: string;
-  status: 'FILLED' | 'PARTIALLY_FILLED' | 'PENDING' | 'CANCELLED';
-  currency: string;
-}
+import { OrderResponse } from '../../models/order-response.model';
+import { GetOrderService } from '../../services/get-order.service';
 
 interface OrderSummary {
   label: string;
@@ -57,51 +42,39 @@ interface OrderSummary {
 })
 export class HistoryComponent implements OnInit {
   orderSummaries: OrderSummary[] = [];
-  displayedColumns: string[] = ['timestamp', 'instrument', 'assetType', 'actionType', 'orderType', 'quantity', 'price', 'totalValue', 'fee', 'timing', 'status', 'currency'];
+  displayedColumns: string[] = ['instrument', 'actionType', 'quantity', 'price', 'totalValue', 'fee', 'status'];
 
-  allOrders: Order[] = [
-    { id: 'ORD-001', timestamp: new Date('2024-01-15T10:30:00'), instrument: 'Apple Inc.', symbol: 'AAPL', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 50, price: 180.25, fee: 0.00, timing: 'day', status: 'FILLED', currency: 'USD' },
-    { id: 'ORD-002', timestamp: new Date('2024-01-14T14:15:00'), instrument: 'Microsoft Corp.', symbol: 'MSFT', assetType: 'Crypto', actionType: 'SELL', orderType: 'Market', quantity: 30, price: 412.50, fee: 43.31, timing: 'day', status: 'FILLED', currency: 'USD' },
-    { id: 'ORD-003', timestamp: new Date('2024-01-12T09:45:00'), instrument: 'Alphabet Inc.', symbol: 'GOOGL', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 100, price: 140.80, fee: 0.00, timing: 'day', status: 'FILLED', currency: 'USD' },
-    { id: 'ORD-004', timestamp: new Date('2024-01-10T16:20:00'), instrument: 'Amazon.com Inc.', symbol: 'AMZN', assetType: 'Equity', actionType: 'BUY', orderType: 'Limit', quantity: 75, price: 172.30, fee: 0.00, timing: 'day', status: 'PARTIALLY_FILLED', currency: 'USD' },
-    { id: 'ORD-005', timestamp: new Date('2024-01-08T11:00:00'), instrument: 'Tesla Inc.', symbol: 'TSLA', assetType: 'FX', actionType: 'SELL', orderType: 'Limit', quantity: 40, price: 178.90, fee: 53.67, timing: 'day', status: 'FILLED', currency: 'USD' },
-    { id: 'ORD-006', timestamp: new Date('2024-01-05T13:30:00'), instrument: 'JPMorgan Chase & Co.', symbol: 'JPM', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 60, price: 188.00, fee: 0.00, timing: 'day', status: 'PENDING', currency: 'USD' },
-    { id: 'ORD-007', timestamp: new Date('2024-01-02T10:15:00'), instrument: 'Visa Inc.', symbol: 'V', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 25, price: 278.50, fee: 0.00, timing: 'day', status: 'FILLED', currency: 'USD' },
-    { id: 'ORD-008', timestamp: new Date('2023-12-28T15:45:00'), instrument: 'NVIDIA Corporation', symbol: 'NVDA', assetType: 'FX', actionType: 'SELL', orderType: 'Limit', quantity: 200, price: 850.00, fee: 1275.00, timing: 'day', status: 'FILLED', currency: 'USD' },
-    { id: 'ORD-009', timestamp: new Date('2023-12-25T12:00:00'), instrument: 'Apple Inc.', symbol: 'AAPL', assetType: 'Crypto', actionType: 'SELL', orderType: 'Market', quantity: 100, price: 189.50, fee: 66.33, timing: 'day', status: 'CANCELLED', currency: 'USD' },
-    { id: 'ORD-010', timestamp: new Date('2023-12-20T09:30:00'), instrument: 'Microsoft Corp.', symbol: 'MSFT', assetType: 'Equity', actionType: 'BUY', orderType: 'Market', quantity: 45, price: 378.20, fee: 0.00, timing: 'day', status: 'FILLED', currency: 'USD' },
-  ];
+  allOrders: OrderResponse[] = [];
   
-  filteredOrders: Order[] = [];
+  filteredOrders: OrderResponse[] = [];
   filterStatus: string = 'ALL';
   filterActionType: string = 'ALL';
-  filterOrderType: string = 'ALL';
-  filterAssetType: string = 'ALL';
   startDate: Date | null = null;
   endDate: Date | null = null;
 
+  constructor(private orderService: GetOrderService) { }
+
   ngOnInit(): void {
-    this.filteredOrders = [...this.allOrders];
-    this.updateSummaries();
+    this.fetchOrders();
   }
 
-    selectedOrder: Order | null = null;
+    selectedOrder: OrderResponse | null = null;
 
-  selectOrder(order: Order): void {
+  selectOrder(order: OrderResponse): void {
     this.selectedOrder = this.selectedOrder === order ? null : order;
   }
 
-  netAmount(o: Order): number {
+  netAmount(o: OrderResponse): number {
     const gross = o.price * o.quantity;
-    return o.actionType === 'BUY' ? gross + o.fee : gross - o.fee;
+    return o.actionType === 'BUY' ? gross + o.estimatedFee : gross - o.estimatedFee;
   }
 
   updateSummaries(): void {
     const totalOrders = this.filteredOrders.length;
-    const filledOrders = this.filteredOrders.filter(o => o.status === 'FILLED').length;
+    const filledOrders = this.filteredOrders.filter(o => o.orderStatus === 'FILLED').length;
     const totalVolume = this.filteredOrders.reduce((sum, o) => sum + (o.price * o.quantity), 0);
     const buyOrders = this.filteredOrders.filter(o => o.actionType === 'BUY').length;
-    const totalFees = this.filteredOrders.reduce((sum, o) => sum + o.fee, 0);
+    const totalFees = this.filteredOrders.reduce((sum, o) => sum + o.estimatedFee, 0);
 
     this.orderSummaries = [
       { label: 'Total Orders', value: totalOrders.toString(), changeText: `${filledOrders} Filled`, changePositive: true },
@@ -113,13 +86,9 @@ export class HistoryComponent implements OnInit {
 
   applyFilters(): void {
     this.filteredOrders = this.allOrders.filter(order => {
-      const statusMatch = this.filterStatus === 'ALL' || order.status === this.filterStatus;
+      const statusMatch = this.filterStatus === 'ALL' || order.orderStatus === this.filterStatus;
       const actionTypeMatch = this.filterActionType === 'ALL' || order.actionType === this.filterActionType;
-      const orderTypeMatch = this.filterOrderType === 'ALL' || order.orderType === this.filterOrderType;
-      const assetTypeMatch = this.filterAssetType === 'ALL' || order.assetType === this.filterAssetType;
-      const startMatch = !this.startDate || order.timestamp >= this.startDate;
-      const endMatch = !this.endDate || order.timestamp <= this.endDate;
-      return statusMatch && actionTypeMatch && orderTypeMatch && assetTypeMatch && startMatch && endMatch;
+      return statusMatch && actionTypeMatch;
     });
     this.updateSummaries();
   }
@@ -127,8 +96,6 @@ export class HistoryComponent implements OnInit {
   resetFilters(): void {
     this.filterStatus = 'ALL';
     this.filterActionType = 'ALL';
-    this.filterOrderType = 'ALL';
-    this.filterAssetType = 'ALL';
     this.startDate = null;
     this.endDate = null;
     this.filteredOrders = [...this.allOrders];
@@ -152,6 +119,14 @@ export class HistoryComponent implements OnInit {
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
+    });
+  }
+
+  fetchOrders(): void {
+    this.orderService.getOrders().subscribe(orders => {
+      this.allOrders = orders;
+      this.filteredOrders = [...this.allOrders];
+      this.updateSummaries();
     });
   }
 }
