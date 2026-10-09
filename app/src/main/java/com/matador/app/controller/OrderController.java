@@ -1,18 +1,21 @@
 package com.matador.app.controller;
-
 import jakarta.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.matador.app.dto.OrderRequest;
 import com.matador.app.dto.OrderResponse;
 import com.matador.app.entity.Order;
+import java.util.ArrayList;
 import com.matador.app.entity.Trade;
 import com.matador.app.repository.OrderRepository;
 import com.matador.app.service.SubmitOrder;
 import com.matador.app.service.FeeCalculator;
 import com.matador.app.service.PricingService;
 import com.matador.app.service.OrderExecutionService;
+import com.matador.app.service.GetOrdersService;
 import java.math.BigDecimal;
 
 @RestController
@@ -23,14 +26,16 @@ public class OrderController {
     private final FeeCalculator feeCalculator;
     private final OrderExecutionService orderExecutionService;
     private final OrderRepository orderRepository;
+    private final GetOrdersService orderService;
 
     public OrderController(SubmitOrder submitOrderService, FeeCalculator feeCalculator, 
                           PricingService pricingService, OrderExecutionService orderExecutionService,
-                          OrderRepository orderRepository) {
+                          OrderRepository orderRepository, GetOrdersService orderService) {
         this.submitOrderService = submitOrderService;
         this.feeCalculator = feeCalculator;
         this.orderExecutionService = orderExecutionService;
         this.orderRepository = orderRepository;
+        this.orderService = orderService;
     }
 
     @PostMapping
@@ -78,6 +83,12 @@ public class OrderController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Order submission failed: " + e.getMessage());
         }
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getOrder() {
+        List<OrderResponse> orders = orderService.getAllOrders();
+        return ResponseEntity.ok(orders);
     }
 }
 
